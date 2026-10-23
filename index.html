@@ -93,8 +93,15 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
+  /* Редактор донатов: строка способа */
+  .dn-row { display:grid; grid-template-columns:1fr 56px 130px; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
+  .dn-row input { padding:8px 10px; font-size:.9rem; }
+  .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
+  .dn-row .full { grid-column:1 / -1; }
+
   .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
-  .donate-box { background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
+  .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
+  .don-edit { position:absolute; top:10px; right:10px; }
   .donate-box h3 { font-size:1.05rem; margin-bottom:6px; }
   .donate-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
   .donate-list { display:flex; flex-wrap:wrap; gap:10px; }
@@ -102,6 +109,8 @@
   .don-btn:hover { border-color:var(--accent); }
   .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
   .don-ico img { width:13px; height:13px; }
+  /* Блок без способов: посетителям не показываем, админу виден с подсказкой */
+  body:not(.admin) #donate.no-methods { display:none; }
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
   .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:12px; align-items:center; }
@@ -178,8 +187,10 @@
 
 <div class="grid view-grid" id="grid"></div>
 
+<!-- Плашка донатов; у админа — кнопка ✏️ для редактирования -->
 <section id="donate" class="donate">
   <div class="donate-box">
+    <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
     <h3 id="donTitle"></h3>
     <p id="donText"></p>
     <div class="donate-list" id="donateList"></div>
@@ -241,6 +252,26 @@
   </div>
 </div>
 
+<!-- Редактор блока донатов (только для админа).
+     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
+<div id="donateModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Блок донатов</h2>
+    <label>Заголовок</label>
+    <input id="dTitle" type="text" placeholder="☕ Поддержать автора">
+    <label>Подпись</label>
+    <textarea id="dText" style="min-height:60px; resize:vertical;"></textarea>
+    <label>Способы поддержки — у каждого название и ссылка ИЛИ реквизиты для копирования:</label>
+    <div id="dList"></div>
+    <button id="dAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить способ</button>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boosty, telegram,Visa нет — попробуй «visa»). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <div class="modal-actions">
+      <button id="dCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
 <!-- Вход по токену -->
 <div id="loginModal" class="overlay hidden">
   <div class="modal">
@@ -262,12 +293,15 @@ const CONFIG = {
   repo: "russifiers",
   branch: "main",
   dataFile: "data.json",
+  donateFile: "donate.json",     // блок донатов хранится здесь (создаётся при первом сохранении из редактора)
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
-// ==== ПЛАШКА ДОНАТОВ — замени ссылки и реквизиты на свои ====
-const DONATE = {
+// ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ ====
+// Используется, пока в репозитории нет donate.json. После первого сохранения
+// в редакторе (✏️ на плашке) блок берётся из donate.json и правится на сайте.
+const DONATE_DEFAULT = {
   title: "☕ Поддержать автора",
   text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
   methods: [
@@ -293,7 +327,7 @@ const LS_STEAM_COMBO = "russifiers_steam_combo";
 const LS_APPNAMES = "russifiers_appnames_v1";
 
 const $ = id => document.getElementById(id);
-const state = { projects: [], dataSha: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
+const state = { projects: [], dataSha: null, donateSha: null, donate: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
 let dlCache = {}; try { dlCache = JSON.parse(localStorage.getItem(LS_DL)) || {}; } catch (e) {}
 const saveDl = () => localStorage.setItem(LS_DL, JSON.stringify(dlCache));
 
@@ -342,9 +376,8 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
-// С 2024 Valve хранит ассеты по новому пути store_item_assets; для части игр
-// старые адреса отдают 404 (пример: Above the Snow, appid 2423760).
-// Поэтому новые пути идут первыми, старые — запасом.
+// Новые пути store_item_assets первыми (часть новых игр отдаёт 404 на старых адресах),
+// старые зеркала — запасом.
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -504,6 +537,9 @@ async function fetchAppName(appid) {
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
+// Название из слага ссылки. ВАЖНО: Steam вырезает из слага все знаки препинания
+// (двоеточия, запятые, апострофы), поэтому это только черновик —
+// точное название приходит из Steam API и перезаписывает черновик.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -522,7 +558,7 @@ function migrate(p) {
   return p;
 }
 
-// ---------- GitHub API ----------
+// ---------- GitHub API: общая запись JSON-файлов ----------
 function gh(path, opts = {}) {
   const headers = { Accept: "application/vnd.github+json", ...(opts.headers || {}) };
   if (state.token) headers.Authorization = "Bearer " + state.token;
@@ -538,24 +574,32 @@ function utf8B64(str) {
     bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
   return btoa(bin);
 }
-async function getDataSha() {
+async function getSha(file) {
   try {
-    const j = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(CONFIG.dataFile)}?ref=${CONFIG.branch}`);
+    const j = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}?ref=${CONFIG.branch}`);
     return j.sha;
   } catch (e) { return null; }
 }
-async function writeData(projects, message, retried = false) {
-  const body = { message, content: utf8B64(JSON.stringify(projects, null, 2)), branch: CONFIG.branch };
-  const sha = state.dataSha || await getDataSha();
+async function putJson(file, obj, message, retried = false) {
+  const body = { message, content: utf8B64(JSON.stringify(obj, null, 2)), branch: CONFIG.branch };
+  const cached = file === CONFIG.dataFile ? state.dataSha : state.donateSha;
+  const sha = cached || await getSha(file);
   if (sha) body.sha = sha;
   try {
-    const res = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(CONFIG.dataFile)}`,
+    const res = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}`,
       { method: "PUT", body: JSON.stringify(body) });
-    state.dataSha = res.content.sha;
+    if (file === CONFIG.dataFile) state.dataSha = res.content.sha;
+    else state.donateSha = res.content.sha;
   } catch (e) {
-    if (!retried && /42[02]|409/.test(e.message)) { state.dataSha = null; return writeData(projects, message, true); }
+    if (!retried && /42[02]|409/.test(e.message)) {
+      if (file === CONFIG.dataFile) state.dataSha = null; else state.donateSha = null;
+      return putJson(file, obj, message, true);
+    }
     throw e;
   }
+}
+async function writeData(projects, message) {
+  return putJson(CONFIG.dataFile, projects, message);
 }
 async function loadData() {
   const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
@@ -566,6 +610,125 @@ async function loadData() {
   state.projects = data.filter(p => p && p.title).map(migrate);
   state.dataSha = null;
 }
+
+// ---------- Донаты: загрузка, отрисовка, редактор ----------
+async function loadDonate() {
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.donateFile}?t=${Date.now()}`);
+    if (r.ok) {
+      const j = await r.json();
+      if (j && typeof j === "object" && Array.isArray(j.methods)) { state.donate = j; return; }
+    }
+  } catch (e) {}
+  state.donate = DONATE_DEFAULT;
+}
+
+function renderDonate() {
+  const sec = $("donate");
+  const d = state.donate;
+  const methods = (d && Array.isArray(d.methods))
+    ? d.methods.filter(m => m && m.name && (m.url || m.value)) : [];
+  if (!methods.length) {
+    sec.classList.add("no-methods");
+    $("donTitle").textContent = "Блок донатов выключен";
+    $("donText").textContent = "Нажми ✏️, чтобы настроить способы поддержки.";
+    $("donateList").innerHTML = "";
+    return;
+  }
+  sec.classList.remove("no-methods");
+  $("donTitle").textContent = d.title || "Поддержать автора";
+  $("donText").textContent = d.text || "";
+  const box = $("donateList");
+  box.innerHTML = "";
+  for (const m of methods) {
+    const ico = m.icon
+      ? `<span class="don-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
+      : `<span class="don-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
+    if (m.url) {
+      box.insertAdjacentHTML("beforeend", `<a class="don-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
+    } else {
+      box.insertAdjacentHTML("beforeend", `<button type="button" class="don-btn don-copy" data-value="${esc(m.value)}" data-label="${esc(m.name)}" title="Нажмите, чтобы скопировать">${ico}<span>${esc(m.name)}: ${esc(m.value)}</span></button>`);
+    }
+  }
+}
+ $("donateList").addEventListener("click", async e => {
+  const b = e.target.closest(".don-copy");
+  if (!b) return;
+  try {
+    await navigator.clipboard.writeText(b.dataset.value);
+    toast("Скопировано: " + b.dataset.label, "ok", 2500);
+  } catch (err) {
+    toast("Не удалось скопировать — выделите реквизит вручную", "err");
+  }
+});
+
+function addDonateRow(m = {}) {
+  const box = document.createElement("div");
+  box.className = "dn-row";
+  box.innerHTML = `
+    <button type="button" class="ver-del" title="Убрать способ">✕</button>
+    <input class="dn-name" placeholder="Название (Boosty, ЮMoney, Карта…)" value="${esc(m.name || "")}">
+    <input class="dn-color" type="color" value="${esc(m.color || "#6c5ce7")}" title="Цвет значка">
+    <input class="dn-icon" placeholder="иконка (boosty)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
+    <input class="dn-url full" placeholder="https:// ссылка (необязательно)" value="${esc(m.url || "")}">
+    <input class="dn-val full" placeholder="…или реквизиты для копирования (необязательно)" value="${esc(m.value || "")}">`;
+  $("dList").appendChild(box);
+}
+
+ $("donEdit").addEventListener("click", () => {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const d = state.donate || {};
+  $("dTitle").value = d.title || "";
+  $("dText").value = d.text || "";
+  $("dList").innerHTML = "";
+  (d.methods?.length ? d.methods : [{}]).forEach(addDonateRow);
+  $("donateModal").classList.remove("hidden");
+});
+ $("dAdd").addEventListener("click", () => addDonateRow());
+ $("dList").addEventListener("click", e => {
+  if (e.target.closest(".ver-del")) e.target.closest(".dn-row").remove();
+});
+const closeDonate = () => $("donateModal").classList.add("hidden");
+ $("dCancel").addEventListener("click", closeDonate);
+
+ $("dSaveBtn").addEventListener("click", async () => {
+  const btn = $("dSaveBtn");
+  if (btn.disabled) return;
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
+
+  const data = {
+    title: $("dTitle").value.trim(),
+    text: $("dText").value.trim(),
+    methods: []
+  };
+  for (const b of document.querySelectorAll("#dList .dn-row")) {
+    const name = b.querySelector(".dn-name").value.trim();
+    if (!name) continue;
+    const m = { name, color: b.querySelector(".dn-color").value };
+    const icon = b.querySelector(".dn-icon").value.trim();
+    if (icon) m.icon = icon;
+    const url = b.querySelector(".dn-url").value.trim();
+    const val = b.querySelector(".dn-val").value.trim();
+    if (url) {
+      if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
+      m.url = url;
+    }
+    if (val) m.value = val;
+    if (m.url || m.value) data.methods.push(m);
+  }
+
+  btn.disabled = true;
+  try {
+    await putJson(CONFIG.donateFile, data, "Обновлён блок донатов");
+    state.donate = data;
+    renderDonate();
+    closeDonate();
+    toast("Блок донатов обновлён", "ok", 4000);
+  } catch (e) {
+    toast("Не удалось сохранить donate.json: " + e.message, "err", 6000);
+  }
+  btn.disabled = false;
+});
 
 // ---------- Счётчик скачиваний ----------
 const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
@@ -885,7 +1048,7 @@ function applyAutoTitle(appid, name, seq) {
   titleAuto = true;
   $("fTitle").value = name;
   updateCoverPreview();
-  setNote("Название подтянуто из Steam — можно отредактировать вручную.");
+  setNote("Точное название из Steam — можно отредактировать вручную.");
 }
 function queueAppIdLookup(immediate = false) {
   clearTimeout(appIdTimer);
@@ -894,17 +1057,21 @@ function queueAppIdLookup(immediate = false) {
   const appid = extractAppId(raw);
   updateCoverPreview();
   if (!appid) return;
+  // Черновик из слага: Steam вырезает из ссылки знаки препинания,
+  // поэтому двоеточий тут не бывает. Точное имя перезапишет его из Steam.
   if ((titleAuto || !$("fTitle").value.trim())) {
     const slugName = titleFromSlug(raw);
-    if (slugName) $("fTitle").value = slugName;
+    if (slugName) {
+      $("fTitle").value = slugName;
+      setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное из Steam…");
+    }
   }
   const run = async () => {
     if (appNamesCache[appid]) { applyAutoTitle(appid, appNamesCache[appid], seq); return; }
-    setNote("Получаю название из Steam…");
     const name = await fetchAppName(appid);
     if (seq !== appIdSeq) return;
     if (name) applyAutoTitle(appid, name, seq);
-    else setNote("Не удалось получить название из Steam — введите его вручную. Обложка по AppID всё равно подтянется.");
+    else setNote("Steam недоступен: название оставлено из ссылки. В ссылке нет двоеточий и других знаков — проверь название и поправь вручную. Обложка по AppID всё равно подтянется.");
   };
   if (immediate) run();
   else appIdTimer = setTimeout(run, 450);
@@ -1054,37 +1221,8 @@ function refreshOrder() {
   toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
 });
 
-// ---------- Донаты ----------
-function renderDonate() {
-  if (!DONATE.methods || !DONATE.methods.length) { $("donate").remove(); return; }
-  $("donTitle").textContent = DONATE.title || "Поддержать автора";
-  $("donText").textContent = DONATE.text || "";
-  const box = $("donateList");
-  box.innerHTML = "";
-  for (const m of DONATE.methods) {
-    const ico = m.icon
-      ? `<span class="don-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${m.icon}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
-      : `<span class="don-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
-    if (m.url) {
-      box.insertAdjacentHTML("beforeend", `<a class="don-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
-    } else if (m.value) {
-      box.insertAdjacentHTML("beforeend", `<button type="button" class="don-btn don-copy" data-value="${esc(m.value)}" data-label="${esc(m.name)}" title="Нажмите, чтобы скопировать">${ico}<span>${esc(m.name)}: ${esc(m.value)}</span></button>`);
-    }
-  }
-}
- $("donateList").addEventListener("click", async e => {
-  const b = e.target.closest(".don-copy");
-  if (!b) return;
-  try {
-    await navigator.clipboard.writeText(b.dataset.value);
-    toast("Скопировано: " + b.dataset.label, "ok", 2500);
-  } catch (err) {
-    toast("Не удалось скопировать — выделите реквизит вручную", "err");
-  }
-});
-
 // Закрытие модалок.
-// Форма русификатора защищена от случайного закрытия: клик мимо и Esc игнорируются.
+// Формы (русификатор и донаты) защищены от случайного закрытия: клик мимо и Esc игнорируются.
 for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
@@ -1102,6 +1240,7 @@ function banner(text) {
 // ---------- Старт ----------
 (async function init() {
   setAdmin(!!state.token);
+  await loadDonate();
   renderDonate();
   applyView();
   if (state.token) {
@@ -1115,7 +1254,7 @@ function banner(text) {
   }
   if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
     grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
-    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и <b>DONATE</b> — см. настройки в начале скрипта.");
+    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и <b>DONATE_DEFAULT</b> — см. настройки в начале скрипта.");
     return;
   }
   try { await loadData(); }
