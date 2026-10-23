@@ -11,10 +11,18 @@
     --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); }
-  header { text-align:center; padding:50px 20px 10px; }
+  body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
+  header { position:relative; text-align:center; padding:50px 20px 10px; }
   header h1 { font-size:2rem; margin-bottom:8px; }
   header p { color:var(--muted); }
+
+  /* Незаметная кнопка входа в правом верхнем углу */
+  .auth-btn {
+    position:absolute; top:20px; right:22px;
+    background:none; border:none; cursor:pointer;
+    font-size:1.1rem; opacity:.4; padding:6px; line-height:1;
+  }
+  .auth-btn:hover { opacity:.9; }
 
   .toolbar { max-width:1000px; margin:25px auto 10px; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
   #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
@@ -27,7 +35,7 @@
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
 
-  .grid { max-width:1000px; margin:20px auto 60px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; }
+  .grid { max-width:1000px; margin:20px auto 30px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; }
   .card { position:relative; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:transform .15s,border-color .15s; }
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
@@ -62,29 +70,33 @@
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
 
-  /* Строка ссылки в форме: версия | сервис | ссылка */
-  .lk-row { display:grid; grid-template-columns:95px 150px 1fr; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
+  /* Строка ссылки в форме: сервис | ссылка */
+  .lk-row { display:grid; grid-template-columns:150px 1fr; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
   .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
   .ver-del { position:absolute; top:6px; right:6px; background:none; border:none; color:var(--muted); cursor:pointer; }
   .ver-del:hover { color:#ff6b6b; }
-  @media (max-width:600px) {
-    .lk-row { grid-template-columns:1fr 1fr; }
-    .lk-row .l-url { grid-column:1 / -1; }
-  }
+  @media (max-width:600px) { .lk-row { grid-template-columns:1fr; } }
 
   /* Окно игры */
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  .g-close { position:absolute; top:12px; right:12px; z-index:2; width:34px; height:34px; border-radius:50%; border:none; background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; font-size:1rem; }
+  .g-close {
+    position:absolute; top:12px; right:12px; z-index:2;
+    width:34px; height:34px; border-radius:50%; border:none;
+    background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; font-size:1rem;
+  }
+  /* Кнопка «Редактировать» — той же высоты, на одном уровне с крестиком */
+  .g-edit {
+    position:absolute; top:12px; right:56px; z-index:2;
+    height:34px; display:inline-flex; align-items:center; gap:6px;
+    padding:0 14px; border-radius:17px; border:none;
+    background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; font-size:.85rem;
+  }
+  .g-edit:hover { color:#a99cf5; }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
   .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
   .g-body { padding:24px; max-height:82vh; overflow:auto; }
   .g-body h2 { margin-bottom:6px; }
   .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
-  .g-edit { margin-bottom:10px; }
-  .g-ver { display:flex; align-items:center; gap:10px; margin-top:10px; }
-  .g-ver label { margin:0; font-size:.9rem; color:var(--muted); }
-  .g-ver select { width:auto; min-width:170px; padding:9px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.92rem; cursor:pointer; }
-  .g-ver select:focus { outline:none; border-color:var(--accent); }
   .lk { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:var(--field); }
   .lk-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; font-size:1rem; }
   .lk-ico img { width:19px; height:19px; }
@@ -97,12 +109,18 @@
     .g-cover { max-height:240px; min-height:0; }
   }
 
-  footer { text-align:center; color:var(--muted); padding:30px; font-size:.85rem; }
+  /* Футер прижат к низу экрана */
+  footer {
+    position:fixed; bottom:0; left:0; right:0; z-index:10;
+    text-align:center; color:var(--muted); padding:12px; font-size:.8rem;
+    background:rgba(15,17,23,.88); border-top:1px solid var(--border);
+  }
 </style>
 </head>
 <body>
 
 <header>
+  <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
   <h1>🎮 Русификаторы игр</h1>
   <p>Мои переводы и проекты — бесплатно</p>
 </header>
@@ -116,29 +134,24 @@
     <option value="new">Сначала новые</option>
   </select>
   <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
-  <button id="authBtn" class="tool-btn" title="Вход администратора">🔐 Войти</button>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <footer>© 2025 Мой сайт русификаторов</footer>
 
-<!-- Окно игры: обложка + выбор версии + ссылки -->
+<!-- Окно игры: обложка + ссылки -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
-    <button class="g-close" id="gClose">✕</button>
+    <button id="gEdit" class="g-edit admin-only">✏️ Редактировать</button>
+    <button class="g-close" id="gClose" title="Закрыть">✕</button>
     <div class="g-grid">
       <img id="gCover" class="g-cover" alt="Обложка">
       <div class="g-body">
-        <button id="gEdit" class="tool-btn admin-only g-edit">✏️ Редактировать</button>
         <h2 id="gTitle"></h2>
         <div id="gTags"></div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Скачать</h3>
-        <div class="g-ver">
-          <label for="gVersion">Версия:</label>
-          <select id="gVersion"></select>
-        </div>
         <div id="gLinks"></div>
       </div>
     </div>
@@ -163,11 +176,9 @@
     <input id="fAppId" type="text" inputmode="numeric" placeholder="Число из ссылки: store.steampowered.com/app/292030/...">
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
-    <label>Описание</label>
-    <textarea id="fDesc"></textarea>
     <label>Теги (через запятую)</label>
     <input id="fTags" type="text" placeholder="RPG, Полный перевод">
-    <label>Версии и ссылки — для каждой ссылки укажите свою версию. Одинаковая версия = одна группа в окне игры:</label>
+    <label>Ссылки для скачивания (сервис определится автоматически):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
     <div class="modal-actions">
@@ -297,32 +308,20 @@ async function steamSearch(term) {
   return null;
 }
 
-// ---------- Версии ----------
-// Сравнение версий ("1.10" новее "1.9", ведущая "v" игнорируется)
-const verParts = v => String(v).replace(/^v/i, "").trim().split(/[.\-_\s]+/).map(x => parseInt(x, 10) || 0);
-function cmpVer(a, b) {
-  const pa = verParts(a), pb = verParts(b);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const d = (pb[i] || 0) - (pa[i] || 0);
-    if (d) return d;
-  }
-  return 0;
-}
-const sortedVersions = p => [...(p.versions || [])].sort((a, b) => cmpVer(a.v, b.v));
-
-// Миграция старого формата (links с подписями) → новый (versions)
+// ---------- Приведение данных к плоскому списку ссылок ----------
+// (форматы с версиями, если были, схлопываются в один список; счётчики сохраняются)
 function migrate(p) {
-  if (Array.isArray(p.versions)) return p;
-  const links = Array.isArray(p.links) ? p.links : [];
-  const grouped = new Map();
-  for (const l of links) {
-    if (!l || !l.url) continue;
-    const v = String(l.label || "").trim() || "1.0"; // старая подпись становится версией
-    if (!grouped.has(v)) grouped.set(v, { v, links: [] });
-    grouped.get(v).links.push({ type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0 });
+  if (!Array.isArray(p.links)) {
+    const flat = [];
+    for (const v of (p.versions || []))
+      for (const l of (v.links || []))
+        if (l && l.url) flat.push(l);
+    p.links = flat;
   }
-  p.versions = [...grouped.values()];
-  delete p.links;
+  delete p.versions;
+  p.links = (p.links || []).filter(l => l && l.url).map(l => ({
+    type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0
+  }));
   return p;
 }
 
@@ -371,11 +370,11 @@ async function loadData() {
   state.dataSha = null;
 }
 
-// ---------- Счётчик скачиваний (привязан к ссылке, переживает перегруппировку версий) ----------
+// ---------- Счётчик скачиваний (привязан к ссылке) ----------
 const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
 const linkKey = (p, l) => `${p.id}_${hstr(l.url)}`;
 const getDl = (p, l) => Math.max(l.dl || 0, dlCache[linkKey(p, l)] || 0);
-const totalDl = p => (p.versions || []).reduce((s, v) => s + (v.links || []).reduce((s2, l) => s2 + getDl(p, l), 0), 0);
+const totalDl = p => (p.links || []).reduce((s, l) => s + getDl(p, l), 0);
 async function remoteGet(key) {
   try {
     const r = await fetch(`${COUNTER_API}/get/${CONFIG.counterNS}/${key}`);
@@ -391,12 +390,11 @@ async function syncCounters() {
   lastSync = Date.now();
   let dirty = false;
   for (const p of state.projects)
-    for (const v of (p.versions || []))
-      for (const l of (v.links || [])) {
-        const k = linkKey(p, l);
-        const remote = await remoteGet(k);
-        if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
-      }
+    for (const l of (p.links || [])) {
+      const k = linkKey(p, l);
+      const remote = await remoteGet(k);
+      if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
+    }
   if (dirty) saveDl();
   render();
 }
@@ -439,8 +437,8 @@ function render() {
         <img class="cover" src="${esc(coverSrc(p))}" alt="" onerror="this.onerror=null;this.src='${phSVG((p.title[0] || "?").toUpperCase())}'">
         <h2>${esc(p.title)}</h2>
         <div>${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
-        <p class="desc">${esc(p.description)}</p>
-        <div class="meta">⬇ ${totalDl(p)} скачиваний • версий: ${(p.versions || []).length}</div>
+        ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
+        <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
       </div>`);
   }
 }
@@ -479,6 +477,7 @@ function openGame(id) {
   $("gTitle").textContent = p.title;
   $("gTags").innerHTML = (p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("");
   $("gDesc").textContent = p.description || "";
+  $("gDesc").style.display = p.description ? "" : "none";
 
   const cover = $("gCover");
   const urls = [];
@@ -487,46 +486,29 @@ function openGame(id) {
   urls.push(phSVG((p.title[0] || "?").toUpperCase()));
   setCoverCascade(cover, urls);
 
-  const versions = sortedVersions(p);
-  const sel = $("gVersion");
-  sel.innerHTML = versions.length
-    ? versions.map((v, i) => `<option value="${i}">Версия ${esc(v.v)}</option>`).join("")
-    : '<option value="0">—</option>';
-  renderGameLinks();
-  $("gameModal").classList.remove("hidden");
-}
-
-function renderGameLinks() {
-  const p = state.projects.find(x => x.id === openedId);
-  if (!p) return;
-  const versions = sortedVersions(p);
-  const ver = versions[+$("gVersion").value || 0];
   const box = $("gLinks");
   box.innerHTML = "";
-  if (!ver || !(ver.links || []).length) {
-    box.innerHTML = '<p class="hint">Для этой версии ссылок нет.</p>';
-    return;
-  }
-  ver.links.forEach((l, li) => {
+  const links = p.links || [];
+  if (!links.length) box.innerHTML = '<p class="hint">Ссылки пока не добавлены.</p>';
+  links.forEach((l, i) => {
     const s = SERVICES[l.type] || SERVICES.other;
     box.insertAdjacentHTML("beforeend", `
       <div class="lk">
         ${makeIcon(l.type)}
         <div class="lk-info"><b>${esc(s.name)}</b>
           <span class="cnt">Скачиваний: ${getDl(p, l)}</span></div>
-        <a class="lk-btn" data-v="${versions.indexOf(ver)}" data-l="${li}" href="${esc(l.url)}" target="_blank" rel="noopener">Скачать</a>
+        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Скачать</a>
       </div>`);
   });
+  $("gameModal").classList.remove("hidden");
 }
-
- $("gVersion").addEventListener("change", renderGameLinks);
 
  $("gLinks").addEventListener("click", e => {
   const a = e.target.closest(".lk-btn");
   if (!a) return;
   const p = state.projects.find(x => x.id === openedId);
   if (!p) return;
-  const l = sortedVersions(p)[+a.dataset.v]?.links[+a.dataset.l];
+  const l = (p.links || [])[+a.dataset.i];
   if (!l) return;
   const k = linkKey(p, l);
   dlCache[k] = getDl(p, l) + 1;
@@ -547,8 +529,10 @@ function renderGameLinks() {
 // ---------- Вход администратора ----------
 function setAdmin(on) {
   document.body.classList.toggle("admin", on);
-  $("authBtn").textContent = on ? "🚪 Выйти" : "🔐 Войти";
-  $("authBtn").title = on && state.user ? "Вошли как " + state.user : "Вход администратора";
+  $("authBtn").textContent = on ? "🚪" : "🔐";
+  $("authBtn").title = on
+    ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
+    : "Вход администратора";
 }
  $("authBtn").addEventListener("click", () => {
   if (state.token) {
@@ -666,7 +650,7 @@ function queueTitleSearch() {
 });
 
 function openForm(id = null) {
-  if (!state.token) { alert("Сначала войдите как администратор (кнопка 🔐)"); return; }
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
   editId = id;
   searchSeq++; clearTimeout(searchTimer);
   titlePick = null; lastFound = [];
@@ -675,37 +659,29 @@ function openForm(id = null) {
   $("fTitle").value = p ? p.title : "";
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
-  $("fDesc").value = p ? p.description : "";
   $("fTags").value = p ? (p.tags || []).join(", ") : "";
   $("lkList").innerHTML = "";
-  let had = false;
-  (p?.versions || []).forEach(v => (v.links || []).forEach(l => { addLinkRow(l, v.v); had = true; }));
-  if (!had) addLinkRow({}, "1.0");
+  const links = p?.links?.length ? p.links : [{}];
+  links.forEach(addLinkRow);
   updateCoverPreview();
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
 
-function addLinkRow(l = {}, ver = "1.0") {
+function addLinkRow(l = {}) {
   const box = document.createElement("div");
   box.className = "lk-row";
   const opts = Object.entries(SERVICES)
     .map(([k, s]) => `<option value="${k}" ${l.type === k ? "selected" : ""}>${s.name}</option>`).join("");
   box.innerHTML = `
     <button type="button" class="ver-del" title="Убрать ссылку">✕</button>
-    <input class="l-ver" placeholder="Версия (1.2)" value="${esc(ver || "1.0")}">
     <select class="l-type">${opts}</select>
     <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">`;
   $("lkList").appendChild(box);
 }
 
  $("btnAdd").addEventListener("click", () => openForm());
- $("fAddLink").addEventListener("click", () => {
-  // новая строка подставляет версию из предыдущей строки — удобно для группы ссылок
-  const rows = document.querySelectorAll("#lkList .l-ver");
-  const last = rows.length ? rows[rows.length - 1].value.trim() : "";
-  addLinkRow({}, last || "1.0");
-});
+ $("fAddLink").addEventListener("click", () => addLinkRow());
  $("fCancel").addEventListener("click", closeForm);
  $("lkList").addEventListener("click", e => {
   if (e.target.classList.contains("ver-del")) e.target.closest(".lk-row").remove();
@@ -721,46 +697,37 @@ function addLinkRow(l = {}, ver = "1.0") {
  $("fSave").addEventListener("click", async () => {
   const btn = $("fSave");
   if (btn.disabled) return;
-  if (!state.token) { alert("Войдите как администратор (кнопка 🔐)"); return; }
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
 
   const title = $("fTitle").value.trim();
   if (!title) { alert("Введите название игры"); return; }
-  const description = $("fDesc").value.trim();
   const tags = $("fTags").value.split(",").map(t => t.trim()).filter(Boolean);
 
-  // Группируем строки по версии
-  const versions = [];
-  const vMap = new Map();
+  const links = [];
   for (const b of document.querySelectorAll("#lkList .lk-row")) {
     const url = b.querySelector(".l-url").value.trim();
     if (!url) continue;
     if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
-    const v = b.querySelector(".l-ver").value.trim() || "1.0";
-    const link = { type: b.querySelector(".l-type").value, url, dl: 0 };
-    if (!vMap.has(v)) { const item = { v, links: [] }; vMap.set(v, item); versions.push(item); }
-    vMap.get(v).links.push(link);
+    links.push({ type: b.querySelector(".l-type").value, url, dl: 0 });
   }
-  if (!versions.length) { alert("Добавьте хотя бы одну ссылку на скачивание (с версией)"); return; }
+  if (!links.length) { alert("Добавьте хотя бы одну ссылку на скачивание"); return; }
 
-  // Сохраняем счётчики: они привязаны к ссылке, а не к версии
-  const oldAll = new Map();
+  // Счётчики привязаны к ссылке и переживают любые правки
+  const oldMap = new Map();
   if (editId) {
     const p = migrate(state.projects.find(x => x.id === editId));
-    (p.versions || []).forEach(v => (v.links || []).forEach(l => oldAll.set(l.url, l)));
+    (p.links || []).forEach(l => oldMap.set(l.url, l));
   }
-  versions.forEach(v => v.links.forEach(l => {
-    const o = oldAll.get(l.url);
-    if (o) l.dl = o.dl || 0;
-  }));
+  links.forEach(l => { const o = oldMap.get(l.url); if (o) l.dl = o.dl || 0; });
 
   const c = effectiveCover();
   const cover = c ? (c.url ? { url: c.url }
     : { appid: c.appid, name: c.name || "", url: steamHeader(c.appid) }) : null;
 
   if (editId) {
-    Object.assign(state.projects.find(x => x.id === editId), { title, description, tags, cover, versions });
+    Object.assign(state.projects.find(x => x.id === editId), { title, tags, cover, links });
   } else {
-    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, description, tags, cover, versions, created: Date.now() });
+    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, tags, cover, links, created: Date.now() });
   }
 
   btn.disabled = true; btn.textContent = "Публикую…";
