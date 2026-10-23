@@ -1,5 +1,22 @@
 [
   {
+    "id": "arkham-horror-mother-s-embrace-mvlhzzlz",
+    "title": "Arkham Horror: Mother's Embrace",
+    "cover": {
+      "appid": "840210",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/840210/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/41KvrzHFPUklQw",
+        "dl": 0
+      }
+    ],
+    "created": 1792791884807
+  },
+  {
     "id": "ark-nova-mvlh51bz",
     "title": "Ark Nova",
     "cover": {
