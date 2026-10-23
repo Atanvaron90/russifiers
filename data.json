@@ -1,5 +1,22 @@
 [
   {
+    "id": "death-roads-tournament-mvljrqix",
+    "title": "Death Roads: Tournament",
+    "cover": {
+      "appid": "1619570",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1619570/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/qtPLU4m9lvZOkw",
+        "dl": 0
+      }
+    ],
+    "created": 1792794859017
+  },
+  {
     "id": "dawnmaker-mvljmgot",
     "title": "Dawnmaker",
     "cover": {
