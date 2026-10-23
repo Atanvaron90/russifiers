@@ -1,28 +1,12 @@
 [
   {
-    "id": "blood-rage-digital-edition-mvli4e8v",
-    "title": "Blood Rage: Digital Edition",
-    "cover": {
-      "appid": "1015930",
-      "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1015930/header.jpg"
-    },
-    "links": [
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/wVKPjjKESOG0iA",
-        "dl": 0
-      }
-    ],
-    "created": 1792792090399
-  },
-  {
     "id": "blocky-dungeon-mvli0p2q",
     "title": "Blocky Dungeon",
     "cover": {
       "appid": "1683370",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1683370/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1683370/header.jpg?t=1687795042",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1683370/capsule_184x69.jpg?t=1687795042"
     },
     "links": [
       {
@@ -39,7 +23,7 @@
     "cover": {
       "appid": "840210",
       "name": "",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/840210/capsule_616x353.jpg?t=1741270543"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/840210/header.jpg"
     },
     "links": [
       {
