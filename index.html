@@ -13,7 +13,17 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
   header { position:relative; text-align:center; padding:50px 20px 10px; }
-  header h1 { font-size:2rem; margin-bottom:8px; }
+  header h1 {
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    font-size:2rem; margin-bottom:8px; flex-wrap:wrap;
+  }
+  .site-logo {
+    display:none; /* показывается после успешной загрузки картинки */
+    width:52px; height:52px; border-radius:50%; object-fit:cover;
+    border:2px solid var(--accent);
+    box-shadow:0 3px 16px rgba(108,92,231,.45);
+  }
+  .logo-fallback { display:none; } /* значок-заглушка, если картинка ещё не загружена */
   header p { color:var(--muted); }
 
   .auth-btn {
@@ -93,16 +103,13 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
-  /* Редактор донатов: название — во всю ширину, цвет, иконка, крестик — узкая колонка справа */
+  /* Редактор донатов: название — во всю ширину, крестик — узкая колонка справа */
   .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .dn-row input { padding:8px 10px; font-size:.9rem; }
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
   .dn-row .full { grid-column:1 / -1; }
 
-  /* Плашка донатов.
-     По умолчанию — внизу, под сеткой (когда слева нет места).
-     На широких экранах (от ~1650px) — прилипает к левому краю контента,
-     как на макете: фиксированно, остаётся при прокрутке. */
+  /* Плашка донатов: внизу по умолчанию; на широких экранах — слева от сетки */
   .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
   .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
   .don-edit { position:absolute; top:10px; right:10px; }
@@ -119,7 +126,7 @@
     .donate {
       position: fixed;
       top: 160px;
-      left: calc(50vw - 824px); /* 24px левее контента (контент 1000px по центру) */
+      left: calc(50vw - 824px);
       width: 300px;
       max-width: none;
       margin: 0;
@@ -184,7 +191,11 @@
 
 <header>
   <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
-  <h1>🌐 Русификаторы от Atanvaron</h1>
+  <h1 class="site-title">
+    <img id="siteLogo" class="site-logo" alt="">
+    <span id="logoFallback" class="logo-fallback">🌐</span>
+    <span>Русификаторы от Atanvaron</span>
+  </h1>
   <p>Мои переводы и проекты — бесплатно</p>
 </header>
 
@@ -318,6 +329,10 @@ const CONFIG = {
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
+// ЛОГОТИП САЙТА: имя файла с аватаром в корне репозитория
+// (загрузи картинку рядом с index.html; до этого показывается значок-заглушка 🌐)
+const SITE_LOGO = "logo.jpg";
+
 // ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
 const DONATE_DEFAULT = {
   title: "☕ Поддержать автора",
@@ -363,6 +378,21 @@ function toast(msg, type = "info", ms = 4000) {
   setTimeout(() => { d.classList.add("out"); setTimeout(() => d.remove(), 400); }, ms);
 }
 
+// ---------- Логотип сайта ----------
+// Круглый аватар рядом с названием; если файла ещё нет в репозитории — значок-заглушка.
+// Тот же файл используется как иконка вкладки (favicon).
+(function setupLogo() {
+  const img = $("siteLogo");
+  img.onload = () => { img.style.display = ""; $("logoFallback").style.display = "none"; };
+  img.onerror = () => { img.style.display = "none"; $("logoFallback").style.display = "inline"; };
+  img.src = SITE_LOGO;
+  const fav = document.createElement("link");
+  fav.rel = "icon";
+  fav.type = SITE_LOGO.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+  fav.href = SITE_LOGO;
+  document.head.appendChild(fav);
+})();
+
 // ---------- Каталог сервисов ----------
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"] },
@@ -395,14 +425,12 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
-// Вертикальная (library_600x900): старые зеркала первыми, новые пути — запасом.
 const steamTallURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
 ];
-// Горизонтальная: у части новых игр старые пути отдают 404, поэтому новые первыми
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
