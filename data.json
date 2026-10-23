@@ -1,5 +1,22 @@
 [
   {
+    "id": "k2-digital-edition-mvlmitaz",
+    "title": "K2: Digital Edition",
+    "cover": {
+      "appid": "2561310",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2561310/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/qTB-_lbwRelAUg",
+        "dl": 0
+      }
+    ],
+    "created": 1792799481563
+  },
+  {
     "id": "istanbul-digital-edition-mvlme322",
     "title": "Istanbul: Digital Edition",
     "cover": {
