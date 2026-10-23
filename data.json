@@ -1,5 +1,22 @@
 [
   {
+    "id": "cascadia-mvlixns2",
+    "title": "Cascadia",
+    "cover": {
+      "appid": "2438970",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438970/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/aeD6TIGDnR3aXw",
+        "dl": 0
+      }
+    ],
+    "created": 1792793455778
+  },
+  {
     "id": "carcassonne-tiles-tactics-mvlidjk9",
     "title": "Carcassonne - Tiles & Tactics",
     "cover": {
