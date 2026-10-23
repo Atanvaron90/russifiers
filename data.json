@@ -1,5 +1,22 @@
 [
   {
+    "id": "labyrinth-the-war-on-terror-mvlml5bd",
+    "title": "Labyrinth: The War on Terror",
+    "cover": {
+      "appid": "931950",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/RggpP6zPbCxccA",
+        "dl": 0
+      }
+    ],
+    "created": 1792799590441
+  },
+  {
     "id": "kingdom-of-cards-mvlmjj7r",
     "title": "Kingdom of Cards",
     "cover": {
