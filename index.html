@@ -372,6 +372,15 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
+// Вертикальная (library_600x900) — как было в начале: старые зеркала CDN первыми,
+// новые пути store_item_assets — запасом.
+const steamTallURLs = appid => [
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
+];
+// Горизонтальная: у части новых игр старые пути отдают 404, поэтому новые пути первыми
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -385,12 +394,6 @@ const steamCapsuleURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`
 ];
-const steamTallURLs = appid => [
-  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
-  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`
-];
 function phSVG(letter) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
@@ -400,6 +403,7 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
+// Горизонтальная обложка для плашки: канонический URL → header → capsule → заглушка
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
@@ -409,10 +413,14 @@ function coverURLs(p) {
   ];
   return dedupe(urls);
 }
+// Для окна игры: СНАЧАЛА вертикальная (как было в начале), потом горизонтальные,
+// потом своя картинка, затем заглушка
 function gameCoverURLs(p) {
   const c = p.cover || {};
   const urls = [
-    c.url, ...(c.appid ? [...steamTallURLs(c.appid), ...steamHeaderURLs(c.appid), ...steamCapsuleURLs(c.appid)] : []),
+    ...(c.appid ? steamTallURLs(c.appid) : []),
+    ...(c.appid ? steamHeaderURLs(c.appid) : []),
+    c.url, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
     phSVG((p.title[0] || "?").toUpperCase())
   ];
   return dedupe(urls);
