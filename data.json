@@ -1,5 +1,22 @@
 [
   {
+    "id": "blood-rage-digital-edition-mvli4e8v",
+    "title": "Blood Rage Digital Edition",
+    "cover": {
+      "appid": "1015930",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1015930/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/wVKPjjKESOG0iA",
+        "dl": 0
+      }
+    ],
+    "created": 1792792090399
+  },
+  {
     "id": "blocky-dungeon-mvli0p2q",
     "title": "Blocky Dungeon",
     "cover": {
