@@ -1,5 +1,22 @@
 [
   {
+    "id": "crime-o-clock-mvljjx11",
+    "title": "Crime O'Clock",
+    "cover": {
+      "appid": "1736290",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1736290/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/hcj83_b5I9EjHg",
+        "dl": 0
+      }
+    ],
+    "created": 1792794494197
+  },
+  {
     "id": "concordia-digital-edition-mvlji7xq",
     "title": "Concordia: Digital Edition",
     "cover": {
