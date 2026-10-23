@@ -1,5 +1,22 @@
 [
   {
+    "id": "fury-of-dracula-digital-edition-mvlm3pc4",
+    "title": "Fury of Dracula: Digital Edition",
+    "cover": {
+      "appid": "958530",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/958530/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/DsM_AYDZLKw1-Q",
+        "dl": 0
+      }
+    ],
+    "created": 1792798776580
+  },
+  {
     "id": "exploding-kittens-2-mvlm2sfg",
     "title": "Exploding Kittens® 2",
     "cover": {
