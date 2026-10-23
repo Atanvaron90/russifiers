@@ -1,5 +1,27 @@
 [
   {
+    "id": "concordia-digital-edition-mvlji7xq",
+    "title": "Concordia: Digital Edition",
+    "cover": {
+      "appid": "1450330",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1450330/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/bYhUwIdKuKtEIw",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1ZeABxKA_9kLDUXSeV5qcp0qVwBuMLtW_?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792794415023
+  },
+  {
     "id": "clue-cluedo-classic-edition-mvljg6cl",
     "title": "Clue/Cluedo: Classic Edition",
     "cover": {
