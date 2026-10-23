@@ -5,7 +5,8 @@
     "cover": {
       "appid": "2438990",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438990/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438990/header.jpg?t=1767897183",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438990/2b3fca049923556bf45bed02055d4c4f56285084/capsule_184x69.jpg?t=1767897183"
     },
     "links": [
       {
@@ -50,7 +51,8 @@
     "cover": {
       "appid": "1074620",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1074620/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1074620/5fd93d522efe0cdf4ec916d5a3d3ddb98e21229c/header.jpg?t=1760528956",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1074620/capsule_184x69.jpg?t=1760528956"
     },
     "links": [
       {
