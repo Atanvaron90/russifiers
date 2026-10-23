@@ -1,5 +1,1012 @@
 [
   {
+    "id": "talisman-horus-heresy-4pda-mvlfbev5-4",
+    "title": "Talisman: Horus Heresy (4pda)",
+    "cover": null,
+    "links": [
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.asmodeedigital.terraformingmars",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=952600",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.marmalade.tickettoride",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1081524",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.acram.Unmatched",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1072852",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.mylileverdell",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1092448",
+        "dl": 0
+      }
+    ],
+    "created": 1792787378949
+  },
+  {
+    "id": "русифицированные-игры-на-android-mvlfbent-3",
+    "title": "Русифицированные игры на Android",
+    "cover": null,
+    "links": [
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.iron",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1022161",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.asmodeedigital.carcassonne",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=876024",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.acram.Charterstone",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1073341",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.clank",
+        "dl": 0
+      },
+      {
+        "type": "telegram",
+        "url": "https://t.me/Boardgamers_ru/449535/515939",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.marmalade.cluedo2&hl=ru",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=187610",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.acram.Concordia",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1033846",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.dune",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1086185&view=findpost&p=129041629",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.everdell&pli=1",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1092443",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.horriblegames.evergreen",
+        "dl": 0
+      },
+      {
+        "type": "telegram",
+        "url": "https://t.me/Boardgamers_ru/449535/511976",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.marmalade.explodingkittens",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1093016",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.nomadgames.furyofdracula",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.acram.Istanbul",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=907225&view=findpost&p=74562799",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.playdekgames.labyrinth",
+        "dl": 0
+      },
+      {
+        "type": "telegram",
+        "url": "https://t.me/Boardgamers_ru/449535/484011",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.marmalade.monopoly",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=974747",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.munchkin",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1073175&view=findpost&p=124022739",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.raiders",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=961052&view=findpost&p=87569826",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.direwolfdigital.sagrada",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1074294&view=findpost&p=124457828",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.acram.StoneAge",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1088317",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.nomadgames.talisman",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://play.google.com/store/apps/details?id=com.nomadgames.talismanchronicles",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=952832&view=findpost&p=85394470",
+        "dl": 0
+      }
+    ],
+    "created": 1792787378684
+  },
+  {
+    "id": "совместные-русификаторы-на-пк-mvlfbegh-2",
+    "title": "Совместные русификаторы на ПК",
+    "cover": null,
+    "links": [
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/274190/Broforce/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/hmqHc_oCJ4_Y9A",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/496340/Fighting_Fantasy_Legends/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/5jgHpjejNQjIHA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/221680/Rocksmith_2014_Edition__Remastered/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/TQFwDxoSk7ao6w",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/358460/Talisman_The_Horus_Heresy/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/AEJYBdv67Uw4LA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/303800",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/sWSVrjB0t2qUf",
+        "dl": 0
+      }
+    ],
+    "created": 1792787378420
+  },
+  {
+    "id": "русификаторы-на-пк-mvlfbe9b-1",
+    "title": "Русификаторы на ПК",
+    "cover": null,
+    "links": [
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2423760/Above_the_Snow/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/cVuWKwrEXIkYhw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1075190/A_Game_of_Thrones_The_Board_Game__Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/ldSmOlkkfD9Zcw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1074620",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/f8O03AUGRqJjuQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/993790/Ancient_Enemy/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/4vTCbQgKJrEvow",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/file/d/1FXle496pfPeWjXsfjHTgdDkk91qEHH5k/view?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2438990/Ark_Nova/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/jFvXCffjlRiehg",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1s3yo4GhK6cIu1nMvtOzxFP0HMUeMfi7V?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/840210/Arkham_Horror_Mothers_Embrace/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/41KvrzHFPUklQw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1683370/Blocky_Dungeon/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/mrKpEA0AzJCAYQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1015930/Blood_Rage_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/wVKPjjKESOG0iA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1287920/Brass_Birmingham/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xvK5pDx5b4i_MA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/598810/Carcassonne__Tiles__Tactics/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/7kOY050FTQqIWQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2438970/Cascadia/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/aeD6TIGDnR3aXw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1046660/Charterstone_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/bYkDnaY2Kl0f_g",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1722870/Clank/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/97-G0Y7KH-T7IA",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1OrWCSlOJWs_JhTxRv-ExZ9QMvgs1etD6?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2506480/ClueCluedo/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/S61uyJXWbBwMPw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/794800/ClueCluedo_Classic_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/VnKJOJavgB2-5Q",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1450330/Concordia_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/bYhUwIdKuKtEIw",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1ZeABxKA_9kLDUXSeV5qcp0qVwBuMLtW_?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1736290/Crime_OClock/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/hcj83_b5I9EjHg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2749100/Dawnmaker/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/toOwETO0YctT3g",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1Zn20_3XMwV-GCdURewyTVOt8udJWN7Ar?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1619570/Death_Roads_Tournament/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/qtPLU4m9lvZOkw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1431950/Decks__Daggers/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xu8ighQ2Sd-xCQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1689500/Dune_Imperium/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/Zw07WxhA4i19ZA",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1LC8MUNVRLlaQ55DdYELIgYUlQcMUo0Zj?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2921150/Escape_Tales_The_Awakening/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zfqaIg2AX9HKtA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1722840/Everdell/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/U2PQL4Uz28-RkA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2238070/Evergreen_The_Board_Game/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/NrDsDTFgUCy3_g",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2999030/Exploding_Kittens_2/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/WMOYiNiQy_y3yQ",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1lGZSLOkpL-LJ6LzY7_JJ0fl--LQ5O7fh?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/958530/Fury_of_Dracula_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/DsM_AYDZLKw1-Q",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/893050/Hasbros_BATTLESHIP/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/NQ3bruEY-QbD9g",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/945680/Here_Be_Dragons/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/42tbYxBnKSUidw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://www.gog.com/ru/game/howl",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/Yw7WMFG4X8zljQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2924580/Inkborn/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/ewSq2oTynPjr3g",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1_5l_M_xO0BY0UI8GJ-e_AOpR2zYP9OED?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/943410/Istanbul_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/6MZszLY5wfy6fw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2561310/K2_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/qTB-_lbwRelAUg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/3160500/Kingdom_of_Cards/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/YOzTmwRSP4l9dw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/931950/Labyrinth_The_War_on_Terror/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/RggpP6zPbCxccA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/511820/Le_Havre_The_Inland_Port/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/8PJnKM8CMHRjDg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1313290/Let_Them_Trade/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/jTwfRJyk3JiTdg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1722860/Munchkin_Digital/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/UcabQGHDorNtqA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/908070/Mystic_Vale/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/P-KcG897Xr681Q",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1L4u72zRRp2s7Nauin93TNraBnABx_zdF?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1915550/Nemesis_Lockdown/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/GYaBv3S4gbHIDw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2109390/Overboss/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/VHg1sDzhuVUD6w",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/480640/Pathfinder_Adventures/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/BqihYiXB3sLGjg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/788420/Potion_Explosion/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/tjlHbTx5LyUhbg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1724390/Power_Chord/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/kt_ftPzyZ1Cchg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/965600/Raiders_of_the_North_Sea/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/AlnOwrnVYPqV3w",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/965590/Sagrada/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/77hD94E3fGPBUg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/3493430/Set_a_Watch_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/kR1XjRkIxri7Pg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2177570/Stone_Age_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/qfqSWZWG04PldA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1442430/Storage_Hunter_Simulator/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xsAZDtJBnpOkPQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/908060/Talisman_Digital_5th_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/VADsv_SqRp2oCQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/247000/Talisman_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/BUs86J1QHJszcw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1033170/Talisman_Origins/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/MNNnIBGljfnecQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1566200/Tape_to_Tape/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/kxWX3-xgwI2p4g",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/800270/Terraforming_Mars/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/DLl0tdrGUld5Ig",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1126580/The_Captain_is_Dead/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/2JNrBXxu9ARLMA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1729050/The_Fox_in_the_Forest/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/IktsZ3REutSb2g",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2438980/The_Isle_of_Cats/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/-QBKIA5mNmcpYA",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2069180/The_Kings_Dilemma_Chronicles/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zW2Ra_C28FNgEQ",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2477010/Ticket_to_Ride/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/5h8qJdRRoqTjow",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/406290/Twilight_Struggle/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/sb_IZhG4Xr3dpg",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1276130/Twilight_Struggle_Red_Sea/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/pljHb4HalXsDHw",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/1677980/Unmatched_Digital_Edition/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xMZKgBjZBp1UAA",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1NZ1i8y9rchJeT6jiuFSHg2D27gGypO7N?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/2553410/Welcome_To_Everdell/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/F5FsQKYijS_e7w",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/965620/Wings_of_Glory/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/ODQ0gjvjaPc1ig",
+        "dl": 0
+      },
+      {
+        "type": "other",
+        "url": "https://store.steampowered.com/app/965610/Reiner_Knizia_Yellow__Yangtze/",
+        "dl": 0
+      },
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zZ10OCHmMHwlLw",
+        "dl": 0
+      }
+    ],
+    "created": 1792787378160
+  },
+  {
     "id": "above-the-snow-mvle4bwr",
     "title": "Above the Snow",
     "cover": {
