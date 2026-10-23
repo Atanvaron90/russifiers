@@ -1,5 +1,22 @@
 [
   {
+    "id": "blocky-dungeon-mvli0p2q",
+    "title": "Blocky Dungeon",
+    "cover": {
+      "appid": "1683370",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1683370/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/mrKpEA0AzJCAYQ",
+        "dl": 0
+      }
+    ],
+    "created": 1792791917810
+  },
+  {
     "id": "arkham-horror-mother-s-embrace-mvlhzzlz",
     "title": "Arkham Horror: Mother's Embrace",
     "cover": {
