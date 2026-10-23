@@ -965,6 +965,9 @@ function render() {
     return;
   }
   for (const p of list) {
+    // перечень сервисов из ссылок: «Яндекс.Диск • Google Drive • Boosty»
+    const services = dedupe((p.links || [])
+      .map(l => (SERVICES[l.type] || SERVICES.other).name));
     grid.insertAdjacentHTML("beforeend", `
       <div class="card" data-id="${esc(p.id)}">
         <div class="card-actions admin-only">
@@ -974,6 +977,7 @@ function render() {
         <img class="cover" alt="">
         <h2>${esc(p.title)}</h2>
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
+        ${services.length ? `<div class="meta">${esc(services.join(" • "))}</div>` : ""}
       </div>`);
     // в компактном виде картинки скрыты — не грузим их зря
     if (view !== "compact")
