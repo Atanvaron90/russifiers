@@ -1,5 +1,27 @@
 [
   {
+    "id": "exploding-kittens-2-mvlm2sfg",
+    "title": "Exploding Kittens® 2",
+    "cover": {
+      "appid": "2999030",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2999030/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/WMOYiNiQy_y3yQ",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1lGZSLOkpL-LJ6LzY7_JJ0fl--LQ5O7fh?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792798733932
+  },
+  {
     "id": "evergreen-the-board-game-mvlm1480",
     "title": "Evergreen: The Board Game",
     "cover": {
