@@ -1,5 +1,22 @@
 [
   {
+    "id": "hasbro-s-battleship-mvlm61x9",
+    "title": "Hasbro's BATTLESHIP",
+    "cover": {
+      "appid": "893050",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/893050/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/NQ3bruEY-QbD9g",
+        "dl": 0
+      }
+    ],
+    "created": 1792798886205
+  },
+  {
     "id": "fury-of-dracula-digital-edition-mvlm3pc4",
     "title": "Fury of Dracula: Digital Edition",
     "cover": {
