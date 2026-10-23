@@ -28,9 +28,9 @@
   .site-logo {
     display:none; /* показывается после успешной загрузки картинки */
     align-self:stretch;
-    max-height:64px;
+    max-height:64px;       /* потолок: высота названия + слогана */
     width:auto;
-    aspect-ratio:1/1;
+    aspect-ratio:1/1;      /* остаётся кругом */
     object-fit:cover;
     border:2px solid var(--accent);
     border-radius:50%;
@@ -53,6 +53,11 @@
   #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  .stat-chip {
+    align-self:center; padding:12px 14px; background:var(--card);
+    border:1px solid var(--border); border-radius:10px;
+    color:var(--muted); font-size:.9rem; white-space:nowrap;
+  }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
@@ -80,7 +85,7 @@
   .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
   .grid.view-list .card .desc { flex-grow:0; }
 
-  /* Компактный вид: просто список названий в столбик —
+  /* Компактный вид: список названий в столбик —
      без плашек, рамок, картинок и промежутков между строками */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
@@ -238,6 +243,7 @@
 
   <div class="toolbar">
     <input id="search" type="text" placeholder="Поиск по названию игры...">
+    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <select id="sortBy" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
@@ -391,6 +397,7 @@ const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
 const LS_VIEW = "russifiers_view";
 const LS_STEAM_COMBO = "russifiers_steam_combo";
+const LS_APP_ROUTE = "russifiers_app_route";
 const LS_APPNAMES = "russifiers_appnames_v2";
 
 const $ = id => document.getElementById(id);
@@ -402,6 +409,13 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&l
 const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
 const encPath = p => p.split("/").map(encodeURIComponent).join("/");
 const dedupe = arr => [...new Set(arr.filter(Boolean))];
+// Русские окончания: 1 русификатор, 2 русификатора, 5 русификаторов
+const pluralRu = (n, one, few, many) => {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+};
 
 // ---------- Тосты ----------
 function toast(msg, type = "info", ms = 4000) {
@@ -532,11 +546,11 @@ function fetchTimeout(url, ms = 8000) {
 }
 
 // ---------- Прокси для Steam ----------
+// corsproxy убран: с 2024 требует платный ключ (HTTP 401 — бесполезен)
 const STEAM_PROXIES = [
   { name:"direct",     wrap: u => u },
   { name:"codetabs",   wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
-  { name:"allorigins", wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
-  { name:"corsproxy",  wrap: u => "https://corsproxy.io/?url=" + encodeURIComponent(u) }
+  { name:"allorigins", wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) }
 ];
 const failedCombos = new Set();
 
@@ -602,7 +616,10 @@ async function steamSearch(term) {
   return anyAnswered ? [] : null;
 }
 
-// ---------- Информация об игре по AppID ----------
+// ---------- Информация об игре по AppID: название + канонические обложки ----------
+// Источники по очереди: appdetails (API Steam) → SteamSpy → HTML-страница игры →
+// полный список приложений (GetAppList, грузится раз за сессию).
+// Удачный маршрут запоминается — следующие запросы идут через него мгновенно.
 const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
 function cacheInfo(id, info) {
   appInfoCache[id] = info;
@@ -628,6 +645,8 @@ const APP_ROUTES = [
       }
       return null;
     } },
+  { name:"steamspy", url: id => `https://steamspy.com/api.php?request=appdetails&appid=${id}`,
+    parse: j => (j && j.name) ? { name: String(j.name), header: "", capsule: "" } : null },
   { name:"htmlpage", url: id => `https://store.steampowered.com/app/${id}/?l=russian`, html: true }
 ];
 function parseOgTitle(html) {
@@ -647,16 +666,29 @@ function parseOg(html) {
     capsule: ""
   };
 }
+// Порядок попыток: сначала запомненный удачный маршрут,
+// затем точечные API (напрямую и через прокси), затем HTML-страница (только через прокси)
+function appRouteAttempts() {
+  const attempts = [];
+  const saved = localStorage.getItem(LS_APP_ROUTE);
+  if (saved) {
+    const [ri, pi] = saved.split(":").map(Number);
+    if (APP_ROUTES[ri] && STEAM_PROXIES[pi]) attempts.push([ri, pi]);
+  }
+  for (let ri = 0; ri < APP_ROUTES.length - 1; ri++)
+    for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
+      attempts.push([ri, pi]);
+  for (let pi = 1; pi < STEAM_PROXIES.length; pi++)
+    attempts.push([APP_ROUTES.length - 1, pi]);
+  return attempts;
+}
 async function fetchAppInfo(appid) {
   const cached = cachedInfo(appid);
   if (cached && cached.header) return cached;
-  const attempts = [];
-  for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);
-  for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);
-  for (const [ri, pi] of attempts) {
+  for (const [ri, pi] of appRouteAttempts()) {
     const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
     try {
-      const r = await fetchTimeout(proxy.wrap(route.url(appid)));
+      const r = await fetchTimeout(proxy.wrap(route.url(appid)), 6000);
       if (!r.ok) throw new Error("HTTP " + r.status);
       const text = await r.text();
       let info;
@@ -666,19 +698,56 @@ async function fetchAppInfo(appid) {
       } else {
         let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
         info = route.parse(j, appid);
-        if (!info) throw new Error("success:false");
+        if (!info) throw new Error("нет данных");
       }
       if (!info.name && cached?.name) info.name = cached.name;
+      if (!info.name && !info.header) throw new Error("пустой ответ");
+      localStorage.setItem(LS_APP_ROUTE, ri + ":" + pi); // запомнили удачный маршрут
       cacheInfo(appid, info);
       return info;
     } catch (e) {
       console.warn("Инфо по AppID: маршрут не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
     }
   }
+  // Последний шанс: полный список приложений Steam (грузится один раз за сессию)
+  const list = await fetchAppListBulk();
+  if (list) {
+    const hit = list.find(x => +x.appid === +appid);
+    if (hit && hit.name) {
+      const info = { name: String(hit.name), header: cached?.header || "", capsule: cached?.capsule || "" };
+      cacheInfo(appid, info);
+      return info;
+    }
+  }
   return cached && (cached.name || cached.header) ? cached : null;
+}
+// Полный список приложений: тяжёлый (~10 МБ), поэтому кэшируется в памяти на сессию
+let appListPromise = null;
+function fetchAppListBulk() {
+  if (appListPromise) return appListPromise;
+  appListPromise = (async () => {
+    const url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
+    for (const proxy of STEAM_PROXIES) {
+      try {
+        const r = await fetchTimeout(proxy.wrap(url), 30000);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const j = await r.json();
+        const list = j && j.applist && j.applist.apps;
+        if (Array.isArray(list) && list.length) return list;
+        throw new Error("пустой список");
+      } catch (e) {
+        console.warn("GetAppList: маршрут не ответил —", proxy.name, "(", e.message, ")");
+      }
+    }
+    appListPromise = null; // не получилось — разрешаем повторную попытку позже
+    return null;
+  })();
+  return appListPromise;
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
+// Название из слага ссылки. Steam вырезает из слага все знаки препинания — это черновик;
+// точное имя приходит из Steam API и перезаписывает черновик.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -959,6 +1028,12 @@ function render() {
     .filter(p => !query || p.title.toLowerCase().includes(query))
     .sort(SORTS[currentSort()].fn);
 
+  // Счётчик русификаторов: всего / найдено при поиске
+  const total = state.projects.length;
+  $("statCount").textContent = query
+    ? `Найдено: ${list.length} из ${total}`
+    : `${total} ${pluralRu(total, "русификатор", "русификатора", "русификаторов")}`;
+
   grid.innerHTML = "";
   if (!list.length) {
     grid.innerHTML = `<div class="empty">${state.token ? "Пока ничего нет — нажмите «Добавить русификатор»" : "Пока ничего не опубликовано 😕"}</div>`;
@@ -1230,6 +1305,8 @@ function queueAppIdLookup(immediate = false) {
     if (slugName) {
       $("fTitle").value = slugName;
       setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное название и обложку из Steam…");
+    } else {
+      setNote("Получаю название и обложку из Steam…");
     }
   }
   const run = async () => {
@@ -1242,7 +1319,7 @@ function queueAppIdLookup(immediate = false) {
         ? "Название и обложка из Steam (точный адрес картинки) — можно отредактировать вручную."
         : "Название из Steam — можно отредактировать вручную.");
     } else {
-      setNote("Steam недоступен: название оставлено из ссылки. В ссылке нет двоеточий и других знаков — проверь и поправь вручную. Обложку можно задать картинкой или она подтянется позже.");
+      setNote("Steam недоступен из этой сети: запросы к API заблокированы. Впиши название вручную — обложка по AppID всё равно подтянется.");
     }
   };
   if (immediate) run();
