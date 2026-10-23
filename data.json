@@ -1,5 +1,27 @@
 [
   {
+    "id": "inkborn-mvlmdf40",
+    "title": "Inkborn",
+    "cover": {
+      "appid": "2924580",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2924580/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/ewSq2oTynPjr3g",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1_5l_M_xO0BY0UI8GJ-e_AOpR2zYP9OED?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792799229888
+  },
+  {
     "id": "howl-mvlm840y",
     "title": "Howl",
     "cover": {
