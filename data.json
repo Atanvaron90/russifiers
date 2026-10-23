@@ -1,5 +1,22 @@
 [
   {
+    "id": "decks-daggers-mvljuknx",
+    "title": "Decks Daggers",
+    "cover": {
+      "appid": "1431950",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1431950/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xu8ighQ2Sd-xCQ",
+        "dl": 0
+      }
+    ],
+    "created": 1792794991389
+  },
+  {
     "id": "death-roads-tournament-mvljrqix",
     "title": "Death Roads: Tournament",
     "cover": {
