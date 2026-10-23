@@ -1,5 +1,22 @@
 [
   {
+    "id": "let-them-trade-mvlmoj6f",
+    "title": "Let Them Trade",
+    "cover": {
+      "appid": "1313290",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1313290/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/jTwfRJyk3JiTdg",
+        "dl": 0
+      }
+    ],
+    "created": 1792799748375
+  },
+  {
     "id": "le-havre-the-inland-port-mvlmm9st",
     "title": "Le Havre: The Inland Port",
     "cover": {
