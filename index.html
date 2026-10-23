@@ -26,7 +26,7 @@
   .toolbar { max-width:1000px; margin:25px auto 10px; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
   #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
-  #sortBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
@@ -47,6 +47,16 @@
   .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; z-index:2; }
   .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
   .icon-btn:hover { opacity:1; }
+
+  /* Вид списка: список (в столбик с картинками) и компактный (в столбик без картинок) */
+  .grid.view-list { grid-template-columns:1fr; }
+  .grid.view-list .card { display:grid; grid-template-columns:230px 1fr; gap:4px 16px; align-items:start; padding:12px; }
+  .grid.view-list .card .cover { grid-column:1; grid-row:1 / span 3; width:100%; height:100%; min-height:110px; }
+  .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
+  .grid.view-list .card .desc { flex-grow:0; }
+  .grid.view-compact { grid-template-columns:1fr; }
+  .grid.view-compact .card { padding:12px 16px; gap:6px; }
+  .grid.view-compact .card .cover { display:none; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -85,15 +95,25 @@
   .imp-links { font-size:.76rem; color:var(--muted); margin-top:6px; overflow-wrap:anywhere; max-height:64px; overflow:auto; }
   .imp-dupnote { font-size:.76rem; color:#f0b45c; margin-top:4px; }
 
+  /* Плашка донатов */
+  .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
+  .donate-box { background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
+  .donate-box h3 { font-size:1.05rem; margin-bottom:6px; }
+  .donate-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
+  .donate-list { display:flex; flex-wrap:wrap; gap:10px; }
+  .don-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 14px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit; }
+  .don-btn:hover { border-color:var(--accent); }
+  .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
+  .don-ico img { width:13px; height:13px; }
+
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  /* Значки в углу окна: без фона, в одном стиле */
   .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:12px; align-items:center; }
   .g-top button {
     background:none; border:none; cursor:pointer;
-    font-size:1.1rem; line-height:1; padding:2px; opacity:.8;
-    text-shadow:0 1px 3px rgba(0,0,0,.45);
+    font-size:1.1rem; line-height:1; padding:2px; opacity:.85;
+    color:#9aa0ab; text-shadow:0 1px 3px rgba(0,0,0,.5); /* серый — читаемо на любой обложке */
   }
-  .g-top button:hover { opacity:1; transform:scale(1.15); }
+  .g-top button:hover { opacity:1; color:#e4e6eb; transform:scale(1.15); }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
   .g-cover-link { display:block; }
   .g-cover-link img { transition:filter .15s; }
@@ -122,6 +142,18 @@
     text-align:center; color:var(--muted); padding:12px; font-size:.8rem;
     background:rgba(15,17,23,.88); border-top:1px solid var(--border);
   }
+
+  /* Всплывающие уведомления (вместо alert) */
+  .toasts { position:fixed; right:16px; bottom:56px; z-index:100; display:flex; flex-direction:column; gap:8px; max-width:min(340px, calc(100vw - 32px)); }
+  .toast {
+    background:#1f2330; border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:10px; padding:10px 14px; font-size:.87rem; color:var(--text);
+    box-shadow:0 6px 20px rgba(0,0,0,.45); animation:tin .25s ease; overflow-wrap:anywhere;
+  }
+  .toast.ok  { border-left-color:#3ecf8e; }
+  .toast.err { border-left-color:#ff6b6b; }
+  .toast.out { opacity:0; transition:opacity .35s; }
+  @keyframes tin { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 </style>
 </head>
 <body>
@@ -140,15 +172,31 @@
     <option value="dl">По скачиваниям</option>
     <option value="new">Сначала новые</option>
   </select>
+  <select id="viewBy" title="Вид списка">
+    <option value="grid">Сетка</option>
+    <option value="list">Список</option>
+    <option value="compact">Компактно</option>
+  </select>
   <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
   <button id="btnImport" class="tool-btn admin-only">📥 Импорт с Teletype</button>
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="grid view-grid" id="grid"></div>
+
+<!-- Плашка донатов (наполняется из DONATE в настройках скрипта) -->
+<section id="donate" class="donate">
+  <div class="donate-box">
+    <h3 id="donTitle"></h3>
+    <p id="donText"></p>
+    <div class="donate-list" id="donateList"></div>
+  </div>
+</section>
 
 <footer>© 2025 Мой сайт русификаторов</footer>
 
-<!-- Окно игры: значки ✏️ 🗑️ ✕ без фона; название и обложка — ссылки на Steam -->
+<div class="toasts" id="toasts"></div>
+
+<!-- Окно игры -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
     <div class="g-top">
@@ -234,8 +282,8 @@
 <script>
 // ================== НАСТРОЙКИ — ЗАПОЛНИ СВОЁ ==================
 const CONFIG = {
-  owner: "ВАШ_НИК_GITHUB",   // ник на GitHub
-  repo: "russifiers",        // имя публичного репозитория
+  owner: "ВАШ_НИК_GITHUB",
+  repo: "russifiers",
   branch: "main",
   dataFile: "data.json",
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
@@ -243,17 +291,29 @@ const CONFIG = {
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 const TELETYPE_DEFAULT = "https://teletype.in/@atanvaron/my_rusificators";
 
+// ==== ПЛАШКА ДОНАТОВ — замени ссылки и реквизиты на свои ====
+const DONATE = {
+  title: "☕ Поддержать автора",
+  text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
+  methods: [
+    { name: "Boosty", url: "https://boosty.to/atanvaron/donate", icon: "boosty", color: "#F15F2C" },
+    { name: "ЮMoney", url: "https://yoomoney.ru/to/4100XXXXXXXXXXXX", color: "#8B3FFE" },          // ← замени номер
+    { name: "Карта — нажмите, чтобы скопировать", value: "0000 0000 0000 0000", color: "#2E7D32" } // ← замени номер
+  ]
+};
+// ============================================================
+
 if (location.hostname.endsWith(".github.io")) {
   CONFIG.owner = location.hostname.split(".")[0];
   const seg = location.pathname.split("/").filter(Boolean);
   if (seg.length) CONFIG.repo = seg[0];
 }
-// ===============================================================
 
 const GH_API = "https://api.github.com";
 const LS_TOKEN = "russifiers_gh_token";
 const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
+const LS_VIEW = "russifiers_view";
 const LS_STEAM_COMBO = "russifiers_steam_combo";
 const LS_APPNAMES = "russifiers_appnames_v1";
 
@@ -266,7 +326,16 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&l
 const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
 const encPath = p => p.split("/").map(encodeURIComponent).join("/");
 
-// ---------- Каталог сервисов (распознавание по суффиксу домена — ловит и cdn.boosty.to) ----------
+// ---------- Всплывающие уведомления (вместо alert) ----------
+function toast(msg, type = "info", ms = 4000) {
+  const d = document.createElement("div");
+  d.className = "toast " + type;
+  d.textContent = msg;
+  $("toasts").appendChild(d);
+  setTimeout(() => { d.classList.add("out"); setTimeout(() => d.remove(), 400); }, ms);
+}
+
+// ---------- Каталог сервисов (по суффиксу домена — ловит cdn.boosty.to и любые поддомены) ----------
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"] },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
@@ -453,20 +522,48 @@ async function fetchAppName(appid) {
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
-// ---------- Импорт с Teletype ----------
-async function teletypeFetch(url) {
-  for (const p of STEAM_PROXIES) {
+// ---------- Импорт с Teletype: этап 1 — HTML через 5 маршрутов ----------
+async function teletypeFetchHTML(url) {
+  const attempts = [
+    ["direct",        () => fetchTimeout(url, 12000)],
+    ["codetabs",      () => fetchTimeout("https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(url), 15000)],
+    ["allorigins",    () => fetchTimeout("https://api.allorigins.win/raw?url=" + encodeURIComponent(url), 15000)],
+    ["corsproxy",     () => fetchTimeout("https://corsproxy.io/?url=" + encodeURIComponent(url), 15000)],
+    ["allorigins-get", async () => {
+      const r = await fetchTimeout("https://api.allorigins.win/get?url=" + encodeURIComponent(url), 15000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json();
+      return new Response(j.contents || "", { status: 200 });
+    }]
+  ];
+  for (const [name, get] of attempts) {
     try {
-      const r = await fetchTimeout(p.wrap(url), 12000);
+      const r = await get();
       if (!r.ok) throw new Error("HTTP " + r.status);
       const text = await r.text();
-      if (text.length < 2000) throw new Error("подозрительно короткий ответ");
+      if (text.length < 2000) throw new Error("короткий ответ (" + text.length + " Б)");
       return text;
     } catch (e) {
-      console.warn("Teletype: маршрут не ответил —", p.name, "(", e.message, ")");
+      console.warn("Teletype HTML: маршрут не ответил —", name, "(", e.message, ")");
     }
   }
-  throw new Error("страница недоступна ни напрямую, ни через прокси");
+  return null;
+}
+
+// ---------- Импорт с Teletype: этап 2 — текстовый режим через r.jina.ai ----------
+async function teletypeFetchText(url) {
+  for (let i = 0; i < 2; i++) { // вторая попытка — на случай rate-limit
+    try {
+      const r = await fetchTimeout("https://r.jina.ai/" + url, 20000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const text = await r.text();
+      if (text.length < 500) throw new Error("короткий ответ");
+      return text;
+    } catch (e) {
+      console.warn("Teletype текст: маршрут r.jina.ai не ответил (попытка " + (i + 1) + ") (", e.message, ")");
+    }
+  }
+  return null;
 }
 
 function parseTeletype(html) {
@@ -474,13 +571,13 @@ function parseTeletype(html) {
   doc.querySelectorAll("script,style,noscript,header,footer,nav,aside").forEach(e => e.remove());
   const root = doc.querySelector(".post-body, .post-content, .t-content, article, main") || doc.body;
 
+  const skipRe = /teletype\.in|\.(png|jpe?g|gif|webp|svg|ico)(\?|#|$)/i;
   const items = [];
   let cur = null;
   const flush = () => { if (cur && cur.title && cur.links.length) items.push(cur); cur = null; };
   const newCur = t => { flush(); cur = { title: t.slice(0, 120), links: [] }; };
   const addLink = href => {
-    if (!href || href.startsWith("#")) return;
-    if (/teletype\.in/i.test(href)) return; // служебные ссылки платформы
+    if (!href || href.startsWith("#") || skipRe.test(href)) return;
     try { const u = new URL(href); if (!/^https?:$/.test(u.protocol)) return; } catch (e) { return; }
     if (!cur) cur = { title: "", links: [] };
     if (!cur.links.includes(href)) cur.links.push(href);
@@ -514,7 +611,43 @@ function parseTeletype(html) {
   return items;
 }
 
-// Очистка названия перед поиском обложки: убираем «(v1.2)», «— русификатор» и т.п.
+// Текстовый парсер (для markdown от r.jina.ai)
+function parseTeletypeText(text) {
+  const cleaned = text
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")  // картинки
+    .replace(/\[\s*\]\([^)]*\)/g, " ");      // пустые ссылки
+  const skipRe = /teletype\.in|jina\.ai|steamstatic\.com|google\.com\/search|\.(png|jpe?g|gif|webp|svg|ico|css|js)(\?|#|$)/i;
+  const items = [];
+  let cur = null;
+  const flush = () => { if (cur && cur.title && cur.links.length) items.push(cur); cur = null; };
+  const addUrl = u => {
+    u = u.replace(/[)\].,;:]+$/, "");
+    if (skipRe.test(u)) return;
+    try { const uu = new URL(u); if (!/^https?:$/.test(uu.protocol)) return; } catch (e) { return; }
+    if (!cur) cur = { title: "", links: [] };
+    if (!cur.links.includes(u)) cur.links.push(u);
+  };
+
+  for (const raw of cleaned.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    // Заголовок: markdown-#, жирная строка **…**, "Title:" от jina
+    const h = line.match(/^#{1,6}\s+(.+?)\s*#*$/)
+           || line.match(/^\*\*(.+?)\*\*[:.]?\s*$/)
+           || line.match(/^Title:\s*(.+)$/i);
+    if (h) {
+      const t = h[1].replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*_`#]/g, "").replace(/\s+/g, " ").trim();
+      if (t && t.length > 1 && t.length < 120) { flush(); cur = { title: t, links: [] }; continue; }
+    }
+    const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s)\]<>"']+)/g;
+    let m;
+    while ((m = re.exec(line))) addUrl(m[2] || m[3]);
+  }
+  flush();
+  return items;
+}
+
+// Очистка названия перед поиском обложки
 const cleanForSearch = t => {
   let s = String(t).replace(/[(\[{}].*?[)\]}]/g, " ");
   s = s.replace(/[—–-]?\s*(русс?ификатор|русс?ификация|перевод|текст).*$/i, " ");
@@ -559,13 +692,22 @@ function renderImpList() {
   const url = $("impUrl").value.trim();
   if (!/^https?:\/\/.+/i.test(url)) { alert("Введите адрес страницы"); return; }
   btn.disabled = true;
-  $("impStatus").textContent = "Загружаю страницу…";
+  $("impStatus").textContent = "Загружаю страницу (несколько маршрутов, это может занять минуту)…";
   try {
-    const html = await teletypeFetch(url);
-    $("impStatus").textContent = "Разбираю содержимое…";
-    importParsed = parseTeletype(html).filter(it => it.links.length);
+    let items = [];
+    const html = await teletypeFetchHTML(url);
+    if (html) {
+      $("impStatus").textContent = "Страница получена, разбираю…";
+      items = parseTeletype(html);
+    }
+    if (!items.length) {
+      $("impStatus").textContent = "HTML-маршруты не дали записей — пробую текстовый режим (r.jina.ai)…";
+      const md = await teletypeFetchText(url);
+      if (md) items = parseTeletypeText(md);
+    }
+    importParsed = items.filter(it => it.links.length);
     if (!importParsed.length) {
-      $("impStatus").textContent = "Записи со ссылками не найдены. Страница могла загрузиться не полностью — попробуйте ещё раз. Если повторится — откройте F12 → Console и пришлите предупреждения.";
+      $("impStatus").innerHTML = "Записи не найдены. Возможные причины: 1) блокировщик рекламы режет прокси — добавьте сайт в исключения; 2) нестандартная структура страницы. Откройте F12 → Console и пришлите строки с пометкой «Teletype».";
     } else {
       $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список (названия можно править), затем нажмите «Импортировать».`;
       renderImpList();
@@ -608,9 +750,9 @@ function renderImpList() {
     await writeData(state.projects, `Импорт с Teletype: ${chosen.length} записей`);
     render();
     $("importModal").classList.add("hidden");
-    alert(`✅ Импортировано записей: ${chosen.length}. Обложек найдено в Steam: ${found}. Остальные можно назначить вручную через ✏️.`);
+    toast(`Импортировано: ${chosen.length}. Обложек найдено в Steam: ${found}. Остальные можно назначить через ✏️.`, "ok", 6000);
   } catch (e) {
-    alert("Импорт не удался: " + e.message);
+    toast("Импорт не удался: " + e.message, "err", 6000);
   }
   btn.disabled = false;
 });
@@ -718,11 +860,28 @@ function currentSort() {
   return SORTS[v] ? v : "az";
 }
 
+// ---------- Вид списка ----------
+function currentView() {
+  const v = localStorage.getItem(LS_VIEW);
+  return ["grid", "list", "compact"].includes(v) ? v : "grid";
+}
+function applyView() {
+  grid.classList.remove("view-grid", "view-list", "view-compact");
+  grid.classList.add("view-" + currentView());
+  $("viewBy").value = currentView();
+}
+ $("viewBy").addEventListener("change", e => {
+  localStorage.setItem(LS_VIEW, e.target.value);
+  applyView();
+  render();
+});
+
 // ---------- Отрисовка ----------
 const grid = $("grid");
 let query = "";
 
 function render() {
+  const view = currentView();
   const list = state.projects
     .filter(p => !query || p.title.toLowerCase().includes(query))
     .sort(SORTS[currentSort()].fn);
@@ -744,7 +903,9 @@ function render() {
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
       </div>`);
-    setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
+    // в компактном виде картинки скрыты — не грузим их зря
+    if (view !== "compact")
+      setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
   }
 }
 
@@ -765,8 +926,9 @@ async function deleteProject(id) {
   render();
   try {
     await writeData(state.projects, "Удалён: " + p.title);
+    toast("Удалено: " + p.title, "ok", 3000);
   } catch (e) {
-    alert("Запись убрана со страницы, но data.json не обновлён: " + e.message);
+    toast("Запись убрана со страницы, но data.json не обновлён: " + e.message, "err", 6000);
   }
   return true;
 }
@@ -1103,7 +1265,7 @@ function addLinkRow(l = {}) {
   if (editId) {
     const p = state.projects.find(x => x.id === editId);
     Object.assign(p, { title, cover, links });
-    delete p.tags; // теги больше не используются
+    delete p.tags;
   } else {
     state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, cover, links, created: Date.now() });
   }
@@ -1112,14 +1274,43 @@ function addLinkRow(l = {}) {
   try {
     await writeData(state.projects, (editId ? "Обновлён: " : "Добавлен: ") + title);
   } catch (e) {
-    alert("Не удалось сохранить data.json: " + e.message);
+    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
     btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
     return;
   }
   btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
   render();
   closeForm();
-  alert("✅ Опубликовано! Все посетители увидят изменения при следующем открытии сайта.");
+  toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
+});
+
+// ---------- Донаты ----------
+function renderDonate() {
+  if (!DONATE.methods || !DONATE.methods.length) { $("donate").remove(); return; }
+  $("donTitle").textContent = DONATE.title || "Поддержать автора";
+  $("donText").textContent = DONATE.text || "";
+  const box = $("donateList");
+  box.innerHTML = "";
+  for (const m of DONATE.methods) {
+    const ico = m.icon
+      ? `<span class="don-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${m.icon}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
+      : `<span class="don-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
+    if (m.url) {
+      box.insertAdjacentHTML("beforeend", `<a class="don-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
+    } else if (m.value) {
+      box.insertAdjacentHTML("beforeend", `<button type="button" class="don-btn don-copy" data-value="${esc(m.value)}" data-label="${esc(m.name)}" title="Нажмите, чтобы скопировать">${ico}<span>${esc(m.name)}: ${esc(m.value)}</span></button>`);
+    }
+  }
+}
+ $("donateList").addEventListener("click", async e => {
+  const b = e.target.closest(".don-copy");
+  if (!b) return;
+  try {
+    await navigator.clipboard.writeText(b.dataset.value);
+    toast("Скопировано: " + b.dataset.label, "ok", 2500);
+  } catch (err) {
+    toast("Не удалось скопировать — выделите реквизит вручную", "err");
+  }
 });
 
 // Закрытие модалок.
@@ -1145,6 +1336,8 @@ function banner(text) {
 // ---------- Старт ----------
 (async function init() {
   setAdmin(!!state.token);
+  renderDonate();
+  applyView();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
       .catch(e => {
@@ -1156,7 +1349,7 @@ function banner(text) {
   }
   if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
     grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
-    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) — см. инструкцию по настройке.");
+    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и <b>DONATE</b> — см. настройки в начале скрипта.");
     return;
   }
   try { await loadData(); }
