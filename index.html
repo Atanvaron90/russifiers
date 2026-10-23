@@ -379,18 +379,34 @@ function toast(msg, type = "info", ms = 4000) {
 }
 
 // ---------- Логотип сайта ----------
-// Круглый аватар рядом с названием; если файла ещё нет в репозитории — значок-заглушка.
-// Тот же файл используется как иконка вкладки (favicon).
+// Ищет файл логотипа среди нескольких имён — расширение файла больше не важно.
+// Первый найденный становится лого в шапке и иконкой вкладки.
 (function setupLogo() {
   const img = $("siteLogo");
-  img.onload = () => { img.style.display = ""; $("logoFallback").style.display = "none"; };
-  img.onerror = () => { img.style.display = "none"; $("logoFallback").style.display = "inline"; };
-  img.src = SITE_LOGO;
   const fav = document.createElement("link");
   fav.rel = "icon";
-  fav.type = SITE_LOGO.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
-  fav.href = SITE_LOGO;
-  document.head.appendChild(fav);
+  const candidates = ["logo.png", "logo.jpg", "logo.jpeg", "logo.webp", "logo.gif"];
+  let i = 0;
+  function tryNext() {
+    if (i >= candidates.length) {           // ни одного файла нет — заглушка
+      img.style.display = "none";
+      $("logoFallback").style.display = "inline";
+      return;
+    }
+    const name = candidates[i++];
+    const probe = new Image();
+    probe.onload = () => {
+      img.src = name;
+      img.style.display = "inline-block";   // ← ИСПРАВЛЕНО: раньше было "" — этого было мало
+      $("logoFallback").style.display = "none";
+      fav.type = name.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+      fav.href = name;
+      document.head.appendChild(fav);
+    };
+    probe.onerror = tryNext;                // файла нет — пробуем следующее имя
+    probe.src = name;
+  }
+  tryNext();
 })();
 
 // ---------- Каталог сервисов ----------
