@@ -1,5 +1,28 @@
 [
   {
+    "id": "mystic-vale-mvlms5uz",
+    "title": "Mystic Vale",
+    "cover": {
+      "appid": "908070",
+      "name": "Mystic Vale",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908070/header.jpg?t=1760518129",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908070/capsule_184x69.jpg?t=1760518129"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/P-KcG897Xr681Q",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1L4u72zRRp2s7Nauin93TNraBnABx_zdF?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792799917739
+  },
+  {
     "id": "munchkin-digital-mvlmqh46",
     "title": "Munchkin Digital",
     "cover": {
