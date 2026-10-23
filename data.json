@@ -1,5 +1,23 @@
 [
   {
+    "id": "clue-cluedo-mvlj9vni",
+    "title": "Clue/Cluedo",
+    "cover": {
+      "appid": "2506480",
+      "name": "Clue/Cluedo",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2506480/066983e66c03169ed617c7e7fa876074ae67ba7e/header_alt_assets_9.jpg?t=1791792661",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2506480/17089fbd0270a56e6d3908ad8792e5328a763479/capsule_184x69_alt_assets_9.jpg?t=1791792661"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/S61uyJXWbBwMPw",
+        "dl": 0
+      }
+    ],
+    "created": 1792794025854
+  },
+  {
     "id": "clank-mvlj90ek",
     "title": "Clank!",
     "cover": {
