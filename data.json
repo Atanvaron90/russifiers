@@ -1,5 +1,22 @@
 [
   {
+    "id": "adore-mvlgco6s",
+    "title": "Adore",
+    "cover": {
+      "appid": "1074620",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1074620/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/f8O03AUGRqJjuQ",
+        "dl": 0
+      }
+    ],
+    "created": 1792789117300
+  },
+  {
     "id": "above-the-snow-mvlg7u1m",
     "title": "Above the Snow",
     "cover": {
