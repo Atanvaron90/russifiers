@@ -172,7 +172,7 @@
   <select id="sortBy" title="Сортировка">
     <option value="az">А → Я</option>
     <option value="za">Я → А</option>
-    <option value="dl">По скачиваниям</option>
+    <option value="dl">По переходам</option>
     <option value="new">Сначала новые</option>
   </select>
   <select id="viewBy" title="Вид списка">
@@ -213,7 +213,7 @@
       <div class="g-body">
         <h2 id="gTitle"></h2>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
-        <h3>Скачать</h3>
+        <h3>Ссылки</h3>
         <div id="gLinks"></div>
       </div>
     </div>
@@ -239,7 +239,7 @@
     </div>
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
-    <label>Ссылки для скачивания (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
+    <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
     <div class="modal-actions">
@@ -372,11 +372,6 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
-// У части новых игр (пример: Above the Snow, appid 2423760) ассеты лежат по путям
-// С ХЭШЕМ версии: shared.*.steamstatic.com/store_item_assets/steam/apps/<id>/<hash>/header.jpg.
-// Угадать хэш нельзя, поэтому главный источник адреса — сам Steam (поле header_image
-// из appdetails / og:image со страницы): он сохраняется в cover.url и идёт первым.
-// Собранные пути — только запас; capsule_616x353 добавлен как ещё одинfallback.
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -405,7 +400,6 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
-// Горизонтальная обложка для плашки: канонический URL → header → capsule → заглушка
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
@@ -415,7 +409,6 @@ function coverURLs(p) {
   ];
   return dedupe(urls);
 }
-// Для окна игры: канонический → вертикальная → горизонтальные → заглушка
 function gameCoverURLs(p) {
   const c = p.cover || {};
   const urls = [
@@ -502,8 +495,7 @@ async function steamSearch(term) {
   return anyAnswered ? [] : null;
 }
 
-// ---------- Информация об игре по AppID: точное название + канонические обложки ----------
-// Кэш хранит объекты {name, header, capsule} (header/capsule — настоящие URL Steam).
+// ---------- Информация об игре по AppID ----------
 const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
 function cacheInfo(id, info) {
   appInfoCache[id] = info;
@@ -514,7 +506,7 @@ function cacheInfo(id, info) {
 function cachedInfo(id) {
   const v = appInfoCache[id];
   if (!v) return null;
-  return typeof v === "string" ? { name: v, header: "", capsule: "" } : v; // совместимость со старым кэшем
+  return typeof v === "string" ? { name: v, header: "", capsule: "" } : v;
 }
 const APP_ROUTES = [
   { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&cc=US&l=russian`,
@@ -551,7 +543,6 @@ function parseOg(html) {
 async function fetchAppInfo(appid) {
   const cached = cachedInfo(appid);
   if (cached && cached.header) return cached;
-  if (cached && !cached.header) { /* имя есть, обложки нет — попробуем добрать */ }
   const attempts = [];
   for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);
   for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);
@@ -570,7 +561,6 @@ async function fetchAppInfo(appid) {
         info = route.parse(j, appid);
         if (!info) throw new Error("success:false");
       }
-      // если из кэша уже известно имя, а тут пусто — сохраним старое
       if (!info.name && cached?.name) info.name = cached.name;
       cacheInfo(appid, info);
       return info;
@@ -582,8 +572,6 @@ async function fetchAppInfo(appid) {
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
-// Название из слага ссылки. Steam вырезает из слага все знаки препинания
-// (двоеточия, запятые, апострофы) — это черновик; точное имя приходит из Steam API.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -654,9 +642,6 @@ async function loadData() {
 }
 
 // ---------- Авторемонт обложек ----------
-// У записей, где cover.url — «собранный» нами адрес (может 404 у новых игр),
-// запрашиваем у Steam канонический URL и сохраняем одним коммитом.
-// Признак собранного адреса: путь заканчивается на apps/<id>/header.jpg без хэша.
 const isConstructedUrl = (p) => {
   const u = p.cover?.url;
   if (!u || !p.cover?.appid) return false;
@@ -800,7 +785,7 @@ const closeDonate = () => $("donateModal").classList.add("hidden");
   btn.disabled = false;
 });
 
-// ---------- Счётчик скачиваний ----------
+// ---------- Счётчик переходов ----------
 const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
 const linkKey = (p, l) => `${p.id}_${hstr(l.url)}`;
 const getDl = (p, l) => Math.max(l.dl || 0, dlCache[linkKey(p, l)] || 0);
@@ -882,7 +867,7 @@ function render() {
         <img class="cover" alt="">
         <h2>${esc(p.title)}</h2>
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
-        <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
+        <div class="meta">⬇ ${totalDl(p)} переходов • ссылок: ${(p.links || []).length}</div>
       </div>`);
     if (view !== "compact")
       setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
@@ -965,8 +950,8 @@ function openGame(id) {
       <div class="lk">
         ${makeIcon(l.type)}
         <div class="lk-info"><b>${esc(s.name)}</b>
-          <span class="cnt">Скачиваний: ${getDl(p, l)}</span></div>
-        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Скачать</a>
+          <span class="cnt">Переходов: ${getDl(p, l)}</span></div>
+        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Перейти</a>
       </div>`);
   });
   $("gameModal").classList.remove("hidden");
@@ -983,7 +968,7 @@ function openGame(id) {
   dlCache[k] = getDl(p, l) + 1;
   saveDl();
   remoteHit(k);
-  a.closest(".lk").querySelector(".cnt").textContent = "Скачиваний: " + dlCache[k];
+  a.closest(".lk").querySelector(".cnt").textContent = "Переходов: " + dlCache[k];
 });
 
  $("gEdit").addEventListener("click", () => {
@@ -1044,7 +1029,6 @@ let titlePick = null, lastFound = [], titleAuto = false;
 
 const setNote = msg => { $("fNote").textContent = msg || ""; };
 
-// Что выбрано как обложка: своя картинка → AppID (с каноническим URL из кэша, если есть) → поиск по названию
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
   if (url) return { url };
@@ -1073,7 +1057,6 @@ function updateCoverPreview() {
     setCoverCascade(img, [c.url, phSVG("?")]);
   } else {
     label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
-    // канонический URL от Steam — первым, затем собранные пути
     setCoverCascade(img, dedupe([
       c.header, ...(c.appid ? steamHeaderURLs(c.appid) : []),
       c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
@@ -1131,8 +1114,6 @@ function queueAppIdLookup(immediate = false) {
   const appid = extractAppId(raw);
   updateCoverPreview();
   if (!appid) return;
-  // Черновик из слага: Steam вырезает из ссылки знаки препинания.
-  // Точное имя и каноническая обложка перезапишут его из Steam.
   if ((titleAuto || !$("fTitle").value.trim())) {
     const slugName = titleFromSlug(raw);
     if (slugName) {
@@ -1179,7 +1160,7 @@ function queueAppIdLookup(immediate = false) {
   titleAuto = true;
   appIdSeq++;
   setNote("");
-  queueAppIdLookup(true); // сразу тянем каноническую обложку для выбранной игры
+  queueAppIdLookup(true);
   updateCoverPreview();
 });
 
@@ -1200,7 +1181,6 @@ function openForm(id = null) {
   links.forEach(addLinkRow);
   refreshOrder();
   updateCoverPreview();
-  // у записи с AppID, но без канонической обложки — тихо добираем её из Steam
   if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
   $("formModal").classList.remove("hidden");
 }
@@ -1284,7 +1264,7 @@ function refreshOrder() {
     if (c.url) cover = { url: c.url };
     else {
       cover = { appid: c.appid, name: c.name || appInfoCache[c.appid]?.name || "" };
-      cover.url = c.header || steamHeaderURLs(c.appid)[0];      // канонический URL, если известен
+      cover.url = c.header || steamHeaderURLs(c.appid)[0];
       if (c.capsule) cover.capsule = c.capsule;
     }
   }
