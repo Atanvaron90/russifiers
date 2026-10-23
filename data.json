@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": "a-game-of-thrones-the-board-game-digital-edition-mvlg5ji9",
+    "title": "A Game of Thrones: The Board Game - Digital Edition",
+    "cover": {
+      "appid": "1075190",
+      "name": "A Game of Thrones: The Board Game - Digital Edition",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1075190/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/ldSmOlkkfD9Zcw",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/6d5953e2-525c-4f3e-a727-00ae433a5bcc?isFromShowcasePreview=true",
+        "dl": 0
+      }
+    ],
+    "created": 1792788784641
+  }
+]
