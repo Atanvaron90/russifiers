@@ -83,7 +83,6 @@
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
 
-  /* Строка ссылки: порядок ↑↓ | сервис | ссылка | удалить */
   .lk-row { display:grid; grid-template-columns:auto 150px 1fr auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
   .lk-order { display:flex; flex-direction:column; gap:2px; }
@@ -255,20 +254,20 @@
   </div>
 </div>
 
-<!-- Импорт с Teletype: главный способ — сохранённый .html/.mhtml файл страницы -->
+<!-- Импорт с Teletype: главный способ — сохранённый PDF страницы -->
 <div id="importModal" class="overlay hidden">
   <div class="modal">
     <h2>Импорт с Teletype</h2>
     <p class="hint">
       <b>1)</b> «🔓 Открыть страницу» →
-      <b>2)</b> на открывшейся странице нажми <b>Ctrl+S</b> и сохрани файл (подойдёт и «Веб-страница полностью», и «только HTML», и «одним файлом .mhtml») →
-      <b>3)</b> нажми кнопку ниже и выбери сохранённый файл →
+      <b>2)</b> на ней <b>Ctrl+P</b> → принтер «<b>Сохранить как PDF</b>» → сохранить (в Chrome/Edge кликабельные ссылки сохраняются в PDF) →
+      <b>3)</b> кнопка ниже → выбери PDF →
       <b>4)</b> проверь список и нажми «Импортировать выбранное».
     </p>
     <div class="modal-actions" style="justify-content:flex-start;">
       <button id="impOpen" class="tool-btn" type="button">🔓 Открыть страницу</button>
-      <input type="file" id="impFile" accept=".html,.htm,.mht,.mhtml,.txt,.md" style="display:none">
-      <button id="impFileBtn" class="tool-btn primary" type="button">📄 Выбрать сохранённый файл</button>
+      <input type="file" id="impFile" accept=".pdf,.html,.htm,.mht,.mhtml,.txt,.md" style="display:none">
+      <button id="impFileBtn" class="tool-btn primary" type="button">📄 Выбрать сохранённый PDF</button>
     </div>
     <div id="impStatus" class="hint"></div>
     <div id="impList"></div>
@@ -389,14 +388,18 @@ function makeIcon(type) {
   return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
 }
 
-// ---------- Обложки ----------
+// ---------- Обложки: 4 зеркала CDN Steam (если одно не отвечает — берём следующее) ----------
 const steamHeaderURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
+  `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`,
+  `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`
 ];
 const steamTallURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://cdn.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/library_600x900.jpg`
 ];
 function phSVG(letter) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
@@ -546,43 +549,100 @@ const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? 
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ============================================================
-// ИМПОРТ С TELETYPE.
-// Главный способ — сохранённый файл страницы (.html / .mhtml / .txt).
-// Запасной — автозагрузка по адресу (HTML-прокси → веб-архив → r.jina.ai).
+// PDF-ДВИЖОК (pdf.js грузится с CDN только при первом импорте)
 // ============================================================
-
-// Декодирование .mhtml («веб-страница одним файлом») в обычный HTML
-function decodeMHTML(raw) {
-  const idx = raw.search(/Content-Type:\s*text\/html/i);
-  if (idx === -1) return null;
-  const seg = raw.slice(idx);
-  const encM = seg.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
-  const enc = encM ? encM[1].trim().toLowerCase() : "quoted-printable";
-  const bodyStart = seg.search(/\r?\n\r?\n/);
-  if (bodyStart === -1) return null;
-  let body = seg.slice(bodyStart).replace(/^\r?\n\r?\n/, "");
-  const b = body.search(/^--/m); // до границы следующей части
-  if (b !== -1) body = body.slice(0, b);
-  if (enc.includes("quoted-printable")) {
-    body = body.replace(/=\r?\n/g, "");
-    const bytes = [];
-    for (let i = 0; i < body.length; i++) {
-      if (body[i] === "=" && /^[0-9A-F]{2}$/i.test(body.slice(i + 1, i + 3))) {
-        bytes.push(parseInt(body.slice(i + 1, i + 3), 16)); i += 2;
-      } else bytes.push(body.charCodeAt(i) & 0xFF);
-    }
-    try { return new TextDecoder("utf-8").decode(new Uint8Array(bytes)); }
-    catch (e) { return body; }
-  }
-  if (enc.includes("base64")) {
+const PDFJS_SOURCES = [
+  ["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"],
+  ["https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js",
+   "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js"]
+];
+async function ensurePdfJs() {
+  if (window.pdfjsLib) return;
+  let lastErr = null;
+  for (const [lib, worker] of PDFJS_SOURCES) {
     try {
-      const bin = atob(body.replace(/\s+/g, ""));
-      return new TextDecoder("utf-8").decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
-    } catch (e) { return null; }
+      await new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = lib;
+        s.onload = res;
+        s.onerror = () => rej(new Error(lib));
+        document.head.appendChild(s);
+      });
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = worker;
+        return;
+      }
+    } catch (e) { lastErr = e; }
   }
-  return body;
+  throw new Error("не удалось загрузить pdf.js (проверь сеть/блокировщик) — " + (lastErr?.message || ""));
 }
 
+// Строки из текстового слоя PDF: группируем элементы по координате Y
+function pdfLines(tc) {
+  const items = (tc.items || [])
+    .filter(i => i.str && i.str.trim())
+    .map(i => ({ x: i.transform[4], y: i.transform[5], s: i.str }));
+  items.sort((a, b) => b.y - a.y || a.x - b.x);
+  const lines = [];
+  for (const it of items) {
+    const last = lines[lines.length - 1];
+    if (last && Math.abs(last.y - it.y) <= 3.5) last.items.push(it);
+    else lines.push({ y: it.y, items: [it], links: [] });
+  }
+  for (const L of lines) {
+    L.items.sort((a, b) => a.x - b.x);
+    L.text = L.items.map(i => i.s).join(" ").replace(/\s+/g, " ").trim();
+  }
+  return lines;
+}
+
+// Кликабельные ссылки (аннотации) прикрепляем к строкам по вертикали
+async function extractPdfText(file, onStatus) {
+  await ensurePdfJs();
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjsLib.getDocument({ data }).promise;
+  const pages = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    if (onStatus) onStatus(`Разбираю PDF: страница ${p} из ${pdf.numPages}…`);
+    const page = await pdf.getPage(p);
+    const lines = pdfLines(await page.getTextContent());
+    try {
+      const anns = (await page.getAnnotations({ intent: "display" }))
+        .filter(a => a.subtype === "Link" && a.url && /^https?:/i.test(a.url));
+      for (const a of anns) {
+        const yc = (a.rect[1] + a.rect[3]) / 2;
+        let best = null, bd = 1e9;
+        for (const l of lines) { const d = Math.abs(l.y - yc); if (d < bd) { bd = d; best = l; } }
+        if (best && bd <= 14) { if (!best.links.includes(a.url)) best.links.push(a.url); }
+        else lines.push({ y: yc, items: [], text: "", links: [a.url] });
+      }
+    } catch (e) { /* аннотаций может не быть */ }
+    lines.sort((a, b) => b.y - a.y);
+    pages.push(lines.map(l => [l.text, ...(l.links || [])].filter(Boolean).join(" ")).filter(Boolean).join("\n"));
+  }
+  return healPdfText(pages.join("\n"));
+}
+
+// Склейка URL, разорванных переносом строки при печати в PDF
+function healPdfText(t) {
+  const lines = t.split("\n");
+  for (let i = 0; i < lines.length - 1; i++) {
+    if (/https?:\/\/\S+$/i.test(lines[i]) &&
+        /^[A-Za-z0-9/?=&._%~+:#-]+$/.test(lines[i + 1]) &&
+        !/^https?:/i.test(lines[i + 1])) {
+      lines[i] += lines[i + 1];
+      lines.splice(i + 1, 1);
+      i--;
+    }
+  }
+  return lines.join("\n");
+}
+
+// ============================================================
+// ИМПОРТ С TELETYPE.
+// Главный способ — сохранённый PDF страницы. Запасные — .html/.mhtml, автозагрузка.
+// ============================================================
 async function teletypeFetchHTML(url) {
   const attempts = [
     ["direct",       () => fetchTimeout(url, 12000)],
@@ -688,7 +748,7 @@ function parseTeletype(html) {
   return items;
 }
 
-// Разбор простого текста / markdown
+// Разбор простого текста / markdown / текста из PDF
 function parseTeletypeText(text) {
   const cleaned = text
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
@@ -784,12 +844,11 @@ function renderImpList() {
   $("impActions").style.display = importParsed.length ? "flex" : "none";
 }
 
-// Разбор содержимого файла: .mhtml → html → текст
+// Разбор содержимого файла: PDF → .mhtml → HTML → текст
 function parseImport(content) {
   let items = [];
   if (/MIME-Version:|multipart\/related/i.test(content.slice(0, 2000))) {
-    const html = decodeMHTML(content);
-    if (html) content = html;
+    // декодирование mhtml вынесено в чтение файла; тут уже html
   }
   const looksHtml = /<\s*(html|body|div|p|a|h[1-6])\b/i.test(content);
   if (looksHtml) items = parseTeletype(content);
@@ -804,7 +863,7 @@ function parseImport(content) {
     $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список (названия можно править) и нажмите «Импортировать выбранное».`;
     renderImpList();
   } else {
-    $("impStatus").textContent = "В файле записи со ссылками не найдены. Убедись, что сохранил именно страницу с русификаторами (Ctrl+S на ней), а не другую страницу.";
+    $("impStatus").textContent = "В файле записи со ссылками не найдены. Убедись, что PDF сохранён со страницы с русификаторами (Ctrl+P → «Сохранить как PDF»), а не распечатан как картинка.";
   }
 }
 
@@ -822,19 +881,74 @@ function parseImport(content) {
   if (/^https?:\/\/.+/i.test(url)) window.open(url, "_blank");
 });
 
+// Выбор файла: PDF разбирается через pdf.js, остальное — как текст
  $("impFileBtn").addEventListener("click", () => $("impFile").click());
- $("impFile").addEventListener("change", () => {
+ $("impFile").addEventListener("change", async () => {
   const f = $("impFile").files[0];
   if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    $("impStatus").textContent = "Файл загружен, разбираю…";
-    parseImport(String(r.result));
-  };
-  r.onerror = () => $("impStatus").textContent = "Не удалось прочитать файл.";
-  r.readAsText(f);
+  const isPdf = /\.pdf$/i.test(f.name) || f.type === "application/pdf";
+  try {
+    if (isPdf) {
+      $("impStatus").textContent = "Готовлю PDF-движок…";
+      const text = await extractPdfText(f, m => { $("impStatus").textContent = m; });
+      if (!text || text.replace(/\s+/g, "").length < 40) {
+        $("impStatus").textContent = "В PDF нет текстового слоя (похоже, это скан/картинки). Сохраняй страницу через Ctrl+P → «Сохранить как PDF» в Chrome/Edge — тогда текст и ссылки попадут в файл.";
+        return;
+      }
+      $("impStatus").textContent = "PDF разобран, ищу записи…";
+      parseImport(text);
+    } else {
+      $("impStatus").textContent = "Читаю файл…";
+      const r = new FileReader();
+      r.onload = () => {
+        let content = String(r.result);
+        if (/MIME-Version:|multipart\/related/i.test(content.slice(0, 2000))) {
+          const html = decodeMHTML(content);
+          if (html) content = html;
+        }
+        $("impStatus").textContent = "Файл загружен, разбираю…";
+        parseImport(content);
+      };
+      r.onerror = () => $("impStatus").textContent = "Не удалось прочитать файл.";
+      r.readAsText(f);
+    }
+  } catch (e) {
+    $("impStatus").textContent = "Ошибка разбора: " + e.message;
+  }
   $("impFile").value = "";
 });
+
+// Декодирование .mhtml («веб-страница одним файлом»)
+function decodeMHTML(raw) {
+  const idx = raw.search(/Content-Type:\s*text\/html/i);
+  if (idx === -1) return null;
+  const seg = raw.slice(idx);
+  const encM = seg.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
+  const enc = encM ? encM[1].trim().toLowerCase() : "quoted-printable";
+  const bodyStart = seg.search(/\r?\n\r?\n/);
+  if (bodyStart === -1) return null;
+  let body = seg.slice(bodyStart).replace(/^\r?\n\r?\n/, "");
+  const b = body.search(/^--/m);
+  if (b !== -1) body = body.slice(0, b);
+  if (enc.includes("quoted-printable")) {
+    body = body.replace(/=\r?\n/g, "");
+    const bytes = [];
+    for (let i = 0; i < body.length; i++) {
+      if (body[i] === "=" && /^[0-9A-F]{2}$/i.test(body.slice(i + 1, i + 3))) {
+        bytes.push(parseInt(body.slice(i + 1, i + 3), 16)); i += 2;
+      } else bytes.push(body.charCodeAt(i) & 0xFF);
+    }
+    try { return new TextDecoder("utf-8").decode(new Uint8Array(bytes)); }
+    catch (e) { return body; }
+  }
+  if (enc.includes("base64")) {
+    try {
+      const bin = atob(body.replace(/\s+/g, ""));
+      return new TextDecoder("utf-8").decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+    } catch (e) { return null; }
+  }
+  return body;
+}
 
  $("impLoad").addEventListener("click", async () => {
   const btn = $("impLoad");
@@ -860,7 +974,7 @@ function parseImport(content) {
       $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список и нажмите «Импортировать выбранное».`;
       renderImpList();
     } else {
-      $("impStatus").textContent = "Автозагрузка не удалась — teletype прикрыт Cloudflare. Сохрани страницу файлом: «🔓 Открыть страницу» → Ctrl+S → «📄 Выбрать сохранённый файл».";
+      $("impStatus").textContent = "Автозагрузка не удалась — teletype прикрыт Cloudflare. Сохрани страницу как PDF: «🔓 Открыть страницу» → Ctrl+P → «Сохранить как PDF» → «📄 Выбрать сохранённый PDF».";
     }
   } catch (e) {
     $("impStatus").textContent = "Ошибка автозагрузки: " + e.message;
@@ -1374,7 +1488,6 @@ function addLinkRow(l = {}) {
   $("lkList").appendChild(box);
 }
 
-// Активность стрелок: у первой «вверх» выключена, у последней «вниз»
 function refreshOrder() {
   const rows = [...$("lkList").querySelectorAll(".lk-row")];
   rows.forEach((r, i) => {
