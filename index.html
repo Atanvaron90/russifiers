@@ -974,7 +974,6 @@ function render() {
         <img class="cover" alt="">
         <h2>${esc(p.title)}</h2>
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
-        <div class="meta">⬇ ${totalDl(p)} переходов • ссылок: ${(p.links || []).length}</div>
       </div>`);
     // в компактном виде картинки скрыты — не грузим их зря
     if (view !== "compact")
