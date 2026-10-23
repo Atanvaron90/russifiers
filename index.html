@@ -64,7 +64,6 @@
   .modal label { display:block; font-size:.82rem; color:var(--muted); margin:12px 0 4px; }
   .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; }
   .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
-  .modal textarea { min-height:110px; resize:vertical; font-family:inherit; }
   .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
   .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
@@ -84,11 +83,20 @@
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
 
-  .lk-row { display:grid; grid-template-columns:150px 1fr; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
+  /* Строка ссылки: порядок ↑↓ | сервис | ссылка | удалить */
+  .lk-row { display:grid; grid-template-columns:auto 150px 1fr auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
-  .ver-del { position:absolute; top:6px; right:6px; background:none; border:none; color:var(--muted); cursor:pointer; }
+  .lk-order { display:flex; flex-direction:column; gap:2px; }
+  .ord { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.85rem; line-height:1; padding:2px 5px; }
+  .ord:hover:not(:disabled) { color:var(--accent); }
+  .ord:disabled { opacity:.25; cursor:default; }
+  .ver-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:4px; }
   .ver-del:hover { color:#ff6b6b; }
-  @media (max-width:600px) { .lk-row { grid-template-columns:1fr; } }
+  @media (max-width:600px) {
+    .lk-row { grid-template-columns:auto 1fr auto; }
+    .l-type { grid-column:2; }
+    .l-url  { grid-column:2; grid-row:2; }
+  }
 
   .imp-item { border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .imp-item.dup { opacity:.55; }
@@ -237,7 +245,7 @@
     </div>
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
-    <label>Ссылки для скачивания (сервис определится автоматически):</label>
+    <label>Ссылки для скачивания (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
     <div class="modal-actions">
@@ -247,19 +255,20 @@
   </div>
 </div>
 
-<!-- Импорт с Teletype: вставка страницы — главный способ, автозагрузка — запасная -->
+<!-- Импорт с Teletype: главный способ — сохранённый .html/.mhtml файл страницы -->
 <div id="importModal" class="overlay hidden">
   <div class="modal">
     <h2>Импорт с Teletype</h2>
-    <p class="hint">Самый надёжный путь: <b>1)</b> «🔓 Открыть страницу» → <b>2)</b> на ней <b>Ctrl+A</b>, затем <b>Ctrl+C</b> → <b>3)</b> кликни в поле ниже и нажми <b>Ctrl+V</b> → <b>4)</b> «Разобрать». Вставка передаёт копию страницы вместе со всеми ссылками — сайт соберёт из неё плашки.</p>
+    <p class="hint">
+      <b>1)</b> «🔓 Открыть страницу» →
+      <b>2)</b> на открывшейся странице нажми <b>Ctrl+S</b> и сохрани файл (подойдёт и «Веб-страница полностью», и «только HTML», и «одним файлом .mhtml») →
+      <b>3)</b> нажми кнопку ниже и выбери сохранённый файл →
+      <b>4)</b> проверь список и нажми «Импортировать выбранное».
+    </p>
     <div class="modal-actions" style="justify-content:flex-start;">
-      <button id="impOpen" class="tool-btn primary" type="button">🔓 Открыть страницу</button>
-    </div>
-    <textarea id="impPaste" style="min-height:150px;" placeholder="Кликни сюда и нажми Ctrl+V…"></textarea>
-    <div class="modal-actions" style="justify-content:flex-start;">
-      <button id="impParse" class="tool-btn primary" type="button">Разобрать</button>
-      <input type="file" id="impFile" accept=".html,.htm,.txt,.md" style="display:none">
-      <button id="impFileBtn" class="tool-btn" type="button">📄 …или выбери сохранённый .html файл</button>
+      <button id="impOpen" class="tool-btn" type="button">🔓 Открыть страницу</button>
+      <input type="file" id="impFile" accept=".html,.htm,.mht,.mhtml,.txt,.md" style="display:none">
+      <button id="impFileBtn" class="tool-btn primary" type="button">📄 Выбрать сохранённый файл</button>
     </div>
     <div id="impStatus" class="hint"></div>
     <div id="impList"></div>
@@ -538,9 +547,42 @@ const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/
 
 // ============================================================
 // ИМПОРТ С TELETYPE.
-// Главный способ — ручная вставка скопированной страницы (HTML или текст).
+// Главный способ — сохранённый файл страницы (.html / .mhtml / .txt).
 // Запасной — автозагрузка по адресу (HTML-прокси → веб-архив → r.jina.ai).
 // ============================================================
+
+// Декодирование .mhtml («веб-страница одним файлом») в обычный HTML
+function decodeMHTML(raw) {
+  const idx = raw.search(/Content-Type:\s*text\/html/i);
+  if (idx === -1) return null;
+  const seg = raw.slice(idx);
+  const encM = seg.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
+  const enc = encM ? encM[1].trim().toLowerCase() : "quoted-printable";
+  const bodyStart = seg.search(/\r?\n\r?\n/);
+  if (bodyStart === -1) return null;
+  let body = seg.slice(bodyStart).replace(/^\r?\n\r?\n/, "");
+  const b = body.search(/^--/m); // до границы следующей части
+  if (b !== -1) body = body.slice(0, b);
+  if (enc.includes("quoted-printable")) {
+    body = body.replace(/=\r?\n/g, "");
+    const bytes = [];
+    for (let i = 0; i < body.length; i++) {
+      if (body[i] === "=" && /^[0-9A-F]{2}$/i.test(body.slice(i + 1, i + 3))) {
+        bytes.push(parseInt(body.slice(i + 1, i + 3), 16)); i += 2;
+      } else bytes.push(body.charCodeAt(i) & 0xFF);
+    }
+    try { return new TextDecoder("utf-8").decode(new Uint8Array(bytes)); }
+    catch (e) { return body; }
+  }
+  if (enc.includes("base64")) {
+    try {
+      const bin = atob(body.replace(/\s+/g, ""));
+      return new TextDecoder("utf-8").decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+    } catch (e) { return null; }
+  }
+  return body;
+}
+
 async function teletypeFetchHTML(url) {
   const attempts = [
     ["direct",       () => fetchTimeout(url, 12000)],
@@ -600,7 +642,7 @@ async function teletypeFetchText(url) {
   return null;
 }
 
-// Разбор HTML (страница целиком или HTML-копия из буфера)
+// Разбор HTML
 function parseTeletype(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
   doc.querySelectorAll("script,style,noscript,header,footer,nav,aside").forEach(e => e.remove());
@@ -646,9 +688,7 @@ function parseTeletype(html) {
   return items;
 }
 
-// Разбор простого текста / markdown.
-// Понимает: заголовки (#, **), «Название — https://…», «[Название](https://…)»,
-// название строкой выше ссылок; игнорирует «Скачать:», «Ссылки:» и служебные адреса.
+// Разбор простого текста / markdown
 function parseTeletypeText(text) {
   const cleaned = text
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
@@ -688,7 +728,6 @@ function parseTeletypeText(text) {
         const t = strip(h[1]);
         if (t && t.length > 1 && t.length < 120) { flush(); cur = { title: t, links: [] }; continue; }
       }
-      // строка без ссылки, за которой идёт строка с ссылкой → название
       const nxt = lines[i + 1] || "";
       if (line.length >= 2 && line.length <= 120 && /https?:\/\//.test(nxt)) {
         const t = strip(line);
@@ -697,7 +736,6 @@ function parseTeletypeText(text) {
       continue;
     }
 
-    // строка содержит ссылку(и)
     const isHeading = /^#{1,6}\s/.test(line) || /^\*\*.+\*\*/.test(line);
     const before = strip(line.slice(0, first.index));
     if (before && before.length >= 2 && before.length <= 120 && !STOP.test(before) &&
@@ -706,7 +744,7 @@ function parseTeletypeText(text) {
     }
     let m;
     while ((m = urlRe.exec(line))) {
-      if (!cur && m[2]) { // «[Название](url)» — текст ссылки может стать названием
+      if (!cur && m[2]) {
         const t = strip(m[1] || "");
         if (t && t.length > 1 && t.length < 120 && !STOP.test(t)) cur = { title: t, links: [] };
       }
@@ -746,9 +784,13 @@ function renderImpList() {
   $("impActions").style.display = importParsed.length ? "flex" : "none";
 }
 
-// Разбор предоставленного содержимого (вставка / файл): HTML или текст
+// Разбор содержимого файла: .mhtml → html → текст
 function parseImport(content) {
   let items = [];
+  if (/MIME-Version:|multipart\/related/i.test(content.slice(0, 2000))) {
+    const html = decodeMHTML(content);
+    if (html) content = html;
+  }
   const looksHtml = /<\s*(html|body|div|p|a|h[1-6])\b/i.test(content);
   if (looksHtml) items = parseTeletype(content);
   if (!items.length) {
@@ -762,7 +804,7 @@ function parseImport(content) {
     $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список (названия можно править) и нажмите «Импортировать выбранное».`;
     renderImpList();
   } else {
-    $("impStatus").textContent = "Во вставленном содержимом записи со ссылками не найдены. Убедись, что скопирована вся страница (Ctrl+A именно на странице teletype), или пришли текст разработчику — соберёт data.json вручную.";
+    $("impStatus").textContent = "В файле записи со ссылками не найдены. Убедись, что сохранил именно страницу с русификаторами (Ctrl+S на ней), а не другую страницу.";
   }
 }
 
@@ -772,9 +814,7 @@ function parseImport(content) {
   $("impList").innerHTML = "";
   $("impStatus").textContent = "";
   $("impActions").style.display = "none";
-  $("impPaste").value = "";
   $("importModal").classList.remove("hidden");
-  setTimeout(() => $("impPaste").focus(), 60);
 });
 
  $("impOpen").addEventListener("click", () => {
@@ -782,34 +822,16 @@ function parseImport(content) {
   if (/^https?:\/\/.+/i.test(url)) window.open(url, "_blank");
 });
 
-// Перехват вставки: HTML-копия содержит живые ссылки — разбираем сразу
- $("impPaste").addEventListener("paste", e => {
-  const cd = e.clipboardData;
-  const html = cd?.getData?.("text/html") || "";
-  if (html.length > 300) {
-    e.preventDefault();
-    $("impStatus").textContent = "Получена HTML-копия страницы со ссылками, разбираю…";
-    parseImport(html);
-    $("impPaste").value = importParsed.length ? "" : (cd.getData("text/plain") || "");
-  } else {
-    setTimeout(() => {
-      if ($("impPaste").value.trim())
-        $("impStatus").textContent = "Вставлено как текст — нажми «Разобрать» (ссылки распознаются и в простом тексте).";
-    }, 0);
-  }
-});
- $("impParse").addEventListener("click", () => {
-  const t = $("impPaste").value;
-  if (!t.trim()) { alert("Сначала вставь содержимое страницы в поле (Ctrl+V)"); return; }
-  $("impStatus").textContent = "Разбираю…";
-  parseImport(t);
-});
  $("impFileBtn").addEventListener("click", () => $("impFile").click());
  $("impFile").addEventListener("change", () => {
   const f = $("impFile").files[0];
   if (!f) return;
   const r = new FileReader();
-  r.onload = () => { $("impStatus").textContent = "Файл загружен, разбираю…"; parseImport(String(r.result)); };
+  r.onload = () => {
+    $("impStatus").textContent = "Файл загружен, разбираю…";
+    parseImport(String(r.result));
+  };
+  r.onerror = () => $("impStatus").textContent = "Не удалось прочитать файл.";
   r.readAsText(f);
   $("impFile").value = "";
 });
@@ -838,7 +860,7 @@ function parseImport(content) {
       $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список и нажмите «Импортировать выбранное».`;
       renderImpList();
     } else {
-      $("impStatus").textContent = "Автозагрузка не удалась — teletype прикрыт Cloudflare. Скопируй страницу вручную: «🔓 Открыть страницу» → Ctrl+A → Ctrl+C → вставь в поле выше → «Разобрать».";
+      $("impStatus").textContent = "Автозагрузка не удалась — teletype прикрыт Cloudflare. Сохрани страницу файлом: «🔓 Открыть страницу» → Ctrl+S → «📄 Выбрать сохранённый файл».";
     }
   } catch (e) {
     $("impStatus").textContent = "Ошибка автозагрузки: " + e.message;
@@ -1330,6 +1352,7 @@ function openForm(id = null) {
   $("lkList").innerHTML = "";
   const links = p?.links?.length ? p.links : [{}];
   links.forEach(addLinkRow);
+  refreshOrder();
   updateCoverPreview();
   $("formModal").classList.remove("hidden");
 }
@@ -1341,17 +1364,40 @@ function addLinkRow(l = {}) {
   const opts = Object.entries(SERVICES)
     .map(([k, s]) => `<option value="${k}" ${l.type === k ? "selected" : ""}>${s.name}</option>`).join("");
   box.innerHTML = `
-    <button type="button" class="ver-del" title="Убрать ссылку">✕</button>
+    <div class="lk-order">
+      <button type="button" class="ord up" title="Поднять выше">▲</button>
+      <button type="button" class="ord down" title="Опустить ниже">▼</button>
+    </div>
     <select class="l-type">${opts}</select>
-    <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">`;
+    <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">
+    <button type="button" class="ver-del" title="Убрать ссылку">✕</button>`;
   $("lkList").appendChild(box);
 }
 
+// Активность стрелок: у первой «вверх» выключена, у последней «вниз»
+function refreshOrder() {
+  const rows = [...$("lkList").querySelectorAll(".lk-row")];
+  rows.forEach((r, i) => {
+    r.querySelector(".ord.up").disabled = i === 0;
+    r.querySelector(".ord.down").disabled = i === rows.length - 1;
+  });
+}
+
  $("btnAdd").addEventListener("click", () => openForm());
- $("fAddLink").addEventListener("click", () => addLinkRow());
+ $("fAddLink").addEventListener("click", () => { addLinkRow(); refreshOrder(); });
  $("fCancel").addEventListener("click", closeForm);
+
  $("lkList").addEventListener("click", e => {
-  if (e.target.classList.contains("ver-del")) e.target.closest(".lk-row").remove();
+  const row = e.target.closest(".lk-row");
+  if (!row) return;
+  if (e.target.closest(".ver-del")) { row.remove(); refreshOrder(); return; }
+  if (e.target.closest(".ord.up") && row.previousElementSibling) {
+    row.previousElementSibling.before(row);
+    refreshOrder();
+  } else if (e.target.closest(".ord.down") && row.nextElementSibling) {
+    row.nextElementSibling.after(row);
+    refreshOrder();
+  }
 });
  $("lkList").addEventListener("input", e => {
   if (!e.target.classList.contains("l-url")) return;
