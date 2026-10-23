@@ -1,5 +1,22 @@
 [
   {
+    "id": "escape-tales-the-awakening-mvllwu84",
+    "title": "Escape Tales: The Awakening",
+    "cover": {
+      "appid": "2921150",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2921150/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zfqaIg2AX9HKtA",
+        "dl": 0
+      }
+    ],
+    "created": 1792798456324
+  },
+  {
     "id": "dune-imperium-mvllu80o",
     "title": "Dune: Imperium",
     "cover": {
