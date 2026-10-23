@@ -1,5 +1,22 @@
 [
   {
+    "id": "kingdom-of-cards-mvlmjj7r",
+    "title": "Kingdom of Cards",
+    "cover": {
+      "appid": "3160500",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/YOzTmwRSP4l9dw",
+        "dl": 0
+      }
+    ],
+    "created": 1792799515143
+  },
+  {
     "id": "k2-digital-edition-mvlmitaz",
     "title": "K2: Digital Edition",
     "cover": {
