@@ -45,7 +45,8 @@
     "cover": {
       "appid": "2423760",
       "name": "Above the Snow",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2423760/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2423760/4499772f65f0042c24d760f22a589017d04aed36/header.jpg?t=1791324155",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2423760/922469681cec5936ee3a231fbaef8157865685b2/capsule_184x69.jpg?t=1791324155"
     },
     "links": [
       {
