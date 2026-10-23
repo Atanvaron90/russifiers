@@ -1,5 +1,23 @@
 [
   {
+    "id": "clue-cluedo-classic-edition-mvljg6cl",
+    "title": "Clue/Cluedo: Classic Edition",
+    "cover": {
+      "appid": "794800",
+      "name": "Clue/Cluedo: Classic Edition",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/794800/b53a7b2070558728da452e83322028e617085c72/header.jpg?t=1748350571",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/794800/c2768f08fe0228c50d8af77e0fcad38834f3a187/capsule_184x69.jpg?t=1748350571"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/VnKJOJavgB2-5Q",
+        "dl": 0
+      }
+    ],
+    "created": 1792794319653
+  },
+  {
     "id": "clue-cluedo-mvlj9vni",
     "title": "Clue/Cluedo",
     "cover": {
