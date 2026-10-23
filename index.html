@@ -93,7 +93,6 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
-  /* Редактор донатов: строка способа */
   .dn-row { display:grid; grid-template-columns:1fr 56px 130px; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
   .dn-row input { padding:8px 10px; font-size:.9rem; }
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
@@ -109,7 +108,6 @@
   .don-btn:hover { border-color:var(--accent); }
   .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
   .don-ico img { width:13px; height:13px; }
-  /* Блок без способов: посетителям не показываем, админу виден с подсказкой */
   body:not(.admin) #donate.no-methods { display:none; }
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
@@ -187,7 +185,6 @@
 
 <div class="grid view-grid" id="grid"></div>
 
-<!-- Плашка донатов; у админа — кнопка ✏️ для редактирования -->
 <section id="donate" class="donate">
   <div class="donate-box">
     <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
@@ -264,7 +261,7 @@
     <label>Способы поддержки — у каждого название и ссылка ИЛИ реквизиты для копирования:</label>
     <div id="dList"></div>
     <button id="dAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить способ</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boosty, telegram,Visa нет — попробуй «visa»). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boosty, telegram). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
     <div class="modal-actions">
       <button id="dCancel" class="tool-btn" type="button">Отмена</button>
       <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -293,14 +290,12 @@ const CONFIG = {
   repo: "russifiers",
   branch: "main",
   dataFile: "data.json",
-  donateFile: "donate.json",     // блок донатов хранится здесь (создаётся при первом сохранении из редактора)
+  donateFile: "donate.json",
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
-// ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ ====
-// Используется, пока в репозитории нет donate.json. После первого сохранения
-// в редакторе (✏️ на плашке) блок берётся из donate.json и правится на сайте.
+// ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
 const DONATE_DEFAULT = {
   title: "☕ Поддержать автора",
   text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
@@ -324,7 +319,7 @@ const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
 const LS_VIEW = "russifiers_view";
 const LS_STEAM_COMBO = "russifiers_steam_combo";
-const LS_APPNAMES = "russifiers_appnames_v1";
+const LS_APPNAMES = "russifiers_appnames_v2";
 
 const $ = id => document.getElementById(id);
 const state = { projects: [], dataSha: null, donateSha: null, donate: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
@@ -334,6 +329,7 @@ const saveDl = () => localStorage.setItem(LS_DL, JSON.stringify(dlCache));
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
 const encPath = p => p.split("/").map(encodeURIComponent).join("/");
+const dedupe = arr => [...new Set(arr.filter(Boolean))];
 
 // ---------- Тосты ----------
 function toast(msg, type = "info", ms = 4000) {
@@ -376,8 +372,11 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
-// Новые пути store_item_assets первыми (часть новых игр отдаёт 404 на старых адресах),
-// старые зеркала — запасом.
+// У части новых игр (пример: Above the Snow, appid 2423760) ассеты лежат по путям
+// С ХЭШЕМ версии: shared.*.steamstatic.com/store_item_assets/steam/apps/<id>/<hash>/header.jpg.
+// Угадать хэш нельзя, поэтому главный источник адреса — сам Steam (поле header_image
+// из appdetails / og:image со страницы): он сохраняется в cover.url и идёт первым.
+// Собранные пути — только запас; capsule_616x353 добавлен как ещё одинfallback.
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -385,12 +384,17 @@ const steamHeaderURLs = appid => [
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
   `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`
 ];
+const steamCapsuleURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`
+];
 const steamTallURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`
 ];
 function phSVG(letter) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
@@ -401,11 +405,24 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
+// Горизонтальная обложка для плашки: канонический URL → header → capsule → заглушка
 function coverURLs(p) {
-  const urls = p.cover?.appid ? [...steamHeaderURLs(p.cover.appid)]
-    : p.cover?.url ? [p.cover.url] : [];
-  urls.push(phSVG((p.title[0] || "?").toUpperCase()));
-  return urls;
+  const c = p.cover || {};
+  const urls = [
+    c.url, ...(c.appid ? steamHeaderURLs(c.appid) : []),
+    c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+    phSVG((p.title[0] || "?").toUpperCase())
+  ];
+  return dedupe(urls);
+}
+// Для окна игры: канонический → вертикальная → горизонтальные → заглушка
+function gameCoverURLs(p) {
+  const c = p.cover || {};
+  const urls = [
+    c.url, ...(c.appid ? [...steamTallURLs(c.appid), ...steamHeaderURLs(c.appid), ...steamCapsuleURLs(c.appid)] : []),
+    phSVG((p.title[0] || "?").toUpperCase())
+  ];
+  return dedupe(urls);
 }
 
 function fetchTimeout(url, ms = 8000) {
@@ -485,17 +502,33 @@ async function steamSearch(term) {
   return anyAnswered ? [] : null;
 }
 
-// ---------- Название игры по AppID ----------
-const appNamesCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
-function cacheName(id, name) {
-  appNamesCache[id] = name;
-  const keys = Object.keys(appNamesCache);
-  if (keys.length > 300) delete appNamesCache[keys[0]];
-  localStorage.setItem(LS_APPNAMES, JSON.stringify(appNamesCache));
+// ---------- Информация об игре по AppID: точное название + канонические обложки ----------
+// Кэш хранит объекты {name, header, capsule} (header/capsule — настоящие URL Steam).
+const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
+function cacheInfo(id, info) {
+  appInfoCache[id] = info;
+  const keys = Object.keys(appInfoCache);
+  if (keys.length > 300) delete appInfoCache[keys[0]];
+  localStorage.setItem(LS_APPNAMES, JSON.stringify(appInfoCache));
+}
+function cachedInfo(id) {
+  const v = appInfoCache[id];
+  if (!v) return null;
+  return typeof v === "string" ? { name: v, header: "", capsule: "" } : v; // совместимость со старым кэшем
 }
 const APP_ROUTES = [
-  { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&l=russian`,
-    parse: (j, id) => { const d = j && j[id]; return (d && d.success && d.data && d.data.name) ? String(d.data.name) : null; } },
+  { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&cc=US&l=russian`,
+    parse: (j, id) => {
+      const d = j && j[id];
+      if (d && d.success && d.data) {
+        return {
+          name: String(d.data.name || ""),
+          header: String(d.data.header_image || ""),
+          capsule: String(d.data.capsule_imagev5 || d.data.capsule_image || "")
+        };
+      }
+      return null;
+    } },
   { name:"htmlpage", url: id => `https://store.steampowered.com/app/${id}/?l=russian`, html: true }
 ];
 function parseOgTitle(html) {
@@ -507,8 +540,18 @@ function parseOgTitle(html) {
   t = t.replace(/\s+(on Steam|в Steam)$/i, "");
   return t || null;
 }
-async function fetchAppName(appid) {
-  if (appNamesCache[appid]) return appNamesCache[appid];
+function parseOg(html) {
+  const im = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+  return {
+    name: parseOgTitle(html) || "",
+    header: im ? im[1].replace(/^http:/, "https:") : "",
+    capsule: ""
+  };
+}
+async function fetchAppInfo(appid) {
+  const cached = cachedInfo(appid);
+  if (cached && cached.header) return cached;
+  if (cached && !cached.header) { /* имя есть, обложки нет — попробуем добрать */ }
   const attempts = [];
   for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);
   for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);
@@ -518,28 +561,29 @@ async function fetchAppName(appid) {
       const r = await fetchTimeout(proxy.wrap(route.url(appid)));
       if (!r.ok) throw new Error("HTTP " + r.status);
       const text = await r.text();
-      let name;
+      let info;
       if (route.html) {
-        name = parseOgTitle(text);
-        if (!name) throw new Error("og:title не найден");
+        info = parseOg(text);
+        if (!info.name && !info.header) throw new Error("og-теги не найдены");
       } else {
         let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
-        name = route.parse(j, appid);
-        if (!name) throw new Error("success:false");
+        info = route.parse(j, appid);
+        if (!info) throw new Error("success:false");
       }
-      cacheName(appid, name);
-      return name;
+      // если из кэша уже известно имя, а тут пусто — сохраним старое
+      if (!info.name && cached?.name) info.name = cached.name;
+      cacheInfo(appid, info);
+      return info;
     } catch (e) {
-      console.warn("Название по AppID: маршрут не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
+      console.warn("Инфо по AppID: маршрут не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
     }
   }
-  return null;
+  return cached && (cached.name || cached.header) ? cached : null;
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
-// Название из слага ссылки. ВАЖНО: Steam вырезает из слага все знаки препинания
-// (двоеточия, запятые, апострофы), поэтому это только черновик —
-// точное название приходит из Steam API и перезаписывает черновик.
+// Название из слага ссылки. Steam вырезает из слага все знаки препинания
+// (двоеточия, запятые, апострофы) — это черновик; точное имя приходит из Steam API.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -558,7 +602,7 @@ function migrate(p) {
   return p;
 }
 
-// ---------- GitHub API: общая запись JSON-файлов ----------
+// ---------- GitHub API ----------
 function gh(path, opts = {}) {
   const headers = { Accept: "application/vnd.github+json", ...(opts.headers || {}) };
   if (state.token) headers.Authorization = "Bearer " + state.token;
@@ -598,9 +642,7 @@ async function putJson(file, obj, message, retried = false) {
     throw e;
   }
 }
-async function writeData(projects, message) {
-  return putJson(CONFIG.dataFile, projects, message);
-}
+const writeData = (projects, message) => putJson(CONFIG.dataFile, projects, message);
 async function loadData() {
   const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
   if (r.status === 404) { state.projects = []; state.dataSha = null; return; }
@@ -611,7 +653,45 @@ async function loadData() {
   state.dataSha = null;
 }
 
-// ---------- Донаты: загрузка, отрисовка, редактор ----------
+// ---------- Авторемонт обложек ----------
+// У записей, где cover.url — «собранный» нами адрес (может 404 у новых игр),
+// запрашиваем у Steam канонический URL и сохраняем одним коммитом.
+// Признак собранного адреса: путь заканчивается на apps/<id>/header.jpg без хэша.
+const isConstructedUrl = (p) => {
+  const u = p.cover?.url;
+  if (!u || !p.cover?.appid) return false;
+  return new RegExp(`steamstatic\\.com\\/(steam|store_item_assets)\\/steam\\/apps\\/${p.cover.appid}\\/header\\.jpg$`, "i").test(u);
+};
+async function autoHealCovers() {
+  if (!state.token) return;
+  const need = state.projects.filter(p =>
+    p.cover?.appid && (!p.cover.url || isConstructedUrl(p)) &&
+    !cachedInfo(p.cover.appid)?.header);
+  if (!need.length) return;
+  let fixed = 0;
+  for (const p of need) {
+    try {
+      const info = await fetchAppInfo(p.cover.appid);
+      if (info?.header && info.header !== p.cover.url) {
+        p.cover.url = info.header;
+        if (info.capsule) p.cover.capsule = info.capsule;
+        fixed++;
+      }
+    } catch (e) {}
+    await new Promise(r => setTimeout(r, 350));
+  }
+  if (fixed) {
+    try {
+      await writeData(state.projects, "Обложки: канонические URL из Steam");
+      render();
+      toast(`Обложки обновлены автоматически: ${fixed} шт.`, "ok", 5000);
+    } catch (e) {
+      console.warn("Авторемонт обложек: не удалось сохранить —", e.message);
+    }
+  }
+}
+
+// ---------- Донаты ----------
 async function loadDonate() {
   try {
     const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.donateFile}?t=${Date.now()}`);
@@ -622,7 +702,6 @@ async function loadDonate() {
   } catch (e) {}
   state.donate = DONATE_DEFAULT;
 }
-
 function renderDonate() {
   const sec = $("donate");
   const d = state.donate;
@@ -661,7 +740,6 @@ function renderDonate() {
     toast("Не удалось скопировать — выделите реквизит вручную", "err");
   }
 });
-
 function addDonateRow(m = {}) {
   const box = document.createElement("div");
   box.className = "dn-row";
@@ -674,7 +752,6 @@ function addDonateRow(m = {}) {
     <input class="dn-val full" placeholder="…или реквизиты для копирования (необязательно)" value="${esc(m.value || "")}">`;
   $("dList").appendChild(box);
 }
-
  $("donEdit").addEventListener("click", () => {
   if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
   const d = state.donate || {};
@@ -690,17 +767,11 @@ function addDonateRow(m = {}) {
 });
 const closeDonate = () => $("donateModal").classList.add("hidden");
  $("dCancel").addEventListener("click", closeDonate);
-
  $("dSaveBtn").addEventListener("click", async () => {
   const btn = $("dSaveBtn");
   if (btn.disabled) return;
   if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
-
-  const data = {
-    title: $("dTitle").value.trim(),
-    text: $("dText").value.trim(),
-    methods: []
-  };
+  const data = { title: $("dTitle").value.trim(), text: $("dText").value.trim(), methods: [] };
   for (const b of document.querySelectorAll("#dList .dn-row")) {
     const name = b.querySelector(".dn-name").value.trim();
     if (!name) continue;
@@ -716,7 +787,6 @@ const closeDonate = () => $("donateModal").classList.add("hidden");
     if (val) m.value = val;
     if (m.url || m.value) data.methods.push(m);
   }
-
   btn.disabled = true;
   try {
     await putJson(CONFIG.donateFile, data, "Обновлён блок донатов");
@@ -883,12 +953,7 @@ function openGame(id) {
   $("gDesc").textContent = p.description || "";
   $("gDesc").style.display = p.description ? "" : "none";
 
-  const cover = $("gCover");
-  const urls = [];
-  if (p.cover?.appid) urls.push(...steamTallURLs(p.cover.appid), ...steamHeaderURLs(p.cover.appid));
-  if (p.cover?.url && !urls.includes(p.cover.url)) urls.push(p.cover.url);
-  urls.push(phSVG((p.title[0] || "?").toUpperCase()));
-  setCoverCascade(cover, urls);
+  setCoverCascade($("gCover"), gameCoverURLs(p));
 
   const box = $("gLinks");
   box.innerHTML = "";
@@ -963,6 +1028,7 @@ function setAdmin(on) {
     setAdmin(true);
     $("loginModal").classList.add("hidden");
     $("tokenInput").value = "";
+    autoHealCovers();
   } catch (e) {
     state.token = old;
     alert("GitHub не принял токен: " + e.message);
@@ -978,11 +1044,21 @@ let titlePick = null, lastFound = [], titleAuto = false;
 
 const setNote = msg => { $("fNote").textContent = msg || ""; };
 
+// Что выбрано как обложка: своя картинка → AppID (с каноническим URL из кэша, если есть) → поиск по названию
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
   if (url) return { url };
   const aid = extractAppId($("fAppId").value);
-  if (aid) return { appid: aid, name: (lastFound.find(x => x.id === aid) || {}).name || appNamesCache[aid] || "" };
+  if (aid) {
+    const info = cachedInfo(aid) || {};
+    const found = lastFound.find(x => x.id === aid);
+    return {
+      appid: aid,
+      name: found?.name || info.name || "",
+      header: info.header || "",
+      capsule: info.capsule || ""
+    };
+  }
   return titlePick;
 }
 
@@ -997,7 +1073,12 @@ function updateCoverPreview() {
     setCoverCascade(img, [c.url, phSVG("?")]);
   } else {
     label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
-    setCoverCascade(img, [...steamHeaderURLs(c.appid), phSVG("?")]);
+    // канонический URL от Steam — первым, затем собранные пути
+    setCoverCascade(img, dedupe([
+      c.header, ...(c.appid ? steamHeaderURLs(c.appid) : []),
+      c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+      phSVG("?")
+    ]));
     const explicit = $("fAppId").value.trim() || $("fCoverUrl").value.trim();
     const others = lastFound.filter(x => x.id !== String(c.appid)).slice(0, 5);
     if (!explicit && others.length) {
@@ -1043,13 +1124,6 @@ function queueTitleSearch(immediate = false) {
   else searchTimer = setTimeout(run, 500);
 }
 
-function applyAutoTitle(appid, name, seq) {
-  if (seq !== appIdSeq) return;
-  titleAuto = true;
-  $("fTitle").value = name;
-  updateCoverPreview();
-  setNote("Точное название из Steam — можно отредактировать вручную.");
-}
 function queueAppIdLookup(immediate = false) {
   clearTimeout(appIdTimer);
   const seq = ++appIdSeq;
@@ -1057,21 +1131,27 @@ function queueAppIdLookup(immediate = false) {
   const appid = extractAppId(raw);
   updateCoverPreview();
   if (!appid) return;
-  // Черновик из слага: Steam вырезает из ссылки знаки препинания,
-  // поэтому двоеточий тут не бывает. Точное имя перезапишет его из Steam.
+  // Черновик из слага: Steam вырезает из ссылки знаки препинания.
+  // Точное имя и каноническая обложка перезапишут его из Steam.
   if ((titleAuto || !$("fTitle").value.trim())) {
     const slugName = titleFromSlug(raw);
     if (slugName) {
       $("fTitle").value = slugName;
-      setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное из Steam…");
+      setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное название и обложку из Steam…");
     }
   }
   const run = async () => {
-    if (appNamesCache[appid]) { applyAutoTitle(appid, appNamesCache[appid], seq); return; }
-    const name = await fetchAppName(appid);
+    const info = await fetchAppInfo(appid);
     if (seq !== appIdSeq) return;
-    if (name) applyAutoTitle(appid, name, seq);
-    else setNote("Steam недоступен: название оставлено из ссылки. В ссылке нет двоеточий и других знаков — проверь название и поправь вручную. Обложка по AppID всё равно подтянется.");
+    if (info && (info.name || info.header)) {
+      if (info.name) { titleAuto = true; $("fTitle").value = info.name; }
+      updateCoverPreview();
+      setNote(info.header
+        ? "Название и обложка из Steam (точный адрес картинки) — можно отредактировать вручную."
+        : "Название из Steam — можно отредактировать вручную.");
+    } else {
+      setNote("Steam недоступен: название оставлено из ссылки. В ссылке нет двоеточий и других знаков — проверь и поправь вручную. Обложку можно задать картинкой или она подтянется позже.");
+    }
   };
   if (immediate) run();
   else appIdTimer = setTimeout(run, 450);
@@ -1099,6 +1179,7 @@ function queueAppIdLookup(immediate = false) {
   titleAuto = true;
   appIdSeq++;
   setNote("");
+  queueAppIdLookup(true); // сразу тянем каноническую обложку для выбранной игры
   updateCoverPreview();
 });
 
@@ -1119,6 +1200,8 @@ function openForm(id = null) {
   links.forEach(addLinkRow);
   refreshOrder();
   updateCoverPreview();
+  // у записи с AppID, но без канонической обложки — тихо добираем её из Steam
+  if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
@@ -1196,8 +1279,15 @@ function refreshOrder() {
   links.forEach(l => { const o = oldMap.get(l.url); if (o) l.dl = o.dl || 0; });
 
   const c = effectiveCover();
-  const cover = c ? (c.url ? { url: c.url }
-    : { appid: c.appid, name: c.name || appNamesCache[c.appid] || "", url: steamHeaderURLs(c.appid)[0] }) : null;
+  let cover = null;
+  if (c) {
+    if (c.url) cover = { url: c.url };
+    else {
+      cover = { appid: c.appid, name: c.name || appInfoCache[c.appid]?.name || "" };
+      cover.url = c.header || steamHeaderURLs(c.appid)[0];      // канонический URL, если известен
+      if (c.capsule) cover.capsule = c.capsule;
+    }
+  }
 
   if (editId) {
     const p = state.projects.find(x => x.id === editId);
@@ -1245,6 +1335,7 @@ function banner(text) {
   applyView();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
+      .then(() => autoHealCovers())
       .catch(e => {
         if (/401/.test(e.message)) {
           state.token = ""; localStorage.removeItem(LS_TOKEN); setAdmin(false);
