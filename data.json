@@ -15,27 +15,5 @@
       }
     ],
     "created": 1792787639111
-  },
-  {
-    "id": "above-the-snow-mvle4bwr",
-    "title": "Above the Snow",
-    "cover": {
-      "appid": "2423760",
-      "name": "",
-      "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2423760/header.jpg"
-    },
-    "links": [
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/cVuWKwrEXIkYhw",
-        "dl": 0
-      },
-      {
-        "type": "boosty",
-        "url": "https://boosty.to/atanvaron_/bundle/6d5953e2-525c-4f3e-a727-00ae433a5bcc?isFromShowcasePreview=true",
-        "dl": 0
-      }
-    ],
-    "created": 1792785368907
   }
 ]
