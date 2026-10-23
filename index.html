@@ -30,6 +30,7 @@
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .tool-btn:disabled { opacity:.5; cursor:default; }
   body:not(.admin) .admin-only { display:none !important; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
@@ -42,12 +43,10 @@
   .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
-  .tag { display:inline-block; font-size:.75rem; padding:3px 10px; background:rgba(108,92,231,.15); color:#a99cf5; border-radius:999px; margin:0 6px 4px 0; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
   .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; z-index:2; }
   .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
   .icon-btn:hover { opacity:1; }
-  .icon-btn.del:hover { color:#ff6b6b; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -56,7 +55,6 @@
   .modal label { display:block; font-size:.82rem; color:var(--muted); margin:12px 0 4px; }
   .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; }
   .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
-  .modal textarea { min-height:70px; resize:vertical; }
   .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
   .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
@@ -78,15 +76,25 @@
   .ver-del:hover { color:#ff6b6b; }
   @media (max-width:600px) { .lk-row { grid-template-columns:1fr; } }
 
+  /* Импорт с Teletype */
+  .imp-item { border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
+  .imp-item.dup { opacity:.55; }
+  .imp-head { display:flex; gap:8px; align-items:center; }
+  .imp-head input[type="checkbox"] { width:auto; flex:none; }
+  .imp-head .imp-title { flex:1; }
+  .imp-links { font-size:.76rem; color:var(--muted); margin-top:6px; overflow-wrap:anywhere; max-height:64px; overflow:auto; }
+  .imp-dupnote { font-size:.76rem; color:#f0b45c; margin-top:4px; }
+
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  .g-top { position:absolute; top:12px; right:12px; z-index:2; display:flex; gap:8px; align-items:center; }
-  .g-top button { height:34px; border:none; background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; }
-  .g-edit { display:inline-flex; align-items:center; gap:6px; padding:0 14px; border-radius:17px; font-size:.85rem; }
-  .g-edit:hover { color:#a99cf5; }
-  .g-close { width:34px; border-radius:50%; font-size:1rem; }
-  .g-close:hover { color:#ff6b6b; }
+  /* Значки в углу окна: без фона, в одном стиле */
+  .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:12px; align-items:center; }
+  .g-top button {
+    background:none; border:none; cursor:pointer;
+    font-size:1.1rem; line-height:1; padding:2px; opacity:.8;
+    text-shadow:0 1px 3px rgba(0,0,0,.45);
+  }
+  .g-top button:hover { opacity:1; transform:scale(1.15); }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
-  /* Обложка-ссылка на Steam */
   .g-cover-link { display:block; }
   .g-cover-link img { transition:filter .15s; }
   .g-cover-link:not(.no-link):hover img { filter:brightness(1.15); }
@@ -94,7 +102,6 @@
   .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
   .g-body { padding:24px; max-height:82vh; overflow:auto; }
   .g-body h2 { margin-bottom:6px; }
-  /* Название-ссылка на Steam */
   .g-title-link { color:inherit; text-decoration:none; }
   .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
   .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
@@ -133,19 +140,21 @@
     <option value="dl">По скачиваниям</option>
     <option value="new">Сначала новые</option>
   </select>
-  <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификator</button>
+  <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
+  <button id="btnImport" class="tool-btn admin-only">📥 Импорт с Teletype</button>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <footer>© 2025 Мой сайт русификаторов</footer>
 
-<!-- Окно игры: обложка + ссылки. Название и обложка — ссылки на Steam (если известен AppID) -->
+<!-- Окно игры: значки ✏️ 🗑️ ✕ без фона; название и обложка — ссылки на Steam -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
     <div class="g-top">
-      <button id="gEdit" class="g-edit admin-only">✏️ Редактировать</button>
-      <button id="gClose" class="g-close" title="Закрыть">✕</button>
+      <button id="gEdit" class="admin-only" title="Редактировать">✏️</button>
+      <button id="gDel" class="admin-only" title="Удалить">🗑️</button>
+      <button id="gClose" title="Закрыть">✕</button>
     </div>
     <div class="g-grid">
       <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
@@ -153,7 +162,6 @@
       </a>
       <div class="g-body">
         <h2 id="gTitle"></h2>
-        <div id="gTags"></div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Скачать</h3>
         <div id="gLinks"></div>
@@ -162,7 +170,7 @@
   </div>
 </div>
 
-<!-- Форма добавления / редактирования (только для админа).
+<!-- Форма добавления / редактирования.
      Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="formModal" class="overlay hidden">
   <div class="modal">
@@ -181,14 +189,30 @@
     </div>
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
-    <label>Теги (через запятую)</label>
-    <input id="fTags" type="text" placeholder="RPG, Полный перевод">
     <label>Ссылки для скачивания (сервис определится автоматически):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
     <div class="modal-actions">
       <button id="fCancel" class="tool-btn" type="button">Отмена</button>
       <button id="fSave" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Импорт с Teletype (только для админа) -->
+<div id="importModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Импорт с Teletype.in</h2>
+    <label>Адрес страницы с русификаторами</label>
+    <input id="impUrl" type="text">
+    <div class="modal-actions" style="justify-content:flex-start;">
+      <button id="impLoad" class="tool-btn primary" type="button">Загрузить список</button>
+    </div>
+    <div id="impStatus" class="hint"></div>
+    <div id="impList"></div>
+    <div class="modal-actions" id="impActions" style="display:none;">
+      <button id="impCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="impDo" class="tool-btn primary" type="button">Импортировать выбранное</button>
     </div>
   </div>
 </div>
@@ -213,10 +237,11 @@ const CONFIG = {
   owner: "ВАШ_НИК_GITHUB",   // ник на GitHub
   repo: "russifiers",        // имя публичного репозитория
   branch: "main",
-  dataFile: "data.json",     // список публикаций хранится здесь
+  dataFile: "data.json",
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
+const TELETYPE_DEFAULT = "https://teletype.in/@atanvaron/my_rusificators";
 
 if (location.hostname.endsWith(".github.io")) {
   CONFIG.owner = location.hostname.split(".")[0];
@@ -241,26 +266,26 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&l
 const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
 const encPath = p => p.split("/").map(encodeURIComponent).join("/");
 
-// ---------- Каталог сервисов ----------
+// ---------- Каталог сервисов (распознавание по суффиксу домена — ловит и cdn.boosty.to) ----------
 const SERVICES = {
-  yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","disk.yandex.com","yadi.sk"] },
-  gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com"] },
+  yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"] },
+  gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
   boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
   pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
-  github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","raw.githubusercontent.com"] },
-  telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph"] },
+  github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","gist.github.com","raw.githubusercontent.com","gist.githubusercontent.com"] },
+  telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph","telesco.pe"] },
   mega:     { name:"MEGA",          slug:"mega",        color:"#D9272E", hosts:["mega.nz","mega.io"] },
-  mediafire:{ name:"MediaFire",     slug:"mediafire",   color:"#1299F3", hosts:["mediafire.com","www.mediafire.com"] },
-  dropbox:  { name:"Dropbox",       slug:"dropbox",     color:"#0061FF", hosts:["dropbox.com","dl.dropboxusercontent.com"] },
+  mediafire:{ name:"MediaFire",     slug:"mediafire",   color:"#1299F3", hosts:["mediafire.com"] },
+  dropbox:  { name:"Dropbox",       slug:"dropbox",     color:"#0061FF", hosts:["dropbox.com","dropboxusercontent.com"] },
   cloudmr:  { name:"Облако Mail.ru",slug:"mailru",      color:"#005FF9", hosts:["cloud.mail.ru"] },
   other:    { name:"Другое",        slug:"",            color:"#8A8F98", hosts:[] }
 };
 function detectService(url) {
   try {
-    const h = new URL(url).hostname.replace(/^www\./, "");
+    const h = new URL(url).hostname.toLowerCase();
     for (const [k, s] of Object.entries(SERVICES))
-      if (s.hosts.includes(h)) return k;
+      if (s.hosts.some(host => h === host || h.endsWith("." + host))) return k;
   } catch (e) {}
   return "other";
 }
@@ -297,13 +322,13 @@ function coverURLs(p) {
   return urls;
 }
 
-function fetchTimeout(url, ms = 7000) {
+function fetchTimeout(url, ms = 8000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
 
-// ---------- Прокси для запросов к Steam ----------
+// ---------- Прокси ----------
 const STEAM_PROXIES = [
   { name:"direct",     wrap: u => u },
   { name:"codetabs",   wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
@@ -312,7 +337,7 @@ const STEAM_PROXIES = [
 ];
 const failedCombos = new Set();
 
-// ---------- Поиск игр по названию (когда AppID не указан) ----------
+// ---------- Поиск игр по названию ----------
 const SEARCH_SOURCES = [
   { name:"community", url: t => "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(t),
     parse: j => Array.isArray(j) ? j.map(x => ({ id:String(x.appid ?? ""), name:x.name || "", tiny:x.icon || x.logo || "" })) : [] },
@@ -374,9 +399,7 @@ async function steamSearch(term) {
   return anyAnswered ? [] : null;
 }
 
-// ---------- Название игры по AppID (обратный поиск) ----------
-// Маршруты: JSON appdetails напрямую → через прокси → HTML-страница игры через прокси
-// (из og:title достаётся точное название). Результаты кэшируются в браузере.
+// ---------- Название игры по AppID ----------
 const appNamesCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
 function cacheName(id, name) {
   appNamesCache[id] = name;
@@ -401,8 +424,8 @@ function parseOgTitle(html) {
 async function fetchAppName(appid) {
   if (appNamesCache[appid]) return appNamesCache[appid];
   const attempts = [];
-  for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);           // appdetails: direct + прокси
-  for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);           // html: только через прокси
+  for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);
+  for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);
   for (const [ri, pi] of attempts) {
     const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
     try {
@@ -427,10 +450,171 @@ async function fetchAppName(appid) {
   return null;
 }
 
-// AppID из чего угодно: "292030", ссылки Steam/SteamDB
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
-// Название из слага ссылки: ".../app/292030/The_Witcher_3_Wild_Hunt/" → "The Witcher 3 Wild Hunt"
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
+
+// ---------- Импорт с Teletype ----------
+async function teletypeFetch(url) {
+  for (const p of STEAM_PROXIES) {
+    try {
+      const r = await fetchTimeout(p.wrap(url), 12000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const text = await r.text();
+      if (text.length < 2000) throw new Error("подозрительно короткий ответ");
+      return text;
+    } catch (e) {
+      console.warn("Teletype: маршрут не ответил —", p.name, "(", e.message, ")");
+    }
+  }
+  throw new Error("страница недоступна ни напрямую, ни через прокси");
+}
+
+function parseTeletype(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script,style,noscript,header,footer,nav,aside").forEach(e => e.remove());
+  const root = doc.querySelector(".post-body, .post-content, .t-content, article, main") || doc.body;
+
+  const items = [];
+  let cur = null;
+  const flush = () => { if (cur && cur.title && cur.links.length) items.push(cur); cur = null; };
+  const newCur = t => { flush(); cur = { title: t.slice(0, 120), links: [] }; };
+  const addLink = href => {
+    if (!href || href.startsWith("#")) return;
+    if (/teletype\.in/i.test(href)) return; // служебные ссылки платформы
+    try { const u = new URL(href); if (!/^https?:$/.test(u.protocol)) return; } catch (e) { return; }
+    if (!cur) cur = { title: "", links: [] };
+    if (!cur.links.includes(href)) cur.links.push(href);
+  };
+
+  root.querySelectorAll("h1,h2,h3,h4,hr,b,strong,a").forEach(el => {
+    const tag = el.tagName;
+    if (tag === "HR") { flush(); return; }
+    if (/^H[1-4]$/.test(tag)) {
+      if (el.closest("h1,h2,h3,h4") !== el) return;
+      const t = el.textContent.replace(/\s+/g, " ").trim();
+      if (t) newCur(t);
+      el.querySelectorAll("a[href]").forEach(a => addLink(a.href));
+      return;
+    }
+    if (tag === "B" || tag === "STRONG") {
+      const p = el.closest("p,li,div");
+      if (p && !p.querySelector("a[href]") &&
+          p.textContent.replace(/\s+/g, " ").trim() === el.textContent.replace(/\s+/g, " ").trim()) {
+        const t = el.textContent.replace(/\s+/g, " ").trim();
+        if (t && t.length > 1) newCur(t);
+      }
+      return;
+    }
+    if (tag === "A") {
+      if (el.closest("h1,h2,h3,h4")) return;
+      addLink(el.getAttribute("href") ? el.href : "");
+    }
+  });
+  flush();
+  return items;
+}
+
+// Очистка названия перед поиском обложки: убираем «(v1.2)», «— русификатор» и т.п.
+const cleanForSearch = t => {
+  let s = String(t).replace(/[(\[{}].*?[)\]}]/g, " ");
+  s = s.replace(/[—–-]?\s*(русс?ификатор|русс?ификация|перевод|текст).*$/i, " ");
+  s = s.replace(/\s{2,}/g, " ").trim();
+  return s.length >= 2 ? s : t;
+};
+
+let importParsed = [];
+
+function renderImpList() {
+  const box = $("impList");
+  box.innerHTML = "";
+  importParsed.forEach((it, i) => {
+    const dup = state.projects.some(x => x.title.trim().toLowerCase() === it.title.trim().toLowerCase());
+    const hosts = it.links.map(u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u.slice(0, 40); } });
+    const d = document.createElement("div");
+    d.className = "imp-item" + (dup ? " dup" : "");
+    d.innerHTML = `
+      <label class="imp-head">
+        <input type="checkbox" class="imp-check" ${dup ? "" : "checked"}>
+        <input class="imp-title" value="${esc(it.title || "(без названия)")}">
+      </label>
+      <div class="imp-links">${it.links.length ? esc(hosts.join(" • ")) : "ссылок не найдено"}</div>
+      ${dup ? '<div class="imp-dupnote">⚠ такая запись уже есть на сайте — импорт заменит её дубликатом</div>' : ""}`;
+    box.appendChild(d);
+  });
+  $("impActions").style.display = importParsed.length ? "flex" : "none";
+}
+
+ $("btnImport").addEventListener("click", () => {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  $("impUrl").value = TELETYPE_DEFAULT;
+  $("impList").innerHTML = "";
+  $("impStatus").textContent = "";
+  $("impActions").style.display = "none";
+  $("importModal").classList.remove("hidden");
+});
+
+ $("impLoad").addEventListener("click", async () => {
+  const btn = $("impLoad");
+  if (btn.disabled) return;
+  const url = $("impUrl").value.trim();
+  if (!/^https?:\/\/.+/i.test(url)) { alert("Введите адрес страницы"); return; }
+  btn.disabled = true;
+  $("impStatus").textContent = "Загружаю страницу…";
+  try {
+    const html = await teletypeFetch(url);
+    $("impStatus").textContent = "Разбираю содержимое…";
+    importParsed = parseTeletype(html).filter(it => it.links.length);
+    if (!importParsed.length) {
+      $("impStatus").textContent = "Записи со ссылками не найдены. Страница могла загрузиться не полностью — попробуйте ещё раз. Если повторится — откройте F12 → Console и пришлите предупреждения.";
+    } else {
+      $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список (названия можно править), затем нажмите «Импортировать».`;
+      renderImpList();
+    }
+  } catch (e) {
+    $("impStatus").textContent = "Ошибка загрузки: " + e.message;
+  }
+  btn.disabled = false;
+});
+
+ $("impDo").addEventListener("click", async () => {
+  const btn = $("impDo");
+  if (btn.disabled) return;
+  const chosen = [...$("impList").querySelectorAll(".imp-item")]
+    .map((el, i) => ({ el, it: importParsed[i] }))
+    .filter(x => x.el.querySelector(".imp-check").checked && x.it);
+  if (!chosen.length) { alert("Отметьте хотя бы одну запись"); return; }
+  btn.disabled = true;
+  try {
+    let found = 0, n = 0;
+    for (const { el, it } of chosen) {
+      n++;
+      $("impStatus").textContent = `Ищу обложки в Steam: ${n} из ${chosen.length}…`;
+      const title = el.querySelector(".imp-title").value.trim() || it.title;
+      let cover = null;
+      const res = await steamSearch(cleanForSearch(title));
+      if (res && res.length) {
+        cover = { appid: res[0].id, name: res[0].name, url: steamHeaderURLs(res[0].id)[0] };
+        found++;
+      }
+      state.projects.unshift({
+        id: `${slugify(title)}-${Date.now().toString(36)}-${n}`,
+        title, cover,
+        links: it.links.map(u => ({ type: detectService(u), url: u, dl: 0 })),
+        created: Date.now() + n
+      });
+      await new Promise(r => setTimeout(r, 250));
+    }
+    $("impStatus").textContent = "Публикую…";
+    await writeData(state.projects, `Импорт с Teletype: ${chosen.length} записей`);
+    render();
+    $("importModal").classList.add("hidden");
+    alert(`✅ Импортировано записей: ${chosen.length}. Обложек найдено в Steam: ${found}. Остальные можно назначить вручную через ✏️.`);
+  } catch (e) {
+    alert("Импорт не удался: " + e.message);
+  }
+  btn.disabled = false;
+});
+ $("impCancel").addEventListener("click", () => $("importModal").classList.add("hidden"));
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
 function migrate(p) {
@@ -540,9 +724,7 @@ let query = "";
 
 function render() {
   const list = state.projects
-    .filter(p => !query ||
-      p.title.toLowerCase().includes(query) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(query)))
+    .filter(p => !query || p.title.toLowerCase().includes(query))
     .sort(SORTS[currentSort()].fn);
 
   grid.innerHTML = "";
@@ -559,7 +741,6 @@ function render() {
         </div>
         <img class="cover" alt="">
         <h2>${esc(p.title)}</h2>
-        <div>${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
       </div>`);
@@ -574,7 +755,7 @@ function render() {
 });
  $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
 
-// ---------- Удаление записи (на плашке-карточке) ----------
+// ---------- Удаление ----------
 async function deleteProject(id) {
   if (!state.token) { alert("Войдите как администратор (🔐 вверху справа)"); return false; }
   const p = state.projects.find(x => x.id === id);
@@ -590,7 +771,6 @@ async function deleteProject(id) {
   return true;
 }
 
-// ---------- События карточек ----------
 grid.addEventListener("click", e => {
   const card = e.target.closest(".card");
   if (!card) return;
@@ -610,7 +790,6 @@ function openGame(id) {
   if (!p) return;
   openedId = id;
 
-  // Название и обложка — ссылки на страницу игры в Steam (если известен AppID)
   const store = steamStoreURL(p);
   const titleEl = $("gTitle");
   if (store) {
@@ -629,7 +808,6 @@ function openGame(id) {
     coverLink.title = "";
   }
 
-  $("gTags").innerHTML = (p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("");
   $("gDesc").textContent = p.description || "";
   $("gDesc").style.display = p.description ? "" : "none";
 
@@ -675,6 +853,10 @@ function openGame(id) {
   if (!openedId) return;
   $("gameModal").classList.add("hidden");
   openForm(openedId);
+});
+ $("gDel").addEventListener("click", async () => {
+  if (!openedId) return;
+  if (await deleteProject(openedId)) $("gameModal").classList.add("hidden");
 });
  $("gClose").addEventListener("click", () => $("gameModal").classList.add("hidden"));
 
@@ -724,7 +906,6 @@ let titlePick = null, lastFound = [], titleAuto = false;
 
 const setNote = msg => { $("fNote").textContent = msg || ""; };
 
-// Что сейчас выбрано в качестве обложки (приоритет: своя картинка → AppID → найденное по названию)
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
   if (url) return { url };
@@ -757,7 +938,6 @@ function updateCoverPreview() {
   }
 }
 
-// Название по названию (когда AppID не заполнен): ищем appid + варианты
 function queueTitleSearch(immediate = false) {
   clearTimeout(searchTimer);
   const seq = ++searchSeq;
@@ -791,13 +971,12 @@ function queueTitleSearch(immediate = false) {
   else searchTimer = setTimeout(run, 500);
 }
 
-// Название по AppID (первое поле — главное)
 function applyAutoTitle(appid, name, seq) {
   if (seq !== appIdSeq) return;
   titleAuto = true;
   $("fTitle").value = name;
   updateCoverPreview();
-  setNote(`Название подтянуто из Steam — можно отредактировать вручную.`);
+  setNote("Название подтянуто из Steam — можно отредактировать вручную.");
 }
 function queueAppIdLookup(immediate = false) {
   clearTimeout(appIdTimer);
@@ -806,7 +985,6 @@ function queueAppIdLookup(immediate = false) {
   const appid = extractAppId(raw);
   updateCoverPreview();
   if (!appid) return;
-  // мгновенный префилл из слага ссылки, пока Steam отвечает
   if ((titleAuto || !$("fTitle").value.trim())) {
     const slugName = titleFromSlug(raw);
     if (slugName) $("fTitle").value = slugName;
@@ -827,8 +1005,8 @@ function queueAppIdLookup(immediate = false) {
  $("fTitle").addEventListener("input", () => {
   titleAuto = false;
   setNote("");
-  if (extractAppId($("fAppId").value)) { updateCoverPreview(); return; } // AppID задан — он источник обложки
-  queueTitleSearch(false); // AppID пуст — ищем по названию
+  if (extractAppId($("fAppId").value)) { updateCoverPreview(); return; }
+  queueTitleSearch(false);
 });
  $("fCoverUrl").addEventListener("input", () => {
   if ($("fCoverUrl").value.trim()) updateCoverPreview();
@@ -839,7 +1017,6 @@ function queueAppIdLookup(immediate = false) {
   if (e.target.closest(".retry-search")) { failedCombos.clear(); queueTitleSearch(true); return; }
   const b = e.target.closest(".steam-item");
   if (!b) return;
-  // Выбрали конкретную игру из вариантов — заполняем оба поля
   titlePick = null;
   $("fAppId").value = b.dataset.id;
   $("fTitle").value = b.dataset.name;
@@ -860,7 +1037,6 @@ function openForm(id = null) {
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
   $("fTitle").value = p ? p.title : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
-  $("fTags").value = p ? (p.tags || []).join(", ") : "";
   setNote("");
   $("lkList").innerHTML = "";
   const links = p?.links?.length ? p.links : [{}];
@@ -903,7 +1079,6 @@ function addLinkRow(l = {}) {
 
   const title = $("fTitle").value.trim();
   if (!title) { alert("Введите название игры"); return; }
-  const tags = $("fTags").value.split(",").map(t => t.trim()).filter(Boolean);
 
   const links = [];
   for (const b of document.querySelectorAll("#lkList .lk-row")) {
@@ -926,9 +1101,11 @@ function addLinkRow(l = {}) {
     : { appid: c.appid, name: c.name || appNamesCache[c.appid] || "", url: steamHeaderURLs(c.appid)[0] }) : null;
 
   if (editId) {
-    Object.assign(state.projects.find(x => x.id === editId), { title, tags, cover, links });
+    const p = state.projects.find(x => x.id === editId);
+    Object.assign(p, { title, cover, links });
+    delete p.tags; // теги больше не используются
   } else {
-    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, tags, cover, links, created: Date.now() });
+    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, cover, links, created: Date.now() });
   }
 
   btn.disabled = true; btn.textContent = "Публикую…";
@@ -947,11 +1124,15 @@ function addLinkRow(l = {}) {
 
 // Закрытие модалок.
 // Форма русификатора защищена от случайного закрытия: клик мимо и Esc игнорируются.
-for (const m of [$("loginModal"), $("gameModal")]) {
+for (const m of [$("loginModal"), $("gameModal"), $("importModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { $("loginModal").classList.add("hidden"); $("gameModal").classList.add("hidden"); }
+  if (e.key === "Escape") {
+    $("loginModal").classList.add("hidden");
+    $("gameModal").classList.add("hidden");
+    $("importModal").classList.add("hidden");
+  }
 });
 
 function banner(text) {
