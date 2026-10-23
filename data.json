@@ -1,61 +1,20 @@
 [
   {
-    "id": "совместные-русификаторы-на-пк-mvlfbegh-2",
-    "title": "Совместные русификаторы на ПК",
-    "cover": null,
+    "id": "a-game-of-thrones-the-board-game-digital-edition-mvlfgzlz",
+    "title": "A Game of Thrones: The Board Game Digital Edition",
+    "cover": {
+      "appid": "1075190",
+      "name": "",
+      "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1075190/header.jpg"
+    },
     "links": [
       {
-        "type": "other",
-        "url": "https://store.steampowered.com/app/274190/Broforce/",
-        "dl": 0
-      },
-      {
         "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/hmqHc_oCJ4_Y9A",
-        "dl": 0
-      },
-      {
-        "type": "other",
-        "url": "https://store.steampowered.com/app/496340/Fighting_Fantasy_Legends/",
-        "dl": 0
-      },
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/5jgHpjejNQjIHA",
-        "dl": 0
-      },
-      {
-        "type": "other",
-        "url": "https://store.steampowered.com/app/221680/Rocksmith_2014_Edition__Remastered/",
-        "dl": 0
-      },
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/TQFwDxoSk7ao6w",
-        "dl": 0
-      },
-      {
-        "type": "other",
-        "url": "https://store.steampowered.com/app/358460/Talisman_The_Horus_Heresy/",
-        "dl": 0
-      },
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/AEJYBdv67Uw4LA",
-        "dl": 0
-      },
-      {
-        "type": "other",
-        "url": "https://store.steampowered.com/app/303800",
-        "dl": 0
-      },
-      {
-        "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/sWSVrjB0t2qUf",
+        "url": "https://disk.yandex.ru/d/ldSmOlkkfD9Zcw",
         "dl": 0
       }
     ],
-    "created": 1792787378420
+    "created": 1792787639111
   },
   {
     "id": "above-the-snow-mvle4bwr",
