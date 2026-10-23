@@ -68,10 +68,6 @@
   .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
-  details.imp-manual { margin-top:16px; border:1px solid var(--border); border-radius:10px; padding:12px; }
-  details.imp-manual summary { cursor:pointer; font-size:.9rem; color:var(--muted); }
-  details.imp-manual[open] summary { margin-bottom:8px; }
-
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
   .cover-preview.hidden { display:none; }
   .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
@@ -96,14 +92,6 @@
     .l-type { grid-column:2; }
     .l-url  { grid-column:2; grid-row:2; }
   }
-
-  .imp-item { border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
-  .imp-item.dup { opacity:.55; }
-  .imp-head { display:flex; gap:8px; align-items:center; }
-  .imp-head input[type="checkbox"] { width:auto; flex:none; }
-  .imp-head .imp-title { flex:1; }
-  .imp-links { font-size:.76rem; color:var(--muted); margin-top:6px; overflow-wrap:anywhere; max-height:64px; overflow:auto; }
-  .imp-dupnote { font-size:.76rem; color:#f0b45c; margin-top:4px; }
 
   .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
   .donate-box { background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
@@ -186,7 +174,6 @@
     <option value="compact">Компактно</option>
   </select>
   <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
-  <button id="btnImport" class="tool-btn admin-only">📥 Импорт с Teletype</button>
 </div>
 
 <div class="grid view-grid" id="grid"></div>
@@ -254,39 +241,6 @@
   </div>
 </div>
 
-<!-- Импорт с Teletype: главный способ — сохранённый PDF страницы -->
-<div id="importModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Импорт с Teletype</h2>
-    <p class="hint">
-      <b>1)</b> «🔓 Открыть страницу» →
-      <b>2)</b> на ней <b>Ctrl+P</b> → принтер «<b>Сохранить как PDF</b>» → сохранить (в Chrome/Edge кликабельные ссылки сохраняются в PDF) →
-      <b>3)</b> кнопка ниже → выбери PDF →
-      <b>4)</b> проверь список и нажми «Импортировать выбранное».
-    </p>
-    <div class="modal-actions" style="justify-content:flex-start;">
-      <button id="impOpen" class="tool-btn" type="button">🔓 Открыть страницу</button>
-      <input type="file" id="impFile" accept=".pdf,.html,.htm,.mht,.mhtml,.txt,.md" style="display:none">
-      <button id="impFileBtn" class="tool-btn primary" type="button">📄 Выбрать сохранённый PDF</button>
-    </div>
-    <div id="impStatus" class="hint"></div>
-    <div id="impList"></div>
-    <div class="modal-actions" id="impActions" style="display:none;">
-      <button id="impCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="impDo" class="tool-btn primary" type="button">Импортировать выбранное</button>
-    </div>
-
-    <details class="imp-manual">
-      <summary>Автозагрузка по адресу (часто не срабатывает — teletype закрыт Cloudflare)</summary>
-      <label>Адрес страницы</label>
-      <input id="impUrl" type="text">
-      <div class="modal-actions" style="justify-content:flex-start;">
-        <button id="impLoad" class="tool-btn" type="button">Загрузить автоматически</button>
-      </div>
-    </details>
-  </div>
-</div>
-
 <!-- Вход по токену -->
 <div id="loginModal" class="overlay hidden">
   <div class="modal">
@@ -311,7 +265,6 @@ const CONFIG = {
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
-const TELETYPE_DEFAULT = "https://teletype.in/@atanvaron/my_rusificators";
 
 // ==== ПЛАШКА ДОНАТОВ — замени ссылки и реквизиты на свои ====
 const DONATE = {
@@ -388,18 +341,23 @@ function makeIcon(type) {
   return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
 }
 
-// ---------- Обложки: 4 зеркала CDN Steam (если одно не отвечает — берём следующее) ----------
+// ---------- Обложки ----------
+// С 2024 Valve хранит ассеты по новому пути store_item_assets; для части игр
+// старые адреса отдают 404 (пример: Above the Snow, appid 2423760).
+// Поэтому новые пути идут первыми, старые — запасом.
 const steamHeaderURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
-  `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`,
-  `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`
+  `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`
 ];
 const steamTallURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/library_600x900.jpg`
+  `https://cdn.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`
 ];
 function phSVG(letter) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
@@ -547,480 +505,6 @@ async function fetchAppName(appid) {
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
-
-// ============================================================
-// PDF-ДВИЖОК (pdf.js грузится с CDN только при первом импорте)
-// ============================================================
-const PDFJS_SOURCES = [
-  ["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
-   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"],
-  ["https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js",
-   "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js"]
-];
-async function ensurePdfJs() {
-  if (window.pdfjsLib) return;
-  let lastErr = null;
-  for (const [lib, worker] of PDFJS_SOURCES) {
-    try {
-      await new Promise((res, rej) => {
-        const s = document.createElement("script");
-        s.src = lib;
-        s.onload = res;
-        s.onerror = () => rej(new Error(lib));
-        document.head.appendChild(s);
-      });
-      if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = worker;
-        return;
-      }
-    } catch (e) { lastErr = e; }
-  }
-  throw new Error("не удалось загрузить pdf.js (проверь сеть/блокировщик) — " + (lastErr?.message || ""));
-}
-
-// Строки из текстового слоя PDF: группируем элементы по координате Y
-function pdfLines(tc) {
-  const items = (tc.items || [])
-    .filter(i => i.str && i.str.trim())
-    .map(i => ({ x: i.transform[4], y: i.transform[5], s: i.str }));
-  items.sort((a, b) => b.y - a.y || a.x - b.x);
-  const lines = [];
-  for (const it of items) {
-    const last = lines[lines.length - 1];
-    if (last && Math.abs(last.y - it.y) <= 3.5) last.items.push(it);
-    else lines.push({ y: it.y, items: [it], links: [] });
-  }
-  for (const L of lines) {
-    L.items.sort((a, b) => a.x - b.x);
-    L.text = L.items.map(i => i.s).join(" ").replace(/\s+/g, " ").trim();
-  }
-  return lines;
-}
-
-// Кликабельные ссылки (аннотации) прикрепляем к строкам по вертикали
-async function extractPdfText(file, onStatus) {
-  await ensurePdfJs();
-  const data = new Uint8Array(await file.arrayBuffer());
-  const pdf = await pdfjsLib.getDocument({ data }).promise;
-  const pages = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
-    if (onStatus) onStatus(`Разбираю PDF: страница ${p} из ${pdf.numPages}…`);
-    const page = await pdf.getPage(p);
-    const lines = pdfLines(await page.getTextContent());
-    try {
-      const anns = (await page.getAnnotations({ intent: "display" }))
-        .filter(a => a.subtype === "Link" && a.url && /^https?:/i.test(a.url));
-      for (const a of anns) {
-        const yc = (a.rect[1] + a.rect[3]) / 2;
-        let best = null, bd = 1e9;
-        for (const l of lines) { const d = Math.abs(l.y - yc); if (d < bd) { bd = d; best = l; } }
-        if (best && bd <= 14) { if (!best.links.includes(a.url)) best.links.push(a.url); }
-        else lines.push({ y: yc, items: [], text: "", links: [a.url] });
-      }
-    } catch (e) { /* аннотаций может не быть */ }
-    lines.sort((a, b) => b.y - a.y);
-    pages.push(lines.map(l => [l.text, ...(l.links || [])].filter(Boolean).join(" ")).filter(Boolean).join("\n"));
-  }
-  return healPdfText(pages.join("\n"));
-}
-
-// Склейка URL, разорванных переносом строки при печати в PDF
-function healPdfText(t) {
-  const lines = t.split("\n");
-  for (let i = 0; i < lines.length - 1; i++) {
-    if (/https?:\/\/\S+$/i.test(lines[i]) &&
-        /^[A-Za-z0-9/?=&._%~+:#-]+$/.test(lines[i + 1]) &&
-        !/^https?:/i.test(lines[i + 1])) {
-      lines[i] += lines[i + 1];
-      lines.splice(i + 1, 1);
-      i--;
-    }
-  }
-  return lines.join("\n");
-}
-
-// ============================================================
-// ИМПОРТ С TELETYPE.
-// Главный способ — сохранённый PDF страницы. Запасные — .html/.mhtml, автозагрузка.
-// ============================================================
-async function teletypeFetchHTML(url) {
-  const attempts = [
-    ["direct",       () => fetchTimeout(url, 12000)],
-    ["cors-workers", () => fetchTimeout("https://test.cors.workers.dev/?" + url, 40000)],
-    ["cors-lol",     () => fetchTimeout("https://api.cors.lol/?url=" + encodeURIComponent(url), 40000)],
-    ["allorigins",   () => fetchTimeout("https://api.allorigins.win/raw?url=" + encodeURIComponent(url), 40000)],
-    ["codetabs",     () => fetchTimeout("https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(url), 40000)],
-    ["allorigins-get", async () => {
-      const r = await fetchTimeout("https://api.allorigins.win/get?url=" + encodeURIComponent(url), 40000);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const j = await r.json();
-      return new Response(j.contents || "", { status: 200 });
-    }]
-  ];
-  for (const [name, get] of attempts) {
-    try {
-      const r = await get();
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const text = await r.text();
-      if (text.length < 2000) throw new Error("короткий ответ (" + text.length + " Б)");
-      return text;
-    } catch (e) {
-      console.warn("Teletype HTML: маршрут не ответил —", name, "(", e.message, ")");
-    }
-  }
-  return null;
-}
-
-async function teletypeFetchWayback(url) {
-  try {
-    const r = await fetchTimeout("https://archive.org/wayback/available?url=" + encodeURIComponent(url), 12000);
-    if (!r.ok) return null;
-    const j = await r.json();
-    const snap = j?.archived_snapshots?.closest?.url;
-    if (!snap) { console.warn("Teletype: в веб-архиве копии нет"); return null; }
-    const r2 = await fetchTimeout(snap.replace(/^http:/, "https:"), 25000);
-    if (!r2.ok) throw new Error("HTTP " + r2.status);
-    return await r2.text();
-  } catch (e) {
-    console.warn("Teletype: веб-архив недоступен (", e.message, ")");
-    return null;
-  }
-}
-
-async function teletypeFetchText(url) {
-  for (let i = 0; i < 2; i++) {
-    try {
-      const r = await fetchTimeout("https://r.jina.ai/" + url, 25000);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const text = await r.text();
-      if (text.length < 500) throw new Error("короткий ответ");
-      return text;
-    } catch (e) {
-      console.warn("Teletype текст: r.jina.ai не ответил (попытка " + (i + 1) + ") (", e.message, ")");
-    }
-  }
-  return null;
-}
-
-// Разбор HTML
-function parseTeletype(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script,style,noscript,header,footer,nav,aside").forEach(e => e.remove());
-  const root = doc.querySelector(".post-body, .post-content, .t-content, article, main") || doc.body;
-
-  const skipRe = /teletype\.in|\.(png|jpe?g|gif|webp|svg|ico)(\?|#|$)/i;
-  const items = [];
-  let cur = null;
-  const flush = () => { if (cur && cur.title && cur.links.length) items.push(cur); cur = null; };
-  const newCur = t => { flush(); cur = { title: t.slice(0, 120), links: [] }; };
-  const addLink = href => {
-    if (!href || href.startsWith("#") || skipRe.test(href)) return;
-    try { const u = new URL(href); if (!/^https?:$/.test(u.protocol)) return; } catch (e) { return; }
-    if (!cur) cur = { title: "", links: [] };
-    if (!cur.links.includes(href)) cur.links.push(href);
-  };
-
-  root.querySelectorAll("h1,h2,h3,h4,hr,b,strong,a").forEach(el => {
-    const tag = el.tagName;
-    if (tag === "HR") { flush(); return; }
-    if (/^H[1-4]$/.test(tag)) {
-      if (el.closest("h1,h2,h3,h4") !== el) return;
-      const t = el.textContent.replace(/\s+/g, " ").trim();
-      if (t) newCur(t);
-      el.querySelectorAll("a[href]").forEach(a => addLink(a.href));
-      return;
-    }
-    if (tag === "B" || tag === "STRONG") {
-      const p = el.closest("p,li,div");
-      if (p && !p.querySelector("a[href]") &&
-          p.textContent.replace(/\s+/g, " ").trim() === el.textContent.replace(/\s+/g, " ").trim()) {
-        const t = el.textContent.replace(/\s+/g, " ").trim();
-        if (t && t.length > 1) newCur(t);
-      }
-      return;
-    }
-    if (tag === "A") {
-      if (el.closest("h1,h2,h3,h4")) return;
-      addLink(el.getAttribute("href") ? el.href : "");
-    }
-  });
-  flush();
-  return items;
-}
-
-// Разбор простого текста / markdown / текста из PDF
-function parseTeletypeText(text) {
-  const cleaned = text
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/\[\s*\]\([^)]*\)/g, " ");
-  const skipRe = /teletype\.in|jina\.ai|steamstatic\.com|google\.[a-z.]+\/search|yandex\.[a-z.]+\/search|\/search\?|\.(png|jpe?g|gif|webp|svg|ico|css|js)([?#]|$)/i;
-  const strip = t => t
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/[*_`#>]+/g, "")
-    .replace(/\s+/g, " ")
-    .replace(/[:\s.]+$/, "")
-    .trim();
-  const STOP = /^(скачать|скачивание|скачать здесь|ссылки?|ссылка на скачивание|download|загрузить|загрузка|файлы?|здесь|тут|available|link|demo|демо)$/i;
-
-  const items = [];
-  let cur = null;
-  const flush = () => { if (cur && cur.title && cur.links.length) items.push(cur); cur = null; };
-  const addUrl = u => {
-    u = u.replace(/[)\].,;:]+$/, "");
-    if (skipRe.test(u)) return;
-    try { const uu = new URL(u); if (!/^https?:$/.test(uu.protocol)) return; } catch (e) { return; }
-    if (!cur) cur = { title: "", links: [] };
-    if (!cur.links.includes(u)) cur.links.push(u);
-  };
-
-  const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const urlRe = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s)\]<>"']+)/g;
-    const first = urlRe.exec(line);
-    urlRe.lastIndex = 0;
-
-    if (!first) {
-      const h = line.match(/^#{1,6}\s+(.+?)\s*#*$/)
-             || line.match(/^\*\*(.+?)\*\*[:.]?\s*$/)
-             || line.match(/^Title:\s*(.+)$/i);
-      if (h) {
-        const t = strip(h[1]);
-        if (t && t.length > 1 && t.length < 120) { flush(); cur = { title: t, links: [] }; continue; }
-      }
-      const nxt = lines[i + 1] || "";
-      if (line.length >= 2 && line.length <= 120 && /https?:\/\//.test(nxt)) {
-        const t = strip(line);
-        if (t && !STOP.test(t)) { flush(); cur = { title: t, links: [] }; }
-      }
-      continue;
-    }
-
-    const isHeading = /^#{1,6}\s/.test(line) || /^\*\*.+\*\*/.test(line);
-    const before = strip(line.slice(0, first.index));
-    if (before && before.length >= 2 && before.length <= 120 && !STOP.test(before) &&
-        (isHeading || !cur)) {
-      flush(); cur = { title: before, links: [] };
-    }
-    let m;
-    while ((m = urlRe.exec(line))) {
-      if (!cur && m[2]) {
-        const t = strip(m[1] || "");
-        if (t && t.length > 1 && t.length < 120 && !STOP.test(t)) cur = { title: t, links: [] };
-      }
-      addUrl(m[2] || m[3]);
-    }
-  }
-  flush();
-  return items;
-}
-
-const cleanForSearch = t => {
-  let s = String(t).replace(/[(\[{}].*?[)\]}]/g, " ");
-  s = s.replace(/[—–-]?\s*(русс?ификатор|русс?ификация|перевод|текст).*$/i, " ");
-  s = s.replace(/\s{2,}/g, " ").trim();
-  return s.length >= 2 ? s : t;
-};
-
-let importParsed = [];
-
-function renderImpList() {
-  const box = $("impList");
-  box.innerHTML = "";
-  importParsed.forEach((it, i) => {
-    const dup = state.projects.some(x => x.title.trim().toLowerCase() === it.title.trim().toLowerCase());
-    const hosts = it.links.map(u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u.slice(0, 40); } });
-    const d = document.createElement("div");
-    d.className = "imp-item" + (dup ? " dup" : "");
-    d.innerHTML = `
-      <label class="imp-head">
-        <input type="checkbox" class="imp-check" ${dup ? "" : "checked"}>
-        <input class="imp-title" value="${esc(it.title || "(без названия)")}">
-      </label>
-      <div class="imp-links">${it.links.length ? esc(hosts.join(" • ")) : "ссылок не найдено"}</div>
-      ${dup ? '<div class="imp-dupnote">⚠ такая запись уже есть на сайте — импорт заменит её дубликатом</div>' : ""}`;
-    box.appendChild(d);
-  });
-  $("impActions").style.display = importParsed.length ? "flex" : "none";
-}
-
-// Разбор содержимого файла: PDF → .mhtml → HTML → текст
-function parseImport(content) {
-  let items = [];
-  if (/MIME-Version:|multipart\/related/i.test(content.slice(0, 2000))) {
-    // декодирование mhtml вынесено в чтение файла; тут уже html
-  }
-  const looksHtml = /<\s*(html|body|div|p|a|h[1-6])\b/i.test(content);
-  if (looksHtml) items = parseTeletype(content);
-  if (!items.length) {
-    const text = looksHtml
-      ? content.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, "\n")
-      : content;
-    items = parseTeletypeText(text);
-  }
-  importParsed = items.filter(it => it.links.length);
-  if (importParsed.length) {
-    $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список (названия можно править) и нажмите «Импортировать выбранное».`;
-    renderImpList();
-  } else {
-    $("impStatus").textContent = "В файле записи со ссылками не найдены. Убедись, что PDF сохранён со страницы с русификаторами (Ctrl+P → «Сохранить как PDF»), а не распечатан как картинка.";
-  }
-}
-
- $("btnImport").addEventListener("click", () => {
-  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  $("impUrl").value = TELETYPE_DEFAULT;
-  $("impList").innerHTML = "";
-  $("impStatus").textContent = "";
-  $("impActions").style.display = "none";
-  $("importModal").classList.remove("hidden");
-});
-
- $("impOpen").addEventListener("click", () => {
-  const url = $("impUrl").value.trim();
-  if (/^https?:\/\/.+/i.test(url)) window.open(url, "_blank");
-});
-
-// Выбор файла: PDF разбирается через pdf.js, остальное — как текст
- $("impFileBtn").addEventListener("click", () => $("impFile").click());
- $("impFile").addEventListener("change", async () => {
-  const f = $("impFile").files[0];
-  if (!f) return;
-  const isPdf = /\.pdf$/i.test(f.name) || f.type === "application/pdf";
-  try {
-    if (isPdf) {
-      $("impStatus").textContent = "Готовлю PDF-движок…";
-      const text = await extractPdfText(f, m => { $("impStatus").textContent = m; });
-      if (!text || text.replace(/\s+/g, "").length < 40) {
-        $("impStatus").textContent = "В PDF нет текстового слоя (похоже, это скан/картинки). Сохраняй страницу через Ctrl+P → «Сохранить как PDF» в Chrome/Edge — тогда текст и ссылки попадут в файл.";
-        return;
-      }
-      $("impStatus").textContent = "PDF разобран, ищу записи…";
-      parseImport(text);
-    } else {
-      $("impStatus").textContent = "Читаю файл…";
-      const r = new FileReader();
-      r.onload = () => {
-        let content = String(r.result);
-        if (/MIME-Version:|multipart\/related/i.test(content.slice(0, 2000))) {
-          const html = decodeMHTML(content);
-          if (html) content = html;
-        }
-        $("impStatus").textContent = "Файл загружен, разбираю…";
-        parseImport(content);
-      };
-      r.onerror = () => $("impStatus").textContent = "Не удалось прочитать файл.";
-      r.readAsText(f);
-    }
-  } catch (e) {
-    $("impStatus").textContent = "Ошибка разбора: " + e.message;
-  }
-  $("impFile").value = "";
-});
-
-// Декодирование .mhtml («веб-страница одним файлом»)
-function decodeMHTML(raw) {
-  const idx = raw.search(/Content-Type:\s*text\/html/i);
-  if (idx === -1) return null;
-  const seg = raw.slice(idx);
-  const encM = seg.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
-  const enc = encM ? encM[1].trim().toLowerCase() : "quoted-printable";
-  const bodyStart = seg.search(/\r?\n\r?\n/);
-  if (bodyStart === -1) return null;
-  let body = seg.slice(bodyStart).replace(/^\r?\n\r?\n/, "");
-  const b = body.search(/^--/m);
-  if (b !== -1) body = body.slice(0, b);
-  if (enc.includes("quoted-printable")) {
-    body = body.replace(/=\r?\n/g, "");
-    const bytes = [];
-    for (let i = 0; i < body.length; i++) {
-      if (body[i] === "=" && /^[0-9A-F]{2}$/i.test(body.slice(i + 1, i + 3))) {
-        bytes.push(parseInt(body.slice(i + 1, i + 3), 16)); i += 2;
-      } else bytes.push(body.charCodeAt(i) & 0xFF);
-    }
-    try { return new TextDecoder("utf-8").decode(new Uint8Array(bytes)); }
-    catch (e) { return body; }
-  }
-  if (enc.includes("base64")) {
-    try {
-      const bin = atob(body.replace(/\s+/g, ""));
-      return new TextDecoder("utf-8").decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
-    } catch (e) { return null; }
-  }
-  return body;
-}
-
- $("impLoad").addEventListener("click", async () => {
-  const btn = $("impLoad");
-  if (btn.disabled) return;
-  const url = $("impUrl").value.trim();
-  if (!/^https?:\/\/.+/i.test(url)) { alert("Введите адрес страницы"); return; }
-  btn.disabled = true;
-  $("impStatus").textContent = "Пробую автозагрузку (до минуты)…";
-  try {
-    let items = [];
-    const html = await teletypeFetchHTML(url);
-    if (html) items = parseTeletype(html);
-    if (!items.length) {
-      const wb = await teletypeFetchWayback(url);
-      if (wb) items = parseTeletype(wb);
-    }
-    if (!items.length) {
-      const md = await teletypeFetchText(url);
-      if (md) items = parseTeletypeText(md);
-    }
-    importParsed = items.filter(it => it.links.length);
-    if (importParsed.length) {
-      $("impStatus").textContent = `Найдено записей: ${importParsed.length}. Проверьте список и нажмите «Импортировать выбранное».`;
-      renderImpList();
-    } else {
-      $("impStatus").textContent = "Автозагрузка не удалась — teletype прикрыт Cloudflare. Сохрани страницу как PDF: «🔓 Открыть страницу» → Ctrl+P → «Сохранить как PDF» → «📄 Выбрать сохранённый PDF».";
-    }
-  } catch (e) {
-    $("impStatus").textContent = "Ошибка автозагрузки: " + e.message;
-  }
-  btn.disabled = false;
-});
-
- $("impDo").addEventListener("click", async () => {
-  const btn = $("impDo");
-  if (btn.disabled) return;
-  const chosen = [...$("impList").querySelectorAll(".imp-item")]
-    .map((el, i) => ({ el, it: importParsed[i] }))
-    .filter(x => x.el.querySelector(".imp-check").checked && x.it);
-  if (!chosen.length) { alert("Отметьте хотя бы одну запись"); return; }
-  btn.disabled = true;
-  try {
-    let found = 0, n = 0;
-    for (const { el, it } of chosen) {
-      n++;
-      $("impStatus").textContent = `Ищу обложки в Steam: ${n} из ${chosen.length}…`;
-      const title = el.querySelector(".imp-title").value.trim() || it.title;
-      let cover = null;
-      const res = await steamSearch(cleanForSearch(title));
-      if (res && res.length) {
-        cover = { appid: res[0].id, name: res[0].name, url: steamHeaderURLs(res[0].id)[0] };
-        found++;
-      }
-      state.projects.unshift({
-        id: `${slugify(title)}-${Date.now().toString(36)}-${n}`,
-        title, cover,
-        links: it.links.map(u => ({ type: detectService(u), url: u, dl: 0 })),
-        created: Date.now() + n
-      });
-      await new Promise(r => setTimeout(r, 250));
-    }
-    $("impStatus").textContent = "Публикую…";
-    await writeData(state.projects, `Импорт с Teletype: ${chosen.length} записей`);
-    render();
-    $("importModal").classList.add("hidden");
-    toast(`Импортировано: ${chosen.length}. Обложек найдено в Steam: ${found}. Остальные можно назначить через ✏️.`, "ok", 6000);
-  } catch (e) {
-    toast("Импорт не удался: " + e.message, "err", 6000);
-  }
-  btn.disabled = false;
-});
- $("impCancel").addEventListener("click", () => $("importModal").classList.add("hidden"));
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
 function migrate(p) {
@@ -1601,15 +1085,11 @@ function renderDonate() {
 
 // Закрытие модалок.
 // Форма русификатора защищена от случайного закрытия: клик мимо и Esc игнорируются.
-for (const m of [$("loginModal"), $("gameModal"), $("importModal")]) {
+for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    $("loginModal").classList.add("hidden");
-    $("gameModal").classList.add("hidden");
-    $("importModal").classList.add("hidden");
-  }
+  if (e.key === "Escape") { $("loginModal").classList.add("hidden"); $("gameModal").classList.add("hidden"); }
 });
 
 function banner(text) {
