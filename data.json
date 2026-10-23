@@ -5,7 +5,8 @@
     "cover": {
       "appid": "1431950",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1431950/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1431950/header.jpg?t=1634109034",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1431950/capsule_184x69.jpg?t=1634109034"
     },
     "links": [
       {
@@ -39,7 +40,8 @@
     "cover": {
       "appid": "2749100",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2749100/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2749100/header.jpg?t=1769451193",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2749100/86b99fb7f0dd564a46431ebe96ad5c09048281ac/capsule_184x69.jpg?t=1769451193"
     },
     "links": [
       {
@@ -61,7 +63,8 @@
     "cover": {
       "appid": "1736290",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1736290/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1736290/header.jpg?t=1712675428",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1736290/capsule_184x69.jpg?t=1712675428"
     },
     "links": [
       {
@@ -78,7 +81,8 @@
     "cover": {
       "appid": "1450330",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1450330/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1450330/a192c66f78fcc0247e625af8a4e0672de25fc2cf/header.jpg?t=1773923584",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1450330/36038842d031ee4f335722543b140803a9d2e503/capsule_184x69.jpg?t=1773923584"
     },
     "links": [
       {
@@ -159,7 +163,8 @@
     "cover": {
       "appid": "1046660",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1046660/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046660/header.jpg?t=1753693728",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046660/capsule_184x69.jpg?t=1753693728"
     },
     "links": [
       {
