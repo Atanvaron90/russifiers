@@ -1,5 +1,22 @@
 [
   {
+    "id": "munchkin-digital-mvlmqh46",
+    "title": "Munchkin Digital",
+    "cover": {
+      "appid": "1722860",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/UcabQGHDorNtqA",
+        "dl": 0
+      }
+    ],
+    "created": 1792799839014
+  },
+  {
     "id": "let-them-trade-mvlmoj6f",
     "title": "Let Them Trade",
     "cover": {
