@@ -62,11 +62,17 @@
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
 
-  .lk-row { display:grid; grid-template-columns:130px 1fr; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; position:relative; }
-  .lk-row .full { grid-column:1 / -1; }
+  /* Строка ссылки в форме: версия | сервис | ссылка */
+  .lk-row { display:grid; grid-template-columns:95px 150px 1fr; gap:8px; border:1px dashed var(--border); border-radius:10px; padding:10px 28px 10px 10px; margin-top:10px; position:relative; }
+  .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
   .ver-del { position:absolute; top:6px; right:6px; background:none; border:none; color:var(--muted); cursor:pointer; }
   .ver-del:hover { color:#ff6b6b; }
+  @media (max-width:600px) {
+    .lk-row { grid-template-columns:1fr 1fr; }
+    .lk-row .l-url { grid-column:1 / -1; }
+  }
 
+  /* Окно игры */
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
   .g-close { position:absolute; top:12px; right:12px; z-index:2; width:34px; height:34px; border-radius:50%; border:none; background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; font-size:1rem; }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
@@ -74,6 +80,11 @@
   .g-body { padding:24px; max-height:82vh; overflow:auto; }
   .g-body h2 { margin-bottom:6px; }
   .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
+  .g-edit { margin-bottom:10px; }
+  .g-ver { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .g-ver label { margin:0; font-size:.9rem; color:var(--muted); }
+  .g-ver select { width:auto; min-width:170px; padding:9px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.92rem; cursor:pointer; }
+  .g-ver select:focus { outline:none; border-color:var(--accent); }
   .lk { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:var(--field); }
   .lk-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; font-size:1rem; }
   .lk-ico img { width:19px; height:19px; }
@@ -112,17 +123,22 @@
 
 <footer>© 2025 Мой сайт русификаторов</footer>
 
-<!-- Окно игры: обложка + ссылки -->
+<!-- Окно игры: обложка + выбор версии + ссылки -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
     <button class="g-close" id="gClose">✕</button>
     <div class="g-grid">
       <img id="gCover" class="g-cover" alt="Обложка">
       <div class="g-body">
+        <button id="gEdit" class="tool-btn admin-only g-edit">✏️ Редактировать</button>
         <h2 id="gTitle"></h2>
         <div id="gTags"></div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Скачать</h3>
+        <div class="g-ver">
+          <label for="gVersion">Версия:</label>
+          <select id="gVersion"></select>
+        </div>
         <div id="gLinks"></div>
       </div>
     </div>
@@ -151,7 +167,7 @@
     <textarea id="fDesc"></textarea>
     <label>Теги (через запятую)</label>
     <input id="fTags" type="text" placeholder="RPG, Полный перевод">
-    <label>Ссылки для скачивания (сервис определится автоматически):</label>
+    <label>Версии и ссылки — для каждой ссылки укажите свою версию. Одинаковая версия = одна группа в окне игры:</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
     <div class="modal-actions">
@@ -254,8 +270,7 @@ function fetchTimeout(url, ms = 7000) {
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
 
-// Поиск игр в Steam: пробуем несколько источников по очереди
-// (прямой API + два публичных прокси — на случай CORS/блокировок)
+// Поиск игр в Steam: несколько источников по очереди (на случай CORS/блокировок)
 async function steamSearch(term) {
   const store = "https://store.steampowered.com/api/storesearch/?term=" +
     encodeURIComponent(term) + "&cc=US&l=russian";
@@ -271,15 +286,44 @@ async function steamSearch(term) {
       if (!r.ok) continue;
       const j = await r.json();
       let items = [];
-      if (Array.isArray(j)) // steamcommunity: [{appid, name, icon, logo}]
+      if (Array.isArray(j))
         items = j.map(x => ({ id: String(x.appid ?? ""), name: x.name || "", tiny: x.icon || x.logo || "" }));
-      else if (j && Array.isArray(j.items)) // storesearch: {items:[{id, name, tiny_capsule}]}
+      else if (j && Array.isArray(j.items))
         items = j.items.map(x => ({ id: String(x.id ?? x.appid ?? ""), name: x.name || "", tiny: x.tiny_capsule || "" }));
       items = items.filter(x => x.id && x.name);
       if (items.length) return items.slice(0, 7);
-    } catch (e) { /* пробуем следующий источник */ }
+    } catch (e) { /* следующий источник */ }
   }
   return null;
+}
+
+// ---------- Версии ----------
+// Сравнение версий ("1.10" новее "1.9", ведущая "v" игнорируется)
+const verParts = v => String(v).replace(/^v/i, "").trim().split(/[.\-_\s]+/).map(x => parseInt(x, 10) || 0);
+function cmpVer(a, b) {
+  const pa = verParts(a), pb = verParts(b);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pb[i] || 0) - (pa[i] || 0);
+    if (d) return d;
+  }
+  return 0;
+}
+const sortedVersions = p => [...(p.versions || [])].sort((a, b) => cmpVer(a.v, b.v));
+
+// Миграция старого формата (links с подписями) → новый (versions)
+function migrate(p) {
+  if (Array.isArray(p.versions)) return p;
+  const links = Array.isArray(p.links) ? p.links : [];
+  const grouped = new Map();
+  for (const l of links) {
+    if (!l || !l.url) continue;
+    const v = String(l.label || "").trim() || "1.0"; // старая подпись становится версией
+    if (!grouped.has(v)) grouped.set(v, { v, links: [] });
+    grouped.get(v).links.push({ type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0 });
+  }
+  p.versions = [...grouped.values()];
+  delete p.links;
+  return p;
 }
 
 // ---------- GitHub API ----------
@@ -323,15 +367,15 @@ async function loadData() {
   if (!r.ok) throw new Error("GitHub вернул " + r.status);
   const data = await r.json();
   if (!Array.isArray(data)) throw new Error("data.json имеет неверный формат");
-  state.projects = data.filter(p => p && p.title && Array.isArray(p.links));
+  state.projects = data.filter(p => p && p.title).map(migrate);
   state.dataSha = null;
 }
 
-// ---------- Счётчик скачиваний ----------
+// ---------- Счётчик скачиваний (привязан к ссылке, переживает перегруппировку версий) ----------
 const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
 const linkKey = (p, l) => `${p.id}_${hstr(l.url)}`;
 const getDl = (p, l) => Math.max(l.dl || 0, dlCache[linkKey(p, l)] || 0);
-const totalDl = p => (p.links || []).reduce((s, l) => s + getDl(p, l), 0);
+const totalDl = p => (p.versions || []).reduce((s, v) => s + (v.links || []).reduce((s2, l) => s2 + getDl(p, l), 0), 0);
 async function remoteGet(key) {
   try {
     const r = await fetch(`${COUNTER_API}/get/${CONFIG.counterNS}/${key}`);
@@ -347,11 +391,12 @@ async function syncCounters() {
   lastSync = Date.now();
   let dirty = false;
   for (const p of state.projects)
-    for (const l of (p.links || [])) {
-      const k = linkKey(p, l);
-      const remote = await remoteGet(k);
-      if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
-    }
+    for (const v of (p.versions || []))
+      for (const l of (v.links || [])) {
+        const k = linkKey(p, l);
+        const remote = await remoteGet(k);
+        if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
+      }
   if (dirty) saveDl();
   render();
 }
@@ -365,7 +410,7 @@ const SORTS = {
 };
 function currentSort() {
   const v = localStorage.getItem(LS_SORT);
-  return SORTS[v] ? v : "az"; // по умолчанию — по алфавиту
+  return SORTS[v] ? v : "az";
 }
 
 // ---------- Отрисовка ----------
@@ -395,7 +440,7 @@ function render() {
         <h2>${esc(p.title)}</h2>
         <div>${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
         <p class="desc">${esc(p.description)}</p>
-        <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
+        <div class="meta">⬇ ${totalDl(p)} скачиваний • версий: ${(p.versions || []).length}</div>
       </div>`);
   }
 }
@@ -426,6 +471,7 @@ grid.addEventListener("click", e => {
 
 // ---------- Окно игры ----------
 let openedId = null;
+
 function openGame(id) {
   const p = state.projects.find(x => x.id === id);
   if (!p) return;
@@ -441,29 +487,46 @@ function openGame(id) {
   urls.push(phSVG((p.title[0] || "?").toUpperCase()));
   setCoverCascade(cover, urls);
 
+  const versions = sortedVersions(p);
+  const sel = $("gVersion");
+  sel.innerHTML = versions.length
+    ? versions.map((v, i) => `<option value="${i}">Версия ${esc(v.v)}</option>`).join("")
+    : '<option value="0">—</option>';
+  renderGameLinks();
+  $("gameModal").classList.remove("hidden");
+}
+
+function renderGameLinks() {
+  const p = state.projects.find(x => x.id === openedId);
+  if (!p) return;
+  const versions = sortedVersions(p);
+  const ver = versions[+$("gVersion").value || 0];
   const box = $("gLinks");
   box.innerHTML = "";
-  const links = p.links || [];
-  if (!links.length) box.innerHTML = '<p class="hint">Ссылки пока не добавлены.</p>';
-  links.forEach((l, i) => {
+  if (!ver || !(ver.links || []).length) {
+    box.innerHTML = '<p class="hint">Для этой версии ссылок нет.</p>';
+    return;
+  }
+  ver.links.forEach((l, li) => {
     const s = SERVICES[l.type] || SERVICES.other;
     box.insertAdjacentHTML("beforeend", `
       <div class="lk">
         ${makeIcon(l.type)}
-        <div class="lk-info"><b>${esc(s.name)}</b>${l.label ? " — " + esc(l.label) : ""}
+        <div class="lk-info"><b>${esc(s.name)}</b>
           <span class="cnt">Скачиваний: ${getDl(p, l)}</span></div>
-        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Скачать</a>
+        <a class="lk-btn" data-v="${versions.indexOf(ver)}" data-l="${li}" href="${esc(l.url)}" target="_blank" rel="noopener">Скачать</a>
       </div>`);
   });
-  $("gameModal").classList.remove("hidden");
 }
+
+ $("gVersion").addEventListener("change", renderGameLinks);
 
  $("gLinks").addEventListener("click", e => {
   const a = e.target.closest(".lk-btn");
   if (!a) return;
   const p = state.projects.find(x => x.id === openedId);
   if (!p) return;
-  const l = p.links[+a.dataset.i];
+  const l = sortedVersions(p)[+a.dataset.v]?.links[+a.dataset.l];
   if (!l) return;
   const k = linkKey(p, l);
   dlCache[k] = getDl(p, l) + 1;
@@ -471,6 +534,14 @@ function openGame(id) {
   remoteHit(k);
   a.closest(".lk").querySelector(".cnt").textContent = "Скачиваний: " + dlCache[k];
 });
+
+// Кнопка «Редактировать» в окне игры (только для админа)
+ $("gEdit").addEventListener("click", () => {
+  if (!openedId) return;
+  $("gameModal").classList.add("hidden");
+  openForm(openedId);
+});
+
  $("gClose").addEventListener("click", () => $("gameModal").classList.add("hidden"));
 
 // ---------- Вход администратора ----------
@@ -514,7 +585,6 @@ function setAdmin(on) {
 let editId = null;
 let searchTimer = null, searchSeq = 0, titlePick = null, lastFound = [];
 
-// Какая обложка сейчас выбрана (приоритет: своя ссылка → AppID → поиск по названию)
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
   if (url) return { url };
@@ -549,7 +619,6 @@ function updateCoverPreview() {
   }
 }
 
-// Автопоиск обложки по названию (первое поле)
 function queueTitleSearch() {
   clearTimeout(searchTimer);
   const seq = ++searchSeq;
@@ -564,7 +633,7 @@ function queueTitleSearch() {
   $("covLabel").textContent = "Ищу обложку в Steam…";
   searchTimer = setTimeout(async () => {
     const res = await steamSearch(q);
-    if (seq !== searchSeq) return; // устаревший ответ — название уже изменилось
+    if (seq !== searchSeq) return;
     if (res) {
       lastFound = res;
       titlePick = { appid: res[0].id, name: res[0].name };
@@ -599,8 +668,7 @@ function queueTitleSearch() {
 function openForm(id = null) {
   if (!state.token) { alert("Сначала войдите как администратор (кнопка 🔐)"); return; }
   editId = id;
-  searchSeq++; // отменяем поиск, оставшийся от предыдущего открытия
-  clearTimeout(searchTimer);
+  searchSeq++; clearTimeout(searchTimer);
   titlePick = null; lastFound = [];
   const p = id ? state.projects.find(x => x.id === id) : null;
   $("formModalTitle").textContent = p ? "Редактировать русификатор" : "Добавить русификатор";
@@ -610,28 +678,34 @@ function openForm(id = null) {
   $("fDesc").value = p ? p.description : "";
   $("fTags").value = p ? (p.tags || []).join(", ") : "";
   $("lkList").innerHTML = "";
-  const links = p?.links?.length ? p.links : [{}];
-  links.forEach(addLinkRow);
+  let had = false;
+  (p?.versions || []).forEach(v => (v.links || []).forEach(l => { addLinkRow(l, v.v); had = true; }));
+  if (!had) addLinkRow({}, "1.0");
   updateCoverPreview();
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
 
-function addLinkRow(l = {}) {
+function addLinkRow(l = {}, ver = "1.0") {
   const box = document.createElement("div");
   box.className = "lk-row";
   const opts = Object.entries(SERVICES)
     .map(([k, s]) => `<option value="${k}" ${l.type === k ? "selected" : ""}>${s.name}</option>`).join("");
   box.innerHTML = `
     <button type="button" class="ver-del" title="Убрать ссылку">✕</button>
+    <input class="l-ver" placeholder="Версия (1.2)" value="${esc(ver || "1.0")}">
     <select class="l-type">${opts}</select>
-    <input class="l-label" placeholder="Подпись (напр. v1.2, полный перевод)" value="${esc(l.label || "")}">
-    <input class="l-url full" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">`;
+    <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">`;
   $("lkList").appendChild(box);
 }
 
  $("btnAdd").addEventListener("click", () => openForm());
- $("fAddLink").addEventListener("click", () => addLinkRow());
+ $("fAddLink").addEventListener("click", () => {
+  // новая строка подставляет версию из предыдущей строки — удобно для группы ссылок
+  const rows = document.querySelectorAll("#lkList .l-ver");
+  const last = rows.length ? rows[rows.length - 1].value.trim() : "";
+  addLinkRow({}, last || "1.0");
+});
  $("fCancel").addEventListener("click", closeForm);
  $("lkList").addEventListener("click", e => {
   if (e.target.classList.contains("ver-del")) e.target.closest(".lk-row").remove();
@@ -654,26 +728,39 @@ function addLinkRow(l = {}) {
   const description = $("fDesc").value.trim();
   const tags = $("fTags").value.split(",").map(t => t.trim()).filter(Boolean);
 
-  const links = [];
+  // Группируем строки по версии
+  const versions = [];
+  const vMap = new Map();
   for (const b of document.querySelectorAll("#lkList .lk-row")) {
     const url = b.querySelector(".l-url").value.trim();
     if (!url) continue;
     if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
-    links.push({ type: b.querySelector(".l-type").value, label: b.querySelector(".l-label").value.trim(), url, dl: 0 });
+    const v = b.querySelector(".l-ver").value.trim() || "1.0";
+    const link = { type: b.querySelector(".l-type").value, url, dl: 0 };
+    if (!vMap.has(v)) { const item = { v, links: [] }; vMap.set(v, item); versions.push(item); }
+    vMap.get(v).links.push(link);
   }
-  if (!links.length) { alert("Добавьте хотя бы одну ссылку на скачивание"); return; }
+  if (!versions.length) { alert("Добавьте хотя бы одну ссылку на скачивание (с версией)"); return; }
+
+  // Сохраняем счётчики: они привязаны к ссылке, а не к версии
+  const oldAll = new Map();
+  if (editId) {
+    const p = migrate(state.projects.find(x => x.id === editId));
+    (p.versions || []).forEach(v => (v.links || []).forEach(l => oldAll.set(l.url, l)));
+  }
+  versions.forEach(v => v.links.forEach(l => {
+    const o = oldAll.get(l.url);
+    if (o) l.dl = o.dl || 0;
+  }));
 
   const c = effectiveCover();
   const cover = c ? (c.url ? { url: c.url }
     : { appid: c.appid, name: c.name || "", url: steamHeader(c.appid) }) : null;
 
   if (editId) {
-    const p = state.projects.find(x => x.id === editId);
-    const byUrl = new Map((p.links || []).map(l => [l.url, l]));
-    links.forEach(l => { const old = byUrl.get(l.url); if (old) l.dl = old.dl || 0; });
-    Object.assign(p, { title, description, tags, cover, links }); // created сохраняется
+    Object.assign(state.projects.find(x => x.id === editId), { title, description, tags, cover, versions });
   } else {
-    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, description, tags, cover, links, created: Date.now() });
+    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, description, tags, cover, versions, created: Date.now() });
   }
 
   btn.disabled = true; btn.textContent = "Публикую…";
@@ -691,8 +778,7 @@ function addLinkRow(l = {}) {
 });
 
 // Закрытие модалок.
-// Форма русификатора — ЗАЩИЩЕНА от случайного закрытия: клик мимо и Esc игнорируются,
-// закрывается только кнопкой «Отмена» (или после успешного сохранения).
+// Форма русификатора защищена от случайного закрытия: клик мимо и Esc игнорируются.
 for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
