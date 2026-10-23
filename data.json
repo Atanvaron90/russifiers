@@ -1,5 +1,22 @@
 [
   {
+    "id": "everdell-mvlm0944",
+    "title": "Everdell",
+    "cover": {
+      "appid": "1722840",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1722840/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/U2PQL4Uz28-RkA",
+        "dl": 0
+      }
+    ],
+    "created": 1792798615588
+  },
+  {
     "id": "escape-tales-the-awakening-mvllwu84",
     "title": "Escape Tales: The Awakening",
     "cover": {
