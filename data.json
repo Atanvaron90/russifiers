@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "exploding-kittens-2-mvlcrza4",
+    "title": "Exploding Kittens 2",
+    "cover": {
+      "appid": "2999030",
+      "name": "",
+      "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2999030/header.jpg"
+    },
+    "links": [
+      {
+        "type": "boosty",
+        "url": "https://cdn.boosty.to/file/c6189004-02e5-459d-a67b-e986d2007b9e?user_id=26313538&content_id=12477923&expire_time=1792868349&sign=4b59a701b8bb0d1203acf2e03c2d3215a5289fb073eb7d017c20b2a890da0883",
+        "dl": 0
+      }
+    ],
+    "created": 1792783113052
+  }
+]
