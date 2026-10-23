@@ -1,5 +1,22 @@
 [
   {
+    "id": "charterstone-digital-edition-mvlizs0s",
+    "title": "Charterstone: Digital Edition",
+    "cover": {
+      "appid": "1046660",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1046660/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/bYkDnaY2Kl0f_g",
+        "dl": 0
+      }
+    ],
+    "created": 1792793554588
+  },
+  {
     "id": "cascadia-mvlixns2",
     "title": "Cascadia",
     "cover": {
