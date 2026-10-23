@@ -1,5 +1,22 @@
 [
   {
+    "id": "howl-mvlm840y",
+    "title": "Howl",
+    "cover": {
+      "appid": "2172180",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2172180/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/Yw7WMFG4X8zljQ",
+        "dl": 0
+      }
+    ],
+    "created": 1792798982242
+  },
+  {
     "id": "here-be-dragons-mvlm6me8",
     "title": "Here Be Dragons",
     "cover": {
