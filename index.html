@@ -44,9 +44,10 @@
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .tag { display:inline-block; font-size:.75rem; padding:3px 10px; background:rgba(108,92,231,.15); color:#a99cf5; border-radius:999px; margin:0 6px 4px 0; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
-  .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; }
-  .icon-btn { background:rgba(15,17,23,.7); border:none; cursor:pointer; font-size:1.05rem; opacity:.55; padding:3px; border-radius:6px; }
+  .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; z-index:2; }
+  .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
   .icon-btn:hover { opacity:1; }
+  .icon-btn.del:hover { color:#ff6b6b; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -57,12 +58,15 @@
   .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
   .modal textarea { min-height:70px; resize:vertical; }
   .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
+  .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
   .cover-preview.hidden { display:none; }
   .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
   .cov-right { flex:1; min-width:0; }
+  .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
+  .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
 
   .steam-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--field); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px; margin-top:6px; cursor:pointer; font-size:.9rem; }
   .steam-item:hover { border-color:var(--accent); }
@@ -74,19 +78,25 @@
   .ver-del:hover { color:#ff6b6b; }
   @media (max-width:600px) { .lk-row { grid-template-columns:1fr; } }
 
-  /* Окно игры */
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  /* Кнопки в правом верхнем углу окна: Редактировать | Удалить | ✕ — одна высота, один уровень */
   .g-top { position:absolute; top:12px; right:12px; z-index:2; display:flex; gap:8px; align-items:center; }
   .g-top button { height:34px; border:none; background:rgba(15,17,23,.75); color:var(--text); cursor:pointer; }
   .g-edit { display:inline-flex; align-items:center; gap:6px; padding:0 14px; border-radius:17px; font-size:.85rem; }
   .g-edit:hover { color:#a99cf5; }
-  .g-del, .g-close { width:34px; border-radius:50%; font-size:1rem; }
-  .g-del:hover, .g-close:hover { color:#ff6b6b; }
+  .g-close { width:34px; border-radius:50%; font-size:1rem; }
+  .g-close:hover { color:#ff6b6b; }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
+  /* Обложка-ссылка на Steam */
+  .g-cover-link { display:block; }
+  .g-cover-link img { transition:filter .15s; }
+  .g-cover-link:not(.no-link):hover img { filter:brightness(1.15); }
+  .g-cover-link.no-link { pointer-events:none; }
   .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
   .g-body { padding:24px; max-height:82vh; overflow:auto; }
   .g-body h2 { margin-bottom:6px; }
+  /* Название-ссылка на Steam */
+  .g-title-link { color:inherit; text-decoration:none; }
+  .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
   .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
   .lk { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:var(--field); }
   .lk-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; font-size:1rem; }
@@ -123,23 +133,24 @@
     <option value="dl">По скачиваниям</option>
     <option value="new">Сначала новые</option>
   </select>
-  <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
+  <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификator</button>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <footer>© 2025 Мой сайт русификаторов</footer>
 
-<!-- Окно игры: обложка + ссылки -->
+<!-- Окно игры: обложка + ссылки. Название и обложка — ссылки на Steam (если известен AppID) -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
     <div class="g-top">
       <button id="gEdit" class="g-edit admin-only">✏️ Редактировать</button>
-      <button id="gDel" class="g-del admin-only" title="Удалить запись">🗑️</button>
       <button id="gClose" class="g-close" title="Закрыть">✕</button>
     </div>
     <div class="g-grid">
-      <img id="gCover" class="g-cover" alt="Обложка">
+      <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
+        <img id="gCover" class="g-cover" alt="Обложка">
+      </a>
       <div class="g-body">
         <h2 id="gTitle"></h2>
         <div id="gTags"></div>
@@ -156,8 +167,11 @@
 <div id="formModal" class="overlay hidden">
   <div class="modal">
     <h2 id="formModalTitle">Добавить русификатор</h2>
+    <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
+    <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
+    <div id="fNote" class="f-note"></div>
     <label>Название игры *</label>
-    <input id="fTitle" type="text" placeholder="Введите название — обложка подтянется автоматически">
+    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
     <div id="coverPreview" class="cover-preview hidden">
       <img id="covImg" alt="Обложка">
       <div class="cov-right">
@@ -165,8 +179,6 @@
         <div id="covAlts"></div>
       </div>
     </div>
-    <label>AppID или ссылка на страницу игры (Steam / SteamDB)</label>
-    <input id="fAppId" type="text" placeholder="292030, store.steampowered.com/app/292030/… или steamdb.info/app/292030/…">
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
     <label>Теги (через запятую)</label>
@@ -217,6 +229,8 @@ const GH_API = "https://api.github.com";
 const LS_TOKEN = "russifiers_gh_token";
 const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
+const LS_STEAM_COMBO = "russifiers_steam_combo";
+const LS_APPNAMES = "russifiers_appnames_v1";
 
 const $ = id => document.getElementById(id);
 const state = { projects: [], dataSha: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
@@ -232,6 +246,8 @@ const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","disk.yandex.com","yadi.sk"] },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com"] },
   boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
+  pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
+              iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
   github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","raw.githubusercontent.com"] },
   telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph"] },
   mega:     { name:"MEGA",          slug:"mega",        color:"#D9272E", hosts:["mega.nz","mega.io"] },
@@ -250,12 +266,13 @@ function detectService(url) {
 }
 function makeIcon(type) {
   const s = SERVICES[type] || SERVICES.other;
-  if (!s.slug) return `<span class="lk-ico" style="background:${s.color}">🔗</span>`;
+  if (s.iconUrl)
+    return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
+  if (!s.slug) return `<span class="lk-ico" style="background:${s.color}">${esc(s.fallback || "🔗")}</span>`;
   return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
 }
 
 // ---------- Обложки ----------
-// Два хоста CDN Steam: если один недоступен, пробуем второй
 const steamHeaderURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`
@@ -280,54 +297,140 @@ function coverURLs(p) {
   return urls;
 }
 
-function fetchTimeout(url, ms = 6000) {
+function fetchTimeout(url, ms = 7000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
 
-// ---------- Поиск игр в Steam ----------
-// Порядок: напрямую к API Steam → через 3 публичных прокси (на случай блокировок).
-// Каждый неудачный источник пишется в консоль (F12) — видно, что именно блокируется.
+// ---------- Прокси для запросов к Steam ----------
 const STEAM_PROXIES = [
-  u => u,
-  u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u),
-  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
-  u => "https://corsproxy.io/?url=" + encodeURIComponent(u)
+  { name:"direct",     wrap: u => u },
+  { name:"codetabs",   wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { name:"allorigins", wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { name:"corsproxy",  wrap: u => "https://corsproxy.io/?url=" + encodeURIComponent(u) }
 ];
+const failedCombos = new Set();
+
+// ---------- Поиск игр по названию (когда AppID не указан) ----------
+const SEARCH_SOURCES = [
+  { name:"community", url: t => "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(t),
+    parse: j => Array.isArray(j) ? j.map(x => ({ id:String(x.appid ?? ""), name:x.name || "", tiny:x.icon || x.logo || "" })) : [] },
+  { name:"storesearch", url: t => "https://store.steampowered.com/api/storesearch/?term=" + encodeURIComponent(t) + "&cc=US&l=russian",
+    parse: j => (j && Array.isArray(j.items)) ? j.items.map(x => ({ id:String(x.id ?? x.appid ?? ""), name:x.name || "", tiny:x.tiny_capsule || "" })) : [] },
+  { name:"htmlpage", url: t => "https://store.steampowered.com/search/?term=" + encodeURIComponent(t), html:true }
+];
+function parseSearchHTML(html) {
+  const out = [];
+  const dec = t => { const ta = document.createElement("textarea"); ta.innerHTML = t; return ta.value; };
+  const re = /<a[^>]*data-ds-appid="(\d+)"[^>]*>[\s\S]*?<span class="title">([^<]*)<\/span>/g;
+  let m;
+  while ((m = re.exec(html)) && out.length < 7) {
+    const id = m[1], name = dec(m[2] || "").trim();
+    if (id && name) out.push({ id, name, tiny: "" });
+  }
+  return out;
+}
+function comboList() {
+  const list = [];
+  const saved = localStorage.getItem(LS_STEAM_COMBO);
+  if (saved) {
+    const [s, p] = saved.split(":").map(Number);
+    if (SEARCH_SOURCES[s] && STEAM_PROXIES[p]) list.push([s, p]);
+  }
+  list.push([0, 0], [1, 0]);
+  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([0, p], [1, p]);
+  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([2, p]);
+  return list;
+}
 async function steamSearch(term) {
-  const uStore = "https://store.steampowered.com/api/storesearch/?term=" +
-    encodeURIComponent(term) + "&cc=US&l=russian";
-  const uComm = "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(term);
-  const attempts = [
-    [0, uStore, "store"], [0, uComm, "community"],
-    [1, uStore, "store"], [2, uStore, "store"], [3, uStore, "store"],
-    [1, uComm, "community"], [2, uComm, "community"], [3, uComm, "community"]
-  ];
-  for (const [pi, u, kind] of attempts) {
+  let anyAnswered = false;
+  for (const [s, p] of comboList()) {
+    const combo = s + ":" + p;
+    if (failedCombos.has(combo)) continue;
+    const src = SEARCH_SOURCES[s];
+    const url = STEAM_PROXIES[p].wrap(src.url(term));
     try {
-      const r = await fetchTimeout(STEAM_PROXIES[pi](u));
+      const r = await fetchTimeout(url);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      const j = await r.json();
-      let items = [];
-      if (kind === "store") {
-        const arr = j && Array.isArray(j.items) ? j.items : [];
-        items = arr.map(x => ({ id: String(x.id ?? x.appid ?? ""), name: x.name || "", tiny: x.tiny_capsule || "" }));
-      } else {
-        const arr = Array.isArray(j) ? j : [];
-        items = arr.map(x => ({ id: String(x.appid ?? ""), name: x.name || "", tiny: x.icon || x.logo || "" }));
+      const text = await r.text();
+      let items;
+      if (src.html) items = parseSearchHTML(text);
+      else {
+        let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
+        items = src.parse(j);
       }
       items = items.filter(x => x.id && x.name);
-      if (items.length) return items.slice(0, 7);
+      if (items.length) {
+        localStorage.setItem(LS_STEAM_COMBO, combo);
+        return items.slice(0, 7);
+      }
+      anyAnswered = true;
     } catch (e) {
-      console.warn("Steam-поиск: источник недоступен —", STEAM_PROXIES[pi](u), "(", e.message, ")");
+      failedCombos.add(combo);
+      console.warn("Steam-поиск: маршрут не ответил —", src.name + "/" + STEAM_PROXIES[p].name, "(", e.message, ")");
+    }
+  }
+  return anyAnswered ? [] : null;
+}
+
+// ---------- Название игры по AppID (обратный поиск) ----------
+// Маршруты: JSON appdetails напрямую → через прокси → HTML-страница игры через прокси
+// (из og:title достаётся точное название). Результаты кэшируются в браузере.
+const appNamesCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
+function cacheName(id, name) {
+  appNamesCache[id] = name;
+  const keys = Object.keys(appNamesCache);
+  if (keys.length > 300) delete appNamesCache[keys[0]];
+  localStorage.setItem(LS_APPNAMES, JSON.stringify(appNamesCache));
+}
+const APP_ROUTES = [
+  { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&l=russian`,
+    parse: (j, id) => { const d = j && j[id]; return (d && d.success && d.data && d.data.name) ? String(d.data.name) : null; } },
+  { name:"htmlpage", url: id => `https://store.steampowered.com/app/${id}/?l=russian`, html: true }
+];
+function parseOgTitle(html) {
+  const m = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)
+        || html.match(/<title>([^<]+)<\/title>/i);
+  if (!m) return null;
+  let t = m[1].trim();
+  t = t.replace(/^Save \d+% on\s+/i, "").replace(/^(Купить|Сохранить \d+% на|Скидка \d+% на)\s+/i, "");
+  t = t.replace(/\s+(on Steam|в Steam)$/i, "");
+  return t || null;
+}
+async function fetchAppName(appid) {
+  if (appNamesCache[appid]) return appNamesCache[appid];
+  const attempts = [];
+  for (let pi = 0; pi < STEAM_PROXIES.length; pi++) attempts.push([0, pi]);           // appdetails: direct + прокси
+  for (let pi = 1; pi < STEAM_PROXIES.length; pi++) attempts.push([1, pi]);           // html: только через прокси
+  for (const [ri, pi] of attempts) {
+    const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
+    try {
+      const r = await fetchTimeout(proxy.wrap(route.url(appid)));
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const text = await r.text();
+      let name;
+      if (route.html) {
+        name = parseOgTitle(text);
+        if (!name) throw new Error("og:title не найден");
+      } else {
+        let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
+        name = route.parse(j, appid);
+        if (!name) throw new Error("success:false");
+      }
+      cacheName(appid, name);
+      return name;
+    } catch (e) {
+      console.warn("Название по AppID: маршрут не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
     }
   }
   return null;
 }
 
-// AppID из чего угодно: "292030", "store.steampowered.com/app/292030/...", "steamdb.info/app/292030/"
+// AppID из чего угодно: "292030", ссылки Steam/SteamDB
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
+// Название из слага ссылки: ".../app/292030/The_Witcher_3_Wild_Hunt/" → "The Witcher 3 Wild Hunt"
+const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
 function migrate(p) {
@@ -460,7 +563,6 @@ function render() {
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         <div class="meta">⬇ ${totalDl(p)} скачиваний • ссылок: ${(p.links || []).length}</div>
       </div>`);
-    // обложка с каскадом: cloudflare → akamai → заглушка
     setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
   }
 }
@@ -472,12 +574,12 @@ function render() {
 });
  $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
 
-// ---------- Удаление записи (общее для карточки и окна игры) ----------
+// ---------- Удаление записи (на плашке-карточке) ----------
 async function deleteProject(id) {
-  if (!state.token) { alert("Войдите как администратор"); return false; }
+  if (!state.token) { alert("Войдите как администратор (🔐 вверху справа)"); return false; }
   const p = state.projects.find(x => x.id === id);
   if (!p) return false;
-  if (!confirm(`Удалить «${p.title}»? Запись исчезнет с сайта (её можно вернуть откатом коммита в истории репозитория).`)) return false;
+  if (!confirm(`Удалить «${p.title}»? Запись исчезнет с сайта (можно вернуть откатом коммита в истории data.json).`)) return false;
   state.projects = state.projects.filter(x => x.id !== id);
   render();
   try {
@@ -501,12 +603,32 @@ grid.addEventListener("click", e => {
 
 // ---------- Окно игры ----------
 let openedId = null;
+const steamStoreURL = p => p.cover?.appid ? `https://store.steampowered.com/app/${p.cover.appid}/` : null;
 
 function openGame(id) {
   const p = state.projects.find(x => x.id === id);
   if (!p) return;
   openedId = id;
-  $("gTitle").textContent = p.title;
+
+  // Название и обложка — ссылки на страницу игры в Steam (если известен AppID)
+  const store = steamStoreURL(p);
+  const titleEl = $("gTitle");
+  if (store) {
+    titleEl.innerHTML = `<a class="g-title-link" href="${esc(store)}" target="_blank" rel="noopener" title="Открыть страницу игры в Steam">${esc(p.title)}</a>`;
+  } else {
+    titleEl.textContent = p.title;
+  }
+  const coverLink = $("gCoverLink");
+  if (store) {
+    coverLink.href = store;
+    coverLink.classList.remove("no-link");
+    coverLink.title = "Открыть страницу игры в Steam";
+  } else {
+    coverLink.removeAttribute("href");
+    coverLink.classList.add("no-link");
+    coverLink.title = "";
+  }
+
   $("gTags").innerHTML = (p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("");
   $("gDesc").textContent = p.description || "";
   $("gDesc").style.display = p.description ? "" : "none";
@@ -549,18 +671,11 @@ function openGame(id) {
   a.closest(".lk").querySelector(".cnt").textContent = "Скачиваний: " + dlCache[k];
 });
 
-// Кнопки админа в окне игры
  $("gEdit").addEventListener("click", () => {
   if (!openedId) return;
   $("gameModal").classList.add("hidden");
   openForm(openedId);
 });
- $("gDel").addEventListener("click", async () => {
-  if (!openedId) return;
-  const ok = await deleteProject(openedId);
-  if (ok) $("gameModal").classList.add("hidden");
-});
-
  $("gClose").addEventListener("click", () => $("gameModal").classList.add("hidden"));
 
 // ---------- Вход администратора ----------
@@ -604,13 +719,17 @@ function setAdmin(on) {
 
 // ---------- Форма ----------
 let editId = null;
-let searchTimer = null, searchSeq = 0, titlePick = null, lastFound = [];
+let searchTimer = null, searchSeq = 0, appIdTimer = null, appIdSeq = 0;
+let titlePick = null, lastFound = [], titleAuto = false;
 
+const setNote = msg => { $("fNote").textContent = msg || ""; };
+
+// Что сейчас выбрано в качестве обложки (приоритет: своя картинка → AppID → найденное по названию)
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
   if (url) return { url };
   const aid = extractAppId($("fAppId").value);
-  if (aid) return { appid: aid, name: (lastFound.find(x => x.id === aid) || {}).name || "" };
+  if (aid) return { appid: aid, name: (lastFound.find(x => x.id === aid) || {}).name || appNamesCache[aid] || "" };
   return titlePick;
 }
 
@@ -638,63 +757,111 @@ function updateCoverPreview() {
   }
 }
 
-function queueTitleSearch() {
+// Название по названию (когда AppID не заполнен): ищем appid + варианты
+function queueTitleSearch(immediate = false) {
   clearTimeout(searchTimer);
   const seq = ++searchSeq;
   const q = $("fTitle").value.trim();
-  if (q.length < 2 || $("fCoverUrl").value.trim() || $("fAppId").value.trim()) {
+  if (q.length < 2 || $("fCoverUrl").value.trim() || extractAppId($("fAppId").value)) {
     updateCoverPreview();
     return;
   }
-  $("coverPreview").classList.remove("hidden");
-  $("covImg").src = phSVG("…");
-  $("covAlts").innerHTML = "";
-  $("covLabel").textContent = "Ищу обложку в Steam…";
-  searchTimer = setTimeout(async () => {
+  const run = async () => {
+    $("coverPreview").classList.remove("hidden");
+    $("covImg").src = phSVG("…");
+    $("covAlts").innerHTML = "";
+    $("covLabel").textContent = "Ищу игру в Steam…";
     const res = await steamSearch(q);
     if (seq !== searchSeq) return;
-    if (res) {
+    if (res && res.length) {
       lastFound = res;
       titlePick = { appid: res[0].id, name: res[0].name };
       updateCoverPreview();
+    } else if (res) {
+      lastFound = []; titlePick = null;
+      $("covImg").src = phSVG("?");
+      $("covLabel").textContent = "В Steam по этому названию ничего не найдено — проверьте название или вставьте ссылку / AppID в первое поле";
     } else {
       lastFound = []; titlePick = null;
-      $("coverPreview").classList.remove("hidden");
       $("covImg").src = phSVG("?");
-      $("covLabel").textContent = "Steam-поиск недоступен из этой сети (подробности в консоли F12) — вставьте ссылку на игру или AppID в поле ниже";
-      $("covAlts").innerHTML = "";
+      $("covLabel").innerHTML = 'Steam-поиск заблокирован в этой сети (отключите блокировщик рекламы для сайта или впишите AppID в первое поле) <button type="button" class="retry-search">↻ Повторить</button>';
     }
-  }, 500);
+  };
+  if (immediate) run();
+  else searchTimer = setTimeout(run, 500);
 }
 
- $("fTitle").addEventListener("input", queueTitleSearch);
- $("fAppId").addEventListener("input", () => {
-  if (extractAppId($("fAppId").value)) updateCoverPreview();
-  else queueTitleSearch();
+// Название по AppID (первое поле — главное)
+function applyAutoTitle(appid, name, seq) {
+  if (seq !== appIdSeq) return;
+  titleAuto = true;
+  $("fTitle").value = name;
+  updateCoverPreview();
+  setNote(`Название подтянуто из Steam — можно отредактировать вручную.`);
+}
+function queueAppIdLookup(immediate = false) {
+  clearTimeout(appIdTimer);
+  const seq = ++appIdSeq;
+  const raw = $("fAppId").value.trim();
+  const appid = extractAppId(raw);
+  updateCoverPreview();
+  if (!appid) return;
+  // мгновенный префилл из слага ссылки, пока Steam отвечает
+  if ((titleAuto || !$("fTitle").value.trim())) {
+    const slugName = titleFromSlug(raw);
+    if (slugName) $("fTitle").value = slugName;
+  }
+  const run = async () => {
+    if (appNamesCache[appid]) { applyAutoTitle(appid, appNamesCache[appid], seq); return; }
+    setNote("Получаю название из Steam…");
+    const name = await fetchAppName(appid);
+    if (seq !== appIdSeq) return;
+    if (name) applyAutoTitle(appid, name, seq);
+    else setNote("Не удалось получить название из Steam — введите его вручную. Обложка по AppID всё равно подтянется.");
+  };
+  if (immediate) run();
+  else appIdTimer = setTimeout(run, 450);
+}
+
+ $("fAppId").addEventListener("input", () => queueAppIdLookup(false));
+ $("fTitle").addEventListener("input", () => {
+  titleAuto = false;
+  setNote("");
+  if (extractAppId($("fAppId").value)) { updateCoverPreview(); return; } // AppID задан — он источник обложки
+  queueTitleSearch(false); // AppID пуст — ищем по названию
 });
  $("fCoverUrl").addEventListener("input", () => {
   if ($("fCoverUrl").value.trim()) updateCoverPreview();
-  else queueTitleSearch();
+  else if (extractAppId($("fAppId").value)) updateCoverPreview();
+  else queueTitleSearch(false);
 });
- $("covAlts").addEventListener("click", e => {
+ $("coverPreview").addEventListener("click", e => {
+  if (e.target.closest(".retry-search")) { failedCombos.clear(); queueTitleSearch(true); return; }
   const b = e.target.closest(".steam-item");
   if (!b) return;
-  titlePick = { appid: b.dataset.id, name: b.dataset.name };
-  $("fAppId").value = ""; $("fCoverUrl").value = "";
+  // Выбрали конкретную игру из вариантов — заполняем оба поля
+  titlePick = null;
+  $("fAppId").value = b.dataset.id;
+  $("fTitle").value = b.dataset.name;
+  titleAuto = true;
+  appIdSeq++;
+  setNote("");
   updateCoverPreview();
 });
 
 function openForm(id = null) {
   if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
   editId = id;
-  searchSeq++; clearTimeout(searchTimer);
-  titlePick = null; lastFound = [];
+  searchSeq++; appIdSeq++;
+  clearTimeout(searchTimer); clearTimeout(appIdTimer);
+  titlePick = null; lastFound = []; titleAuto = false;
   const p = id ? state.projects.find(x => x.id === id) : null;
   $("formModalTitle").textContent = p ? "Редактировать русификатор" : "Добавить русификатор";
-  $("fTitle").value = p ? p.title : "";
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
+  $("fTitle").value = p ? p.title : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
   $("fTags").value = p ? (p.tags || []).join(", ") : "";
+  setNote("");
   $("lkList").innerHTML = "";
   const links = p?.links?.length ? p.links : [{}];
   links.forEach(addLinkRow);
@@ -756,7 +923,7 @@ function addLinkRow(l = {}) {
 
   const c = effectiveCover();
   const cover = c ? (c.url ? { url: c.url }
-    : { appid: c.appid, name: c.name || "", url: steamHeaderURLs(c.appid)[0] }) : null;
+    : { appid: c.appid, name: c.name || appNamesCache[c.appid] || "", url: steamHeaderURLs(c.appid)[0] }) : null;
 
   if (editId) {
     Object.assign(state.projects.find(x => x.id === editId), { title, tags, cover, links });
