@@ -13,35 +13,35 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
 
-  /* Липкая шапка: название + донаты + поиск всегда наверху,
-     прокручиваются только плашки с русификаторами */
+  /* Липкая шапка — стиль как у футера: полупрозрачный тёмный фон + граница */
   .sticky-top {
     position: sticky; top: 0; z-index: 20;
-    background: var(--bg);
+    background: rgba(15,17,23,.88);
     border-bottom: 1px solid var(--border);
-    box-shadow: 0 8px 22px rgba(0,0,0,.4);
-    padding: 12px 0 12px;
+    padding: 12px 0;
   }
   header { position:relative; text-align:center; padding:0 20px 8px; }
-  /* Аватар + текстовый блок в одной строке: аватар тянется
-     ровно на высоту названия + слогана */
+  /* Аватар + текстовый блок: аватар тянется на высоту обеих строк,
+     но не больше 64px — иначе собственный размер картинки распирает строку */
   .title-row { display:flex; align-items:stretch; justify-content:center; gap:16px; }
-  .title-text { display:flex; flex-direction:column; justify-content:center; text-align:left; }
+  .title-text { display:flex; flex-direction:column; justify-content:space-between; text-align:left; }
   .title-text h1 { font-size:2rem; margin-bottom:4px; }
   .title-text p { color:var(--muted); font-size:.92rem; }
   .site-logo {
     display:none; /* показывается после успешной загрузки картинки */
     align-self:stretch;
+    max-height:64px;       /* потолок: равен высоте названия + слогана */
     width:auto;
-    aspect-ratio:1/1;      /* остаётся кругом при любой высоте */
+    aspect-ratio:1/1;      /* остаётся кругом */
     object-fit:cover;
     border:2px solid var(--accent);
     border-radius:50%;
     box-shadow:0 3px 16px rgba(108,92,231,.45);
   }
-  .logo-fallback { display:none; align-self:center; font-size:2.4rem; } /* заглушка, пока файла нет */
+  .logo-fallback { display:none; align-self:center; font-size:2.4rem; }
   @media (max-width:640px) {
     .title-text h1 { font-size:1.45rem; }
+    .site-logo { max-height:48px; }
   }
 
   .auth-btn {
@@ -51,9 +51,7 @@
   }
   .auth-btn:hover { opacity:.9; }
 
-  /* Строка внутри закреплённой области: донаты слева, поиск справа */
-  .sticky-row { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:14px; align-items:stretch; flex-wrap:wrap; }
-  .toolbar { flex:1; min-width:270px; display:flex; gap:10px; flex-wrap:wrap; align-content:center; }
+  .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
   #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
@@ -129,23 +127,35 @@
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
   .dn-row .full { grid-column:1 / -1; }
 
-  /* Плашка донатов — внутри закреплённой области, слева от поиска.
-     Компактные размеры, чтобы шапка не была громоздкой */
-  .donate { flex:0 1 340px; min-width:280px; display:flex; }
-  .donate-box { position:relative; flex:1; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
-  .don-edit { position:absolute; top:8px; right:8px; }
-  .donate-box h3 { font-size:.98rem; margin:0; }
-  .donate-box p { font-size:.78rem; color:var(--muted); margin:0; }
-  .donate-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
-  .don-btn { display:inline-flex; align-items:center; gap:7px; padding:7px 12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); text-decoration:none; font-size:.85rem; cursor:pointer; font-family:inherit; }
+  /* Плашка донатов: по умолчанию — в потоке под сеткой;
+     на широких экранах (от 1650px) — фиксируется слева от сетки,
+     верх — на уровне закреплённой области */
+  .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
+  .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
+  .don-edit { position:absolute; top:10px; right:10px; }
+  .donate-box h3 { font-size:1.05rem; margin-bottom:6px; }
+  .donate-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
+  .donate-list { display:flex; flex-wrap:wrap; gap:10px; }
+  .don-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 14px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit; }
   .don-btn:hover { border-color:var(--accent); }
-  .don-ico { width:18px; height:18px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:700; color:#fff; flex:none; }
-  .don-ico img { width:12px; height:12px; }
+  .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
+  .don-ico img { width:13px; height:13px; }
   body:not(.admin) #donate.no-methods { display:none; }
-  /* На узких экранах: поиск первым, донаты под ним, без подписи */
-  @media (max-width:700px) {
-    .donate { order:2; flex:1 1 100%; min-width:0; }
-    .donate-box p { display:none; }
+
+  @media (min-width: 1650px) {
+    .donate {
+      position: fixed;
+      top: 152px; /* сразу под закреплённой областью; подгони, если нужно выше/ниже */
+      left: calc(50vw - 824px); /* 24px левее контента (контент 1000px по центру) */
+      width: 300px;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      z-index: 5;
+    }
+    .donate-box { padding: 14px 16px; }
+    .donate-box h3 { font-size: 1rem; }
+    .donate-box p { font-size: .82rem; margin-bottom: 10px; }
   }
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
@@ -213,35 +223,35 @@
     </div>
   </header>
 
-  <div class="sticky-row">
-    <section id="donate" class="donate">
-      <div class="donate-box">
-        <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
-        <h3 id="donTitle"></h3>
-        <p id="donText"></p>
-        <div class="donate-list" id="donateList"></div>
-      </div>
-    </section>
-
-    <div class="toolbar">
-      <input id="search" type="text" placeholder="Поиск по названию игры...">
-      <select id="sortBy" title="Сортировка">
-        <option value="az">А → Я</option>
-        <option value="za">Я → А</option>
-        <option value="dl">По переходам</option>
-        <option value="new">Сначала новые</option>
-      </select>
-      <select id="viewBy" title="Вид списка">
-        <option value="grid">Сетка</option>
-        <option value="list">Список</option>
-        <option value="compact">Компактно</option>
-      </select>
-      <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
-    </div>
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="Поиск по названию игры...">
+    <select id="sortBy" title="Сортировка">
+      <option value="az">А → Я</option>
+      <option value="za">Я → А</option>
+      <option value="dl">По переходам</option>
+      <option value="new">Сначала новые</option>
+    </select>
+    <select id="viewBy" title="Вид списка">
+      <option value="grid">Сетка</option>
+      <option value="list">Список</option>
+      <option value="compact">Компактно</option>
+    </select>
+    <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
   </div>
 </div>
 
 <div class="grid view-grid" id="grid"></div>
+
+<!-- Плашка донатов: на широких экранах прилипает слева от сетки,
+     на узких — остаётся здесь же, под сеткой -->
+<section id="donate" class="donate">
+  <div class="donate-box">
+    <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
+    <h3 id="donTitle"></h3>
+    <p id="donText"></p>
+    <div class="donate-list" id="donateList"></div>
+  </div>
+</section>
 
 <footer>© 2026 Atanvaron</footer>
 
