@@ -1,5 +1,28 @@
 [
   {
+    "id": "clank-mvlj90ek",
+    "title": "Clank!",
+    "cover": {
+      "appid": "1722870",
+      "name": "Clank!",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722870/ed76a3e3ba468f4f7c3dd8d49b36f905534660c9/header_alt_assets_1.jpg?t=1773855162",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722870/8affa2524082c304f24fb6c4e8d477c1cbbda6f9/capsule_184x69_alt_assets_1.jpg?t=1773855162"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/97-G0Y7KH-T7IA",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1OrWCSlOJWs_JhTxRv-ExZ9QMvgs1etD6?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792793985356
+  },
+  {
     "id": "charterstone-digital-edition-mvlizs0s",
     "title": "Charterstone: Digital Edition",
     "cover": {
