@@ -52,6 +52,12 @@
   .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
+  /* Превью обложки в форме */
+  .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
+  .cover-preview.hidden { display:none; }
+  .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
+  .cov-right { flex:1; min-width:0; }
+
   .steam-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--field); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px; margin-top:6px; cursor:pointer; font-size:.9rem; }
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
@@ -123,16 +129,23 @@
   </div>
 </div>
 
-<!-- Форма добавления / редактирования (только для админа) -->
+<!-- Форма добавления / редактирования (только для админа).
+     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="formModal" class="overlay hidden">
   <div class="modal">
     <h2 id="formModalTitle">Добавить русификатор</h2>
     <label>Название игры *</label>
-    <input id="fTitle" type="text">
-    <label>Найти обложку в Steam (по названию)</label>
-    <input id="fSteam" type="text" placeholder="Начните вводить название...">
-    <div id="steamResults"></div>
-    <label>…или ссылка на картинку вручную (для игр не из Steam)</label>
+    <input id="fTitle" type="text" placeholder="Введите название — обложка подтянется автоматически">
+    <div id="coverPreview" class="cover-preview hidden">
+      <img id="covImg" alt="Обложка">
+      <div class="cov-right">
+        <div id="covLabel" class="meta"></div>
+        <div id="covAlts"></div>
+      </div>
+    </div>
+    <label>AppID из Steam (если обложка не нашлась сама)</label>
+    <input id="fAppId" type="text" inputmode="numeric" placeholder="Число из ссылки: store.steampowered.com/app/292030/...">
+    <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
     <label>Описание</label>
     <textarea id="fDesc"></textarea>
@@ -165,11 +178,11 @@
 <script>
 // ================== НАСТРОЙКИ — ЗАПОЛНИ СВОЁ ==================
 const CONFIG = {
-  owner: "Atanvaron90",   // ник на GitHub
+  owner: "ВАШ_НИК_GITHUB",   // ник на GitHub
   repo: "russifiers",        // имя публичного репозитория
   branch: "main",
   dataFile: "data.json",     // список публикаций хранится здесь
-  counterNS: "atn-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
+  counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
@@ -233,6 +246,40 @@ function setCoverCascade(img, urls) {
   let i = 0;
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
+}
+
+function fetchTimeout(url, ms = 7000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
+}
+
+// Поиск игр в Steam: пробуем несколько источников по очереди
+// (прямой API + два публичных прокси — на случай CORS/блокировок)
+async function steamSearch(term) {
+  const store = "https://store.steampowered.com/api/storesearch/?term=" +
+    encodeURIComponent(term) + "&cc=US&l=russian";
+  const sources = [
+    store,
+    "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(term),
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(store),
+    "https://corsproxy.io/?url=" + encodeURIComponent(store)
+  ];
+  for (const u of sources) {
+    try {
+      const r = await fetchTimeout(u);
+      if (!r.ok) continue;
+      const j = await r.json();
+      let items = [];
+      if (Array.isArray(j)) // steamcommunity: [{appid, name, icon, logo}]
+        items = j.map(x => ({ id: String(x.appid ?? ""), name: x.name || "", tiny: x.icon || x.logo || "" }));
+      else if (j && Array.isArray(j.items)) // storesearch: {items:[{id, name, tiny_capsule}]}
+        items = j.items.map(x => ({ id: String(x.id ?? x.appid ?? ""), name: x.name || "", tiny: x.tiny_capsule || "" }));
+      items = items.filter(x => x.id && x.name);
+      if (items.length) return items.slice(0, 7);
+    } catch (e) { /* пробуем следующий источник */ }
+  }
+  return null;
 }
 
 // ---------- GitHub API ----------
@@ -366,15 +413,15 @@ grid.addEventListener("click", e => {
   if (!card) return;
   const p = state.projects.find(x => x.id === card.dataset.id);
   if (!p) return;
-  if (e.target.closest(".edit")) { openForm(p.id); return; }   // только админ (кнопка скрыта у гостей)
-  if (e.target.closest(".del")) {                              // только админ
+  if (e.target.closest(".edit")) { openForm(p.id); return; }
+  if (e.target.closest(".del")) {
     if (!confirm(`Удалить «${p.title}»?`)) return;
     state.projects = state.projects.filter(x => x.id !== p.id);
     writeData(state.projects, "Удалён: " + p.title).catch(err => alert("data.json не обновлён: " + err.message));
     render();
     return;
   }
-  openGame(p.id); // все посетители: просмотр карточки
+  openGame(p.id);
 });
 
 // ---------- Окно игры ----------
@@ -463,25 +510,109 @@ function setAdmin(on) {
  $("loginCancel").addEventListener("click", () => $("loginModal").classList.add("hidden"));
  $("tokenInput").addEventListener("keydown", e => { if (e.key === "Enter") $("loginOk").click(); });
 
-// ---------- Форма (только для админа) ----------
+// ---------- Форма ----------
 let editId = null;
-let steamPick = null;
+let searchTimer = null, searchSeq = 0, titlePick = null, lastFound = [];
+
+// Какая обложка сейчас выбрана (приоритет: своя ссылка → AppID → поиск по названию)
+function effectiveCover() {
+  const url = $("fCoverUrl").value.trim();
+  if (url) return { url };
+  const aid = $("fAppId").value.trim();
+  if (/^\d{2,10}$/.test(aid))
+    return { appid: aid, name: (lastFound.find(x => x.id === aid) || {}).name || "" };
+  return titlePick;
+}
+
+function updateCoverPreview() {
+  const box = $("coverPreview"), img = $("covImg"), label = $("covLabel"), alts = $("covAlts");
+  const c = effectiveCover();
+  if (!c) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  alts.innerHTML = "";
+  img.onerror = () => { img.onerror = null; img.src = phSVG("?"); };
+  if (c.url) {
+    label.textContent = "Обложка: своя ссылка на картинку";
+    img.src = c.url;
+  } else {
+    label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
+    img.src = steamHeader(c.appid);
+    const explicit = $("fAppId").value.trim() || $("fCoverUrl").value.trim();
+    const others = lastFound.filter(x => x.id !== String(c.appid)).slice(0, 5);
+    if (!explicit && others.length) {
+      alts.innerHTML = '<span class="hint">Не та игра? Выберите другую:</span>' + others.map(x =>
+        `<button type="button" class="steam-item" data-id="${esc(x.id)}" data-name="${esc(x.name)}">
+           <img src="${esc(x.tiny || steamHeader(x.id))}" alt="" onerror="this.onerror=null;this.src='${steamHeader(x.id)}'">
+           <span>${esc(x.name)}</span>
+         </button>`).join("");
+    }
+  }
+}
+
+// Автопоиск обложки по названию (первое поле)
+function queueTitleSearch() {
+  clearTimeout(searchTimer);
+  const seq = ++searchSeq;
+  const q = $("fTitle").value.trim();
+  if (q.length < 2 || $("fCoverUrl").value.trim() || $("fAppId").value.trim()) {
+    updateCoverPreview();
+    return;
+  }
+  $("coverPreview").classList.remove("hidden");
+  $("covImg").src = phSVG("…");
+  $("covAlts").innerHTML = "";
+  $("covLabel").textContent = "Ищу обложку в Steam…";
+  searchTimer = setTimeout(async () => {
+    const res = await steamSearch(q);
+    if (seq !== searchSeq) return; // устаревший ответ — название уже изменилось
+    if (res) {
+      lastFound = res;
+      titlePick = { appid: res[0].id, name: res[0].name };
+      updateCoverPreview();
+    } else {
+      lastFound = []; titlePick = null;
+      $("coverPreview").classList.remove("hidden");
+      $("covImg").src = phSVG("?");
+      $("covLabel").textContent = "Не удалось найти обложку в Steam — укажите AppID или ссылку на картинку";
+      $("covAlts").innerHTML = "";
+    }
+  }, 500);
+}
+
+ $("fTitle").addEventListener("input", queueTitleSearch);
+ $("fAppId").addEventListener("input", () => {
+  if ($("fAppId").value.trim()) updateCoverPreview();
+  else queueTitleSearch();
+});
+ $("fCoverUrl").addEventListener("input", () => {
+  if ($("fCoverUrl").value.trim()) updateCoverPreview();
+  else queueTitleSearch();
+});
+ $("covAlts").addEventListener("click", e => {
+  const b = e.target.closest(".steam-item");
+  if (!b) return;
+  titlePick = { appid: b.dataset.id, name: b.dataset.name };
+  $("fAppId").value = ""; $("fCoverUrl").value = "";
+  updateCoverPreview();
+});
 
 function openForm(id = null) {
   if (!state.token) { alert("Сначала войдите как администратор (кнопка 🔐)"); return; }
   editId = id;
-  steamPick = null;
+  searchSeq++; // отменяем поиск, оставшийся от предыдущего открытия
+  clearTimeout(searchTimer);
+  titlePick = null; lastFound = [];
   const p = id ? state.projects.find(x => x.id === id) : null;
   $("formModalTitle").textContent = p ? "Редактировать русификатор" : "Добавить русификатор";
   $("fTitle").value = p ? p.title : "";
+  $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
+  $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
   $("fDesc").value = p ? p.description : "";
   $("fTags").value = p ? (p.tags || []).join(", ") : "";
-  $("fSteam").value = ""; $("steamResults").innerHTML = "";
-  if (p?.cover?.appid) steamPick = { appid: p.cover.appid, name: p.cover.name || p.title };
-  $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
   $("lkList").innerHTML = "";
-  const links = p?.links?.length ? p.links : [{ type: "auto", url: "", label: "" }];
+  const links = p?.links?.length ? p.links : [{}];
   links.forEach(addLinkRow);
+  updateCoverPreview();
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
@@ -512,38 +643,6 @@ function addLinkRow(l = {}) {
   if (det !== "other") sel.value = det;
 });
 
-// Поиск обложки в Steam
-let searchTimer;
- $("fSteam").addEventListener("input", e => {
-  const q = e.target.value.trim();
-  clearTimeout(searchTimer);
-  if (!q) return;
-  searchTimer = setTimeout(async () => {
-    const box = $("steamResults");
-    box.innerHTML = '<span class="hint">Ищу…</span>';
-    try {
-      const r = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&cc=RU&l=russian`);
-      const j = await r.json();
-      const items = (j.items || []).slice(0, 8);
-      if (!items.length) { box.innerHTML = '<span class="hint">Не найдено — вставьте ссылку на картинку вручную</span>'; return; }
-      box.innerHTML = items.map(it =>
-        `<button type="button" class="steam-item" data-id="${it.id}" data-name="${esc(it.name)}">
-           <img src="${esc(it.tiny_capsule || steamHeader(it.id))}" alt=""><span>${esc(it.name)}</span>
-         </button>`).join("");
-    } catch (err) {
-      box.innerHTML = '<span class="hint">Поиск недоступен — вставьте ссылку на картинку вручную</span>';
-    }
-  }, 450);
-});
- $("steamResults").addEventListener("click", e => {
-  const b = e.target.closest(".steam-item");
-  if (!b) return;
-  steamPick = { appid: b.dataset.id, name: b.dataset.name };
-  $("steamResults").innerHTML = "";
-  $("fSteam").value = "";
-});
- $("fCoverUrl").addEventListener("input", e => { if (e.target.value.trim()) steamPick = null; });
-
 // ---------- Сохранение ----------
  $("fSave").addEventListener("click", async () => {
   const btn = $("fSave");
@@ -564,10 +663,9 @@ let searchTimer;
   }
   if (!links.length) { alert("Добавьте хотя бы одну ссылку на скачивание"); return; }
 
-  const manual = $("fCoverUrl").value.trim();
-  const cover = manual ? { url: manual }
-    : steamPick ? { appid: steamPick.appid, name: steamPick.name, url: steamHeader(steamPick.appid) }
-    : null;
+  const c = effectiveCover();
+  const cover = c ? (c.url ? { url: c.url }
+    : { appid: c.appid, name: c.name || "", url: steamHeader(c.appid) }) : null;
 
   if (editId) {
     const p = state.projects.find(x => x.id === editId);
@@ -592,12 +690,14 @@ let searchTimer;
   alert("✅ Опубликовано! Все посетители увидят изменения при следующем открытии сайта.");
 });
 
-// Закрытие модалок
-for (const m of [$("formModal"), $("loginModal"), $("gameModal")]) {
+// Закрытие модалок.
+// Форма русификатора — ЗАЩИЩЕНА от случайного закрытия: клик мимо и Esc игнорируются,
+// закрывается только кнопкой «Отмена» (или после успешного сохранения).
+for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") for (const m of [$("formModal"), $("loginModal"), $("gameModal")]) m.classList.add("hidden");
+  if (e.key === "Escape") { $("loginModal").classList.add("hidden"); $("gameModal").classList.add("hidden"); }
 });
 
 function banner(text) {
