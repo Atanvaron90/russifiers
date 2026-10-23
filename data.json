@@ -1,5 +1,27 @@
 [
   {
+    "id": "ark-nova-mvlh51bz",
+    "title": "Ark Nova",
+    "cover": {
+      "appid": "2438990",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438990/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/jFvXCffjlRiehg",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1s3yo4GhK6cIu1nMvtOzxFP0HMUeMfi7V?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "created": 1792790440703
+  },
+  {
     "id": "ancient-enemy-mvlgljch",
     "title": "Ancient Enemy",
     "cover": {
