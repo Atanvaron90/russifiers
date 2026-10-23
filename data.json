@@ -1,5 +1,22 @@
 [
   {
+    "id": "istanbul-digital-edition-mvlme322",
+    "title": "Istanbul: Digital Edition",
+    "cover": {
+      "appid": "943410",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/943410/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/6MZszLY5wfy6fw",
+        "dl": 0
+      }
+    ],
+    "created": 1792799260922
+  },
+  {
     "id": "inkborn-mvlmdf40",
     "title": "Inkborn",
     "cover": {
