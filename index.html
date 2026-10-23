@@ -13,7 +13,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
 
-  /* Липкая шапка — стиль как у футера: полупрозрачный тёмный фон + граница */
   .sticky-top {
     position: sticky; top: 0; z-index: 20;
     background: rgba(15,17,23,.88);
@@ -26,11 +25,11 @@
   .title-text h1 { font-size:2rem; margin-bottom:4px; }
   .title-text p { color:var(--muted); font-size:.92rem; }
   .site-logo {
-    display:none; /* показывается после успешной загрузки картинки */
+    display:none;
     align-self:stretch;
-    max-height:64px;       /* потолок: высота названия + слогана */
+    max-height:64px;
     width:auto;
-    aspect-ratio:1/1;      /* остаётся кругом */
+    aspect-ratio:1/1;
     object-fit:cover;
     border:2px solid var(--accent);
     border-radius:50%;
@@ -85,8 +84,6 @@
   .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
   .grid.view-list .card .desc { flex-grow:0; }
 
-  /* Компактный вид: список названий в столбик —
-     без плашек, рамок, картинок и промежутков между строками */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
     background:none; border:none; border-radius:0;
@@ -112,7 +109,8 @@
   .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; }
   .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
   .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
-  .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; }
+  .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; line-height:1.5; }
+  .f-note a { color:#a99cf5; text-decoration:underline; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
@@ -140,14 +138,11 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
-  /* Редактор донатов: название — во всю ширину, крестик — узкая колонка справа */
   .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .dn-row input { padding:8px 10px; font-size:.9rem; }
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
   .dn-row .full { grid-column:1 / -1; }
 
-  /* Плашка донатов: по умолчанию — в потоке под сеткой;
-     на широких экранах — фиксируется слева от сетки */
   .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
   .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
   .don-edit { position:absolute; top:10px; right:10px; }
@@ -227,7 +222,6 @@
 </head>
 <body>
 
-<!-- Липкая шапка: остаётся наверху при прокрутке -->
 <div class="sticky-top">
   <header>
     <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
@@ -261,8 +255,6 @@
 
 <div class="grid view-grid" id="grid"></div>
 
-<!-- Плашка донатов: на широких экранах прилипает слева от сетки,
-     на узких — остаётся здесь же, под сеткой -->
 <section id="donate" class="donate">
   <div class="donate-box">
     <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
@@ -409,7 +401,6 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&l
 const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
 const encPath = p => p.split("/").map(encodeURIComponent).join("/");
 const dedupe = arr => [...new Set(arr.filter(Boolean))];
-// Русские окончания: 1 русификатор, 2 русификатора, 5 русификаторов
 const pluralRu = (n, one, few, many) => {
   const m10 = n % 10, m100 = n % 100;
   if (m10 === 1 && m100 !== 11) return one;
@@ -458,8 +449,10 @@ function toast(msg, type = "info", ms = 4000) {
 })();
 
 // ---------- Каталог сервисов ----------
+// yadisk: у Simple Icons нет значка "yandexdisk" (404) — используем favicon-сервис
 const SERVICES = {
-  yadisk:   { name:"Яндекс.Диск",   slug:"yandexdisk",  color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"] },
+  yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
+              iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я" },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
   boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
   pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
@@ -546,11 +539,15 @@ function fetchTimeout(url, ms = 8000) {
 }
 
 // ---------- Прокси для Steam ----------
-// corsproxy убран: с 2024 требует платный ключ (HTTP 401 — бесполезен)
+// corsproxy убран (требует ключ, HTTP 401). cors-lol и cors-workers добавлены.
+// allorigins-get — тот же allorigins, но с JSON-обёрткой {"contents": "..."}.
 const STEAM_PROXIES = [
-  { name:"direct",     wrap: u => u },
-  { name:"codetabs",   wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
-  { name:"allorigins", wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) }
+  { name:"direct",         wrap: u => u },
+  { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { name:"allorigins",     wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { name:"allorigins-get", wrap: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json:"contents" },
+  { name:"cors-lol",       wrap: u => "https://api.cors.lol/?url=" + encodeURIComponent(u) },
+  { name:"cors-workers",   wrap: u => "https://test.cors.workers.dev/?" + u }
 ];
 const failedCombos = new Set();
 
@@ -593,7 +590,7 @@ async function steamSearch(term) {
     const src = SEARCH_SOURCES[s];
     const url = STEAM_PROXIES[p].wrap(src.url(term));
     try {
-      const r = await fetchTimeout(url);
+      const r = await fetchTimeout(url, 15000);
       if (!r.ok) throw new Error("HTTP " + r.status);
       const text = await r.text();
       let items;
@@ -617,9 +614,10 @@ async function steamSearch(term) {
 }
 
 // ---------- Информация об игре по AppID: название + канонические обложки ----------
-// Источники по очереди: appdetails (API Steam) → SteamSpy → HTML-страница игры →
-// полный список приложений (GetAppList, грузится раз за сессию).
-// Удачный маршрут запоминается — следующие запросы идут через него мгновенно.
+// Источники: appdetails (Steam) → SteamSpy → HTML-страница игры (og:title).
+// Стратегия: сначала мгновенная попытка через запомненный удачный маршрут,
+// затем ГОНКА — все маршруты запускаются одновременно, берём первый успешный.
+// (GetAppList убран: публичные прокси не прокачивают 10 МБ списка — 522/500.)
 const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
 function cacheInfo(id, info) {
   appInfoCache[id] = info;
@@ -666,83 +664,73 @@ function parseOg(html) {
     capsule: ""
   };
 }
-// Порядок попыток: сначала запомненный удачный маршрут,
-// затем точечные API (напрямую и через прокси), затем HTML-страница (только через прокси)
-function appRouteAttempts() {
-  const attempts = [];
-  const saved = localStorage.getItem(LS_APP_ROUTE);
-  if (saved) {
-    const [ri, pi] = saved.split(":").map(Number);
-    if (APP_ROUTES[ri] && STEAM_PROXIES[pi]) attempts.push([ri, pi]);
+// Одна попытка через конкретный маршрут: успех → {name, header, capsule}, иначе throw
+async function tryRoute(route, proxy, appid, ms) {
+  const r = await fetchTimeout(proxy.wrap(route.url(appid)), ms);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  let text = await r.text();
+  if (proxy.json) { // обёртка allorigins/get: {"contents": "..."}
+    try { text = JSON.parse(text)[proxy.json] || ""; } catch (e) { throw new Error("нет обёртки"); }
   }
-  for (let ri = 0; ri < APP_ROUTES.length - 1; ri++)
-    for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
-      attempts.push([ri, pi]);
-  for (let pi = 1; pi < STEAM_PROXIES.length; pi++)
-    attempts.push([APP_ROUTES.length - 1, pi]);
-  return attempts;
+  let info;
+  if (route.html) {
+    info = parseOg(text);
+    if (!info.name && !info.header) throw new Error("og-теги не найдены");
+  } else {
+    let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
+    info = route.parse(j, appid);
+    if (!info || (!info.name && !info.header)) throw new Error("пустой ответ");
+  }
+  return info;
 }
 async function fetchAppInfo(appid) {
   const cached = cachedInfo(appid);
   if (cached && cached.header) return cached;
-  for (const [ri, pi] of appRouteAttempts()) {
-    const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
-    try {
-      const r = await fetchTimeout(proxy.wrap(route.url(appid)), 6000);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const text = await r.text();
-      let info;
-      if (route.html) {
-        info = parseOg(text);
-        if (!info.name && !info.header) throw new Error("og-теги не найдены");
-      } else {
-        let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
-        info = route.parse(j, appid);
-        if (!info) throw new Error("нет данных");
-      }
-      if (!info.name && cached?.name) info.name = cached.name;
-      if (!info.name && !info.header) throw new Error("пустой ответ");
-      localStorage.setItem(LS_APP_ROUTE, ri + ":" + pi); // запомнили удачный маршрут
-      cacheInfo(appid, info);
-      return info;
-    } catch (e) {
-      console.warn("Инфо по AppID: маршрут не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
-    }
-  }
-  // Последний шанс: полный список приложений Steam (грузится один раз за сессию)
-  const list = await fetchAppListBulk();
-  if (list) {
-    const hit = list.find(x => +x.appid === +appid);
-    if (hit && hit.name) {
-      const info = { name: String(hit.name), header: cached?.header || "", capsule: cached?.capsule || "" };
-      cacheInfo(appid, info);
-      return info;
-    }
-  }
-  return cached && (cached.name || cached.header) ? cached : null;
-}
-// Полный список приложений: тяжёлый (~10 МБ), поэтому кэшируется в памяти на сессию
-let appListPromise = null;
-function fetchAppListBulk() {
-  if (appListPromise) return appListPromise;
-  appListPromise = (async () => {
-    const url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
-    for (const proxy of STEAM_PROXIES) {
+
+  // 1) Быстрая попытка через запомненный удачный маршрут
+  const saved = localStorage.getItem(LS_APP_ROUTE);
+  if (saved) {
+    const [ri, pi] = saved.split(":").map(Number);
+    if (APP_ROUTES[ri] && STEAM_PROXIES[pi]) {
       try {
-        const r = await fetchTimeout(proxy.wrap(url), 30000);
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        const j = await r.json();
-        const list = j && j.applist && j.applist.apps;
-        if (Array.isArray(list) && list.length) return list;
-        throw new Error("пустой список");
+        const info = await tryRoute(APP_ROUTES[ri], STEAM_PROXIES[pi], appid, 8000);
+        if (!info.name && cached?.name) info.name = cached.name;
+        cacheInfo(appid, info);
+        return info;
       } catch (e) {
-        console.warn("GetAppList: маршрут не ответил —", proxy.name, "(", e.message, ")");
+        localStorage.removeItem(LS_APP_ROUTE); // маршрут перестал работать — сбрасываем
+        console.warn("Инфо по AppID: сохранённый маршрут не ответил —", APP_ROUTES[ri].name + "/" + STEAM_PROXIES[pi].name, "(", e.message, ")");
       }
     }
-    appListPromise = null; // не получилось — разрешаем повторную попытку позже
-    return null;
-  })();
-  return appListPromise;
+  }
+
+  // 2) ГОНКА: все маршруты одновременно; прямой (без прокси) падает мгновенно из-за
+  //    CORS и не мешает, побеждает первый ответивший прокси. Таймаут каждому — 20 с.
+  const tasks = [];
+  for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
+    for (let ri = 0; ri < APP_ROUTES.length; ri++) {
+      const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
+      if (route.html && proxy.name === "direct") continue; // HTML без CORS — только через прокси
+      tasks.push(
+        tryRoute(route, proxy, appid, 20000)
+          .then(info => {
+            localStorage.setItem(LS_APP_ROUTE, ri + ":" + pi); // запомнили удачный маршрут
+            return info;
+          })
+          .catch(e => {
+            console.warn("Инфо по AppID: не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
+            throw e;
+          })
+      );
+    }
+  try {
+    const info = await Promise.any(tasks);
+    if (!info.name && cached?.name) info.name = cached.name;
+    cacheInfo(appid, info);
+    return info;
+  } catch (e) {
+    return cached && (cached.name || cached.header) ? cached : null;
+  }
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
@@ -818,6 +806,9 @@ async function loadData() {
 }
 
 // ---------- Авторемонт обложек ----------
+// autoHealTried: не долбим Steam повторно по тем же appid в рамках сессии,
+// если попытка уже провалилась
+const autoHealTried = new Set();
 const isConstructedUrl = (p) => {
   const u = p.cover?.url;
   if (!u || !p.cover?.appid) return false;
@@ -827,10 +818,11 @@ async function autoHealCovers() {
   if (!state.token) return;
   const need = state.projects.filter(p =>
     p.cover?.appid && (!p.cover.url || isConstructedUrl(p)) &&
-    !cachedInfo(p.cover.appid)?.header);
+    !cachedInfo(p.cover.appid)?.header && !autoHealTried.has(p.cover.appid));
   if (!need.length) return;
   let fixed = 0;
   for (const p of need) {
+    autoHealTried.add(p.cover.appid);
     try {
       const info = await fetchAppInfo(p.cover.appid);
       if (info?.header && info.header !== p.cover.url) {
@@ -1213,7 +1205,7 @@ let editId = null;
 let searchTimer = null, searchSeq = 0, appIdTimer = null, appIdSeq = 0;
 let titlePick = null, lastFound = [], titleAuto = false;
 
-const setNote = msg => { $("fNote").textContent = msg || ""; };
+const setNote = html => { $("fNote").innerHTML = html || ""; };
 
 function effectiveCover() {
   const url = $("fCoverUrl").value.trim();
@@ -1319,7 +1311,8 @@ function queueAppIdLookup(immediate = false) {
         ? "Название и обложка из Steam (точный адрес картинки) — можно отредактировать вручную."
         : "Название из Steam — можно отредактировать вручную.");
     } else {
-      setNote("Steam недоступен из этой сети: запросы к API заблокированы. Впиши название вручную — обложка по AppID всё равно подтянется.");
+      // Steam API недоступен из этой сети — даём ссылку, чтобы сверить название вручную
+      setNote(`Steam API недоступен из этой сети. Впиши название вручную — обложка по AppID подтянется. Сверить название: <a href="https://store.steampowered.com/app/${appid}/" target="_blank" rel="noopener">страница игры в Steam</a>`);
     }
   };
   if (immediate) run();
