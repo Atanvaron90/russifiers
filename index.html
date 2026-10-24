@@ -288,9 +288,9 @@
       <option value="new">Сначала новые</option>
     </select>
     <select id="viewBy" title="Вид списка">
-      <option value="grid">Сетка</option>
+      <option value="grid">Сетка 3х3</option>
       <option value="list">Список</option>
-      <option value="compact">Компактно</option>
+      <option value="compact">Компактный список</option>
     </select>
     <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
   </div>
@@ -326,7 +326,7 @@
       </a>
       <div class="g-body">
         <h2 id="gTitle"></h2>
-        <div id="gStale" class="stale-badge" style="position:static; margin-top:6px; display:none;">🏷 Не обновляется</div>
+        <div id="gStale" class="stale-badge" style="position:static; margin-top:6px; display:none;">Не обновляется</div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Ссылки</h3>
         <div id="gLinks"></div>
@@ -339,12 +339,12 @@
      Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="formModal" class="overlay hidden">
   <div class="modal">
-    <h2 id="formModalTitle">Добавить русификатор</h2>
+    <h2 id="formModalTitle">Добавление русификатора</h2>
     <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
-    <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
+    <input id="fAppId" type="text" placeholder="AppId игры или ссылка на страницу игры в Steam">
     <div id="fNote" class="f-note"></div>
     <label>Название игры *</label>
-    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
+    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически, или введите вручную">
     <div id="coverPreview" class="cover-preview hidden">
       <img id="covImg" alt="Обложка">
       <div class="cov-right">
@@ -352,12 +352,12 @@
         <div id="covAlts"></div>
       </div>
     </div>
-    <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
+    <label>Ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
 
     <label class="flag-row">
       <input id="fStale" type="checkbox">
-      <span class="flag-text">🏷 Пометить «Не обновляется»
+      <span class="flag-text">Ярлык «Не обновляется»
         <small>Например, если вышел официальный перевод игры и версии больше не выходят. На плашке появится ярлык.</small>
       </span>
     </label>
