@@ -88,7 +88,7 @@
   .f-chip .n { opacity:.65; font-weight:400; }
   .s-row label { display:block; font-size:.72rem; color:var(--muted); }
   .s-row select { margin-top:4px; padding:8px 10px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; cursor:pointer; width:100%; }
-  /* Шестерёнка настроек: только на мобильных (на десктопе сортировка и вид открыто) */
+  /* Шестерёнка настроек: скрыта на десктопе, показывается в мобильном медиазапросе */
   .gear-btn {
     padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px;
     color:var(--muted); cursor:pointer; font-size:1rem;
@@ -99,7 +99,8 @@
   .gear-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
 
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
-  /* Счётчик: перед кнопкой админа; для посетителя — крайний правый элемент */
+  /* Счётчик: перед кнопкой админа; для посетителя — крайний правый элемент.
+     auto-отступ прижимает счётчик (и кнопку после него) вправо */
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
@@ -110,8 +111,6 @@
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
-  /* Кнопка админа всегда у правого края панели (десктоп) */
-  #btnAdd { margin-left:auto; }
   /* Две подписи кнопки админа: полная на десктопе, короткая на мобильном */
   #btnAdd .m-short { display:none; }
   body:not(.admin) .admin-only { display:none !important; }
@@ -174,8 +173,8 @@
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
      прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px).
-     Шапка: 2 строки — [поиск (остаток строки) + шестерёнка] и
-     [счётчик + «Добавить»]. Сортировка и вид — в шестерёнке */
+     Шапка — CSS Grid с фиксированными областями (элементы не могут «уехать»):
+     строка 1: поиск + шестерёнка; строка 2: счётчик + «Добавить» */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -204,15 +203,19 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Шапка в 2 строки:
-       строка 1: поиск занимает остаток строки (flex-basis 0 — шестерёнка всегда рядом),
-       строка 2: счётчик слева, короткая «Добавить» после него */
-    .toolbar { padding:0 12px; row-gap:10px; }
+    /* Шапка в 2 строки через grid-области: элементы закреплены, порядок не зависит от DOM */
+    .toolbar {
+      display:grid; grid-template-columns:1fr auto;
+      grid-template-areas:
+        "search gear"
+        "stat   add";
+      align-items:center; row-gap:10px; column-gap:10px; padding:0 12px;
+    }
     .toolbar .m-hide { display:none !important; }
-    .search-wrap { order:1; flex:1 1 0; min-width:0; }
-    .gear-btn { display:inline-flex; order:2; }
-    .stat-chip { order:3; margin-left:0; }
-    #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
+    .search-wrap { grid-area:search; }
+    .gear-btn { grid-area:gear; display:inline-flex; }
+    .stat-chip { grid-area:stat; margin-left:0; justify-self:start; }
+    #btnAdd { grid-area:add; justify-self:start; padding:12px; font-size:.9rem; }
     #btnAdd .m-full { display:none; }
     #btnAdd .m-short { display:inline; }
     .grid.view-compact { max-width:none; padding:0 8px; }
@@ -422,10 +425,10 @@
       <option value="compact">Список</option>
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
-    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <button id="btnAdd" class="tool-btn primary admin-only">
       <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
     </button>
+    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <div id="settingsPanel" class="settings-panel hidden">
       <div class="f-title">Настройки поиска</div>
       <div class="s-row">
