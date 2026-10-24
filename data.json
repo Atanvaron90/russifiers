@@ -372,6 +372,11 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/DLl0tdrGUld5Ig",
         "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/bb798ec5-bb0f-46c1-b76f-fd251363cb1a?isFromShowcase=true",
+        "dl": 0
       }
     ],
     "created": 1792801076864
