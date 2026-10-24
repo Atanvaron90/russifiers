@@ -1,5 +1,23 @@
 [
   {
+    "id": "talisman-digital-classic-edition-mvlpscdl",
+    "title": "Talisman: Digital Classic Edition",
+    "cover": {
+      "appid": "247000",
+      "name": "Talisman: Digital Classic Edition",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/247000/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/BUs86J1QHJszcw",
+        "dl": 0
+      }
+    ],
+    "stale": true,
+    "created": 1792804965033
+  },
+  {
     "id": "monopoly-mvlp6rew",
     "title": "MONOPOLY",
     "cover": {
