@@ -729,13 +729,18 @@
     "title": "K2: Digital Edition",
     "cover": {
       "appid": "2561310",
-      "name": "",
+      "name": "K2: Digital Edition",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2561310/capsule_616x353.jpg?t=1763553739"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/qTB-_lbwRelAUg",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/74b851ad-5dc3-4640-a858-f6239f38e766?isFromShowcase=true",
         "dl": 0
       }
     ],
