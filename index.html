@@ -94,6 +94,7 @@
   .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
   .grid.view-list .card .desc { flex-grow:0; }
 
+  /* Компактный вид: список названий в столбик без плашек и промежутков */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
     background:none; border:none; border-radius:0;
@@ -124,7 +125,6 @@
   .f-note a { color:#a99cf5; text-decoration:underline; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
-  /* Чекбокс ярлыка в форме */
   .flag-row { display:flex; align-items:flex-start; gap:10px; margin-top:14px; cursor:pointer; }
   .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; margin-top:2px; cursor:pointer; accent-color:var(--accent); }
   .flag-row .flag-text { font-size:.9rem; color:var(--text); }
@@ -219,6 +219,20 @@
     .g-cover { max-height:240px; min-height:0; }
   }
 
+  /* Кнопка «Вниз» / «Наверх» в правом нижнем углу */
+  .scroll-btn {
+    position: fixed; right: 16px; bottom: 56px; z-index: 90;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border: 1px solid var(--border); border-radius: 999px;
+    background: rgba(31,35,48,.92); color: var(--text);
+    font-size: .87rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; box-shadow: 0 6px 20px rgba(0,0,0,.45);
+    opacity: 0; pointer-events: none; transform: translateY(8px);
+    transition: opacity .25s, transform .25s;
+  }
+  .scroll-btn.show { opacity: 1; pointer-events: auto; transform: none; }
+  .scroll-btn:hover { border-color: var(--accent); color: #a99cf5; }
+
   footer {
     position:fixed; bottom:0; left:0; right:0; z-index:10;
     text-align:center; color:var(--muted); padding:12px; font-size:.8rem;
@@ -284,6 +298,7 @@
 <footer>© 2026 Atanvaron</footer>
 
 <div class="toasts" id="toasts"></div>
+<button id="scrollBtn" class="scroll-btn" type="button">⬇ Вниз</button>
 
 <!-- Окно игры -->
 <div id="gameModal" class="overlay hidden">
@@ -475,7 +490,6 @@ function toast(msg, type = "info", ms = 4000) {
 })();
 
 // ---------- Каталог сервисов ----------
-// yadisk: у Simple Icons нет значка "yandexdisk" (404) — favicon-сервис + белый фон
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
@@ -725,7 +739,7 @@ async function fetchAppInfo(appid) {
     }
   }
 
-  // ГОНКА: все маршруты одновременно
+  // ГОНКА: все маршруты одновременно; побеждает первый успешный ответ
   const tasks = [];
   for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
     for (let ri = 0; ri < APP_ROUTES.length; ri++) {
@@ -754,6 +768,8 @@ async function fetchAppInfo(appid) {
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
+// Название из слага ссылки — только черновик: Steam вырезает из слага знаки препинания.
+// Точное имя приходит из Steam API и перезаписывает черновик.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -1510,6 +1526,43 @@ function banner(text) {
   d.innerHTML = text;
   grid.before(d);
 }
+
+// ---------- Кнопка «Вниз» / «Наверх» ----------
+// Вверху страницы: «Вниз» → скроллит к списку русификаторов.
+// Ниже (или прокрутил дальше): «Наверх» → возвращает к шапке.
+(function setupScrollBtn() {
+  const btn = $("scrollBtn");
+  if (!btn) return;
+
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const toList = () => {
+    const g = $("grid");
+    if (g) g.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Что показывать: если прокрутили хотя бы на 60% высоты экрана — предлагаем «Наверх»
+  const update = () => {
+    const down = window.scrollY < window.innerHeight * 0.6;
+    btn.textContent = down ? "⬇ Вниз" : "⬆ Наверх";
+    btn.title = down ? "Прокрутить к списку русификаторов" : "Вернуться наверх";
+  };
+
+  btn.addEventListener("click", () => {
+    if (btn.textContent.includes("Вниз")) toList(); else toTop();
+  });
+
+  // Обновляем подпись не чаще раза за кадр — экономно при быстром скролле
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => { update(); ticking = false; });
+    }
+  }, { passive: true });
+
+  update();
+  setTimeout(() => btn.classList.add("show"), 500);
+})();
 
 // ---------- Старт ----------
 (async function init() {
