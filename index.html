@@ -68,14 +68,16 @@
   }
   .filter-btn:hover { border-color:var(--accent); color:var(--text); }
   .filter-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .filter-panel {
-    position:absolute; top:calc(100% + 8px); left:0; right:0; z-index:30;
+  .filter-panel, .settings-panel {
+    position:absolute; top:calc(100% + 8px); z-index:30;
     background:var(--card); border:1px solid var(--border); border-radius:12px;
     padding:12px; box-shadow:0 12px 30px rgba(0,0,0,.5);
-    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    display:flex; flex-direction:column; gap:8px; align-items:stretch;
   }
-  .filter-panel.hidden { display:none; }
-  .filter-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
+  .filter-panel { left:0; right:0; }
+  .settings-panel { right:0; width:190px; }
+  .filter-panel.hidden, .settings-panel.hidden { display:none; }
+  .filter-panel .f-title, .settings-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
   .f-chip {
     display:inline-flex; align-items:center; gap:6px;
     border:1px solid var(--border); border-radius:10px;
@@ -85,6 +87,17 @@
   .f-chip:hover { border-color:var(--accent); }
   .f-chip.sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
   .f-chip .n { opacity:.65; font-weight:400; }
+  .s-row { display:flex; gap:8px; }
+  .s-row label { flex:1; font-size:.72rem; color:var(--muted); }
+  .s-row select { margin-top:4px; padding:8px 10px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; cursor:pointer; width:100%; }
+  .gear-btn {
+    padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px;
+    color:var(--muted); cursor:pointer; font-size:1rem;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition: color .15s, border-color .15s;
+  }
+  .gear-btn:hover { border-color:var(--accent); color:var(--text); }
+  .gear-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
 
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
   .stat-chip {
@@ -99,6 +112,9 @@
   /* Кнопка админа всегда у правого края панели */
   #btnAdd { margin-left:auto; }
   body:not(.admin) .admin-only { display:none !important; }
+  /* Счётчик занимает крайнее правое положение для посетителей */
+  .stat-chip { margin-left:auto; }
+  body.admin .stat-chip { margin-left:0; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
 
@@ -107,9 +123,9 @@
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
   .card:hover h2 { color:#a99cf5; }
-  /* Обложка: единый формат 231×87 (маленькая капсула со страницы Steam) —
-     все горизонтальные обложки одного размера, ряд ровный */
-  .cover { width:100%; aspect-ratio:231/87; object-fit:cover; border-radius:10px; background:var(--field); }
+  /* Обложка: header 460×215 — единый горизонтальный формат,
+     чуть обрезается при вписывании в карточку, ряд ровный */
+  .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
@@ -157,7 +173,7 @@
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
-  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка того же формата 231×87,
+  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
      прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px) */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
@@ -168,7 +184,7 @@
     .grid:not(.view-compact) .card .cover {
       grid-column:1; grid-row:1 / span 3;
       width:100%; height:auto;
-      aspect-ratio:231/87;
+      aspect-ratio:460/215;
       border-radius:8px;
       align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
     }
@@ -187,13 +203,20 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Поиск ровно под подсказку (ширина --ph-w считается в JS), счётчик — в конец строки */
+    /* Мобильная шапка: 2 строки — поиск (по ширине подсказки) и счётчик в первой,
+       шестерёнка во второй; сортировка и вид спрятаны в панель настроек */
     .search-wrap { flex:0 0 auto; min-width:0; width:calc(var(--ph-w, 150px) + 62px); }
-    .stat-chip { order:9; margin-left:auto; align-self:center; }
+    #filterBy-legacy { display:none; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
     .toolbar { padding:0 12px; }
+    .toolbar .m-hide { display:none !important; } /* сортировка и вид — в шестерёнку */
+    .gear-btn { display:inline-flex; }
   }
+
+  /* На десктопе шестерёнка не нужна */
+  .gear-btn { display:none; }
+  .settings-panel { display:none; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -225,7 +248,7 @@
 
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
   .cover-preview.hidden { display:none; }
-  .cover-preview img { width:180px; aspect-ratio:231/87; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
+  .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
   .cov-right { flex:1; min-width:0; }
   .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
   .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
@@ -320,12 +343,12 @@
   .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
   .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
   .lk-btn:hover { filter:brightness(1.15); }
-  /* Мобильное окно игры: горизонтальная обложка 231×87 сверху (тот же формат, что на
-     плашках), под ней — текст и ссылки */
+  /* Мобильное окно игры: горизонтальная обложка header 460×215 сверху (тот же формат,
+     что на плашках), под ней — текст и ссылки */
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
     .g-cover-link { order:-1; }
-    .g-cover { height:auto; min-height:0; aspect-ratio:231/87; }
+    .g-cover { height:auto; min-height:0; aspect-ratio:460/215; }
     .g-body { padding:18px; }
   }
 
@@ -387,17 +410,39 @@
       </button>
       <div id="filterPanel" class="filter-panel hidden"></div>
     </div>
-    <select id="sortBy" title="Сортировка">
+    <select id="sortBy" class="m-hide" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
       <option value="dl">Сначала популярные</option>
       <option value="new">Сначала новые</option>
     </select>
-    <select id="viewBy" title="Вид списка">
+    <select id="viewBy" class="m-hide" title="Вид списка">
       <option value="grid">Сетка</option>
       <option value="compact">Список</option>
     </select>
     <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
+    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
+    <div id="settingsPanel" class="settings-panel hidden">
+      <div class="f-title">Настройки поиска</div>
+      <div class="s-row">
+        <label>Сортировка
+          <select id="sortByM">
+            <option value="az">А → Я</option>
+            <option value="za">Я → А</option>
+            <option value="dl">Сначала популярные</option>
+            <option value="new">Сначала новые</option>
+          </select>
+        </label>
+      </div>
+      <div class="s-row">
+        <label>Вид списка
+          <select id="viewByM">
+            <option value="grid">Сетка</option>
+            <option value="compact">Список</option>
+          </select>
+        </label>
+      </div>
+    </div>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
   </div>
 </div>
@@ -688,16 +733,7 @@ const steamTallURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
 ];
-// Маленькая горизонтальная капсула (та, что справа на странице Steam, 231×87) —
-// единый формат для горизонтальных обложек на плашках и в мобильном окне игры
-const steamCapsuleSmallURLs = appid => [
-  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_231x87.jpg`,
-  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_231x87.jpg`,
-  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`,
-  `https://cdn.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`
-];
-// Большой header (460×215) — запас, если маленькой капсулы у игры нет
+// Горизонтальный формат 460×215 (header со страницы Steam):
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -720,14 +756,13 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
-// Горизонтальный каскад: маленькая капсула → канонический URL → header → большая капсула → заглушка.
+// Горизонтальный каскад: header 460×215 → канонический URL → большая капсула → заглушка.
 // Одинаков для плашек и мобильного окна игры — картинки всегда совпадают
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
-    ...(c.appid ? steamCapsuleSmallURLs(c.appid) : []),
-    c.url, ...(c.appid ? steamHeaderURLs(c.appid) : []),
-    c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+    ...(c.appid ? steamHeaderURLs(c.appid) : []),
+    c.url, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
     phSVG((p.title[0] || "?").toUpperCase())
   ];
   return dedupe(urls);
@@ -1209,9 +1244,17 @@ function currentView() {
 function applyView() {
   grid.classList.remove("view-grid", "view-list", "view-compact");
   grid.classList.add("view-" + currentView());
+  // Синхронизация обоих селектов (десктопный и мобильный из настроек)
   $("viewBy").value = currentView();
+  const m = $("viewByM");
+  if (m) m.value = currentView();
 }
  $("viewBy").addEventListener("change", e => {
+  localStorage.setItem(LS_VIEW, e.target.value);
+  applyView();
+  render();
+});
+ $("viewByM").addEventListener("change", e => {
   localStorage.setItem(LS_VIEW, e.target.value);
   applyView();
   render();
@@ -1258,12 +1301,17 @@ function toggleFilterPanel(force) {
   toggleFilterPanel(false);
   render();
 });
-// Закрытие панели кликом мимо (кроме клика по самой кнопке — у неё stopPropagation)
+// Закрытие панелей кликом мимо (кроме клика по самим кнопкам — у них stopPropagation)
 document.addEventListener("click", e => {
-  const panel = $("filterPanel");
-  if (!panel.classList.contains("hidden") &&
-      !panel.contains(e.target) && e.target !== $("filterBtn") && !$("filterBtn").contains(e.target)) {
+  const fp = $("filterPanel");
+  if (!fp.classList.contains("hidden") &&
+      !fp.contains(e.target) && !$("filterBtn").contains(e.target)) {
     toggleFilterPanel(false);
+  }
+  const sp = $("settingsPanel");
+  if (!sp.classList.contains("hidden") && !$("gearBtn").contains(e.target)) {
+    sp.classList.add("hidden");
+    $("gearBtn").classList.remove("on");
   }
 });
 
@@ -1371,8 +1419,15 @@ if (document.fonts && document.fonts.ready) {
 }
 
  $("sortBy").value = currentSort();
+ $("sortByM").value = currentSort();
  $("sortBy").addEventListener("change", e => {
   localStorage.setItem(LS_SORT, e.target.value);
+  $("sortByM").value = e.target.value;
+  render();
+});
+ $("sortByM").addEventListener("change", e => {
+  localStorage.setItem(LS_SORT, e.target.value);
+  $("sortBy").value = e.target.value;
   render();
 });
  $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
@@ -1437,6 +1492,9 @@ function openGame(id) {
   } else {
     st.style.display = "none";
   }
+
+  $("gDesc").textContent = p.description || "";
+  $("gDesc").style.display = p.description ? "" : "none";
 
   setCoverCascade($("gCover"), gameCoverURLs(p));
 
@@ -1558,9 +1616,8 @@ function updateCoverPreview() {
   } else {
     label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
     setCoverCascade(img, dedupe([
-      ...(c.appid ? steamCapsuleSmallURLs(c.appid) : []),
-      c.header, ...(c.appid ? steamHeaderURLs(c.appid) : []),
-      c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+      ...(c.appid ? steamHeaderURLs(c.appid) : []),
+      c.header, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
       phSVG("?")
     ]));
     const explicit = $("fAppId").value.trim() || $("fCoverUrl").value.trim();
@@ -1853,6 +1910,8 @@ document.addEventListener("keydown", e => {
     $("loginModal").classList.add("hidden");
     $("gameModal").classList.add("hidden");
     toggleFilterPanel(false);
+    $("settingsPanel").classList.add("hidden");
+    $("gearBtn").classList.remove("on");
   }
 });
 
@@ -1900,6 +1959,17 @@ function fitSearchWidth() {
   probe.remove();
   document.documentElement.style.setProperty("--ph-w", w + "px");
 }
+
+// ---------- Панель настроек (мобильная шестерёнка) ----------
+(function setupGear() {
+  const gear = $("gearBtn"), panel = $("settingsPanel");
+  gear.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = panel.classList.toggle("hidden");
+    gear.classList.toggle("on", !open);
+  });
+  panel.addEventListener("click", e => e.stopPropagation());
+})();
 
 // ---------- Старт ----------
 (async function init() {
