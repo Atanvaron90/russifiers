@@ -1,5 +1,23 @@
 [
   {
+    "id": "twilight-struggle-mvlnzm67",
+    "title": "Twilight Struggle",
+    "cover": {
+      "appid": "406290",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/406290/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/sb_IZhG4Xr3dpg",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792801945087
+  },
+  {
     "id": "ticket-to-ride-mvlnt3di",
     "title": "Ticket to Ride",
     "cover": {
