@@ -110,8 +110,10 @@
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
-  /* Кнопка админа всегда у правого края панели */
+  /* Кнопка админа всегда у правого края панели (десктоп) */
   #btnAdd { margin-left:auto; }
+  /* Две подписи кнопки админа: полная на десктопе, короткая на мобильном */
+  #btnAdd .m-short { display:none; }
   body:not(.admin) .admin-only { display:none !important; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
@@ -172,8 +174,8 @@
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
      прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px).
-     Шапка: 2 строки — поиск заполняет всю строку, шестерёнка справа;
-     счётчик слева, «Добавить» после него. Сортировка и вид — в шестерёнке */
+     Шапка: 2 строки — [поиск (остаток строки) + шестерёнка] и
+     [счётчик + «Добавить»]. Сортировка и вид — в шестерёнке */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -202,14 +204,17 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Шапка в 2 строки: поиск заполняет строку, шестерёнка справа;
-       счётчик слева, «Добавить» после него */
+    /* Шапка в 2 строки:
+       строка 1: поиск занимает остаток строки (flex-basis 0 — шестерёнка всегда рядом),
+       строка 2: счётчик слева, короткая «Добавить» после него */
     .toolbar { padding:0 12px; row-gap:10px; }
     .toolbar .m-hide { display:none !important; }
-    .search-wrap { order:1; flex:1 1 auto; min-width:0; }
+    .search-wrap { order:1; flex:1 1 0; min-width:0; }
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
-    #btnAdd { order:4; margin-left:0; }
+    #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
+    #btnAdd .m-full { display:none; }
+    #btnAdd .m-short { display:inline; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
   }
@@ -418,7 +423,9 @@
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
-    <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
+    <button id="btnAdd" class="tool-btn primary admin-only">
+      <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
+    </button>
     <div id="settingsPanel" class="settings-panel hidden">
       <div class="f-title">Настройки поиска</div>
       <div class="s-row">
