@@ -204,10 +204,14 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
+  /* Редактор донатов: название | цвет | иконка | ✕ — крестик справа от поля иконки,
+     в той же строке; ссылка и реквизиты — во всю ширину ниже */
   .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .dn-row input { padding:8px 10px; font-size:.9rem; }
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
   .dn-row .full { grid-column:1 / -1; }
+  .dn-row .ver-del { grid-column:4; grid-row:1; justify-self:center; padding:8px; }
+  .dn-row .ver-del:hover { color:#ff6b6b; }
 
   .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
   .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
@@ -681,6 +685,17 @@ function fetchTimeout(url, ms = 8000) {
   const t = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
+
+// ---------- Прокси для Steam ----------
+const STEAM_PROXIES = [
+  { name:"direct",         wrap: u => u },
+  { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { name:"allorigins",     wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { name:"allorigins-get", wrap: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json:"contents" },
+  { name:"cors-lol",       wrap: u => "https://api.cors.lol/?url=" + encodeURIComponent(u) },
+  { name:"cors-workers",   wrap: u => "https://test.cors.workers.dev/?" + u }
+];
+const failedCombos = new Set();
 
 // ---------- Поиск игр по названию ----------
 const SEARCH_SOURCES = [
