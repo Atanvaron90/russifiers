@@ -1,5 +1,22 @@
 [
   {
+    "id": "the-fox-in-the-forest-mvlnjo4i",
+    "title": "The Fox in the Forest",
+    "cover": {
+      "appid": "1729050",
+      "name": "The Fox in the Forest",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1729050/capsule_616x353.jpg?t=1767903253"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/IktsZ3REutSb2g",
+        "dl": 0
+      }
+    ],
+    "created": 1792801201122
+  },
+  {
     "id": "the-captain-is-dead-mvlnipa0",
     "title": "The Captain is Dead",
     "cover": {
