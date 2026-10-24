@@ -149,7 +149,7 @@
   },
   {
     "id": "ticket-to-ride-mvlnt3di",
-    "title": "Сэкономьте 70% при покупке Ticket to Ride®",
+    "title": "Ticket to Ride",
     "cover": {
       "appid": "2477010",
       "name": "Сэкономьте 70% при покупке Ticket to Ride®",
@@ -260,15 +260,9 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/DLl0tdrGUld5Ig",
         "dl": 0
-      },
-      {
-        "type": "pda4",
-        "url": "https://4pda.to/forum/index.php?showtopic=952600",
-        "dl": 0
       }
     ],
-    "created": 1792801076864,
-    "stale": false
+    "created": 1792801076864
   },
   {
     "id": "сэкономьте-10-при-покупке-tape-to-tape-mvlnfaby",
