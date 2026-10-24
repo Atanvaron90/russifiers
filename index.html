@@ -118,7 +118,8 @@
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком,
-     колонка обложки адаптивна; ярлык — та же квадратная форма, уменьшенная */
+     прижата К ВЕРХУ плашки (align-self:start), чтобы её верхний край
+     совпадал с ярлыком (оба на отступе 10px) */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -130,7 +131,7 @@
       width:100%; height:auto;
       aspect-ratio:460/215;
       border-radius:8px;
-      align-self:center;
+      align-self:start;   /* прижата к верху — не центрируется */
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
@@ -141,8 +142,12 @@
     .grid:not(.view-compact) .card .meta { font-size:.74rem; }
     .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
     .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
+    /* Ярлык: верхний и левый края совпадают с кромкой обложки
+       (внутренний отступ плашки 10px; обложка прижата к верху) */
     .grid:not(.view-compact) .card .stale-badge {
-      top:6px; left:6px; font-size:.62rem; padding:3px 7px; border-radius:8px;
+      top:10px; left:10px;
+      font-size:.68rem; font-weight:700;
+      padding:3px 8px; border-radius:8px;
     }
     .grid.view-compact { max-width:none; padding:0 8px; }
     .toolbar { padding:0 12px; }
