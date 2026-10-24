@@ -661,13 +661,19 @@
     "title": "Let Them Trade",
     "cover": {
       "appid": "1313290",
-      "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1313290/header.jpg"
+      "name": "Let Them Trade",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/03febd9b7c531a5a685fc46c0f06a6f249a2e273/header.jpg?t=1792070270",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/c2b85763fab13ed1068cffe2013de2dcc9d344bf/capsule_184x69.jpg?t=1792070270"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/jTwfRJyk3JiTdg",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/1db76d38-4cf6-4203-9a50-c7ee07dfb2c2?isFromShowcase=true",
         "dl": 0
       }
     ],
