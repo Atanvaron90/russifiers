@@ -78,6 +78,1547 @@
   .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
   .icon-btn:hover { opacity:1; }
 
+  /* Ярлык «Не обновляется» на обложке плашки */
+  .stale-badge {
+    position:absolute; top:12px; left:12px; z-index:2;
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(15,17,23,.82); border:1px solid rgba(154,160,171,.5);
+    color:#b9bec8; font-size:.72rem; font-weight:600;
+    padding:4px 9px; border-radius:999px;
+    text-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+
+  .grid.view-list { grid-template-columns:1fr; }
+  .grid.view-list .card { display:grid; grid-template-columns:230px 1fr; gap:4px 16px; align-items:start; padding:12px; }
+  .grid.view-list .card .cover { grid-column:1; grid-row:1 / span 3; width:100%; height:100%; min-height:110px; }
+  .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
+  .grid.view-list .card .desc { flex-grow:0; }
+
+  .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
+  .grid.view-compact .card {
+    background:none; border:none; border-radius:0;
+    padding:7px 14px; gap:0; transform:none;
+  }
+  .grid.view-compact .card:hover { transform:none; border-color:transparent; background:rgba(108,92,231,.09); }
+  .grid.view-compact .card h2 {
+    font-size:1rem; font-weight:500; padding-right:40px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .grid.view-compact .card:hover h2 { color:#a99cf5; }
+  .grid.view-compact .card .cover,
+  .grid.view-compact .card .desc,
+  .grid.view-compact .card .meta,
+  .grid.view-compact .card .stale-badge { display:none; }
+  .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
+  .grid.view-compact .icon-btn { background:rgba(15,17,23,.55); }
+
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .overlay.hidden { display:none; }
+  .modal { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; width:100%; max-width:560px; max-height:92vh; overflow:auto; }
+  .modal h2 { font-size:1.2rem; margin-bottom:12px; }
+  .modal label { display:block; font-size:.82rem; color:var(--muted); margin:12px 0 4px; }
+  .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; }
+  .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
+  .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
+  .f-note { font-size:.8rem; color:#a99cf5; margin-top:6px; min-height:1em; line-height:1.5; }
+  .f-note a { color:#a99cf5; text-decoration:underline; }
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
+
+  /* Чекбокс ярлыка в форме */
+  .flag-row { display:flex; align-items:flex-start; gap:10px; margin-top:14px; cursor:pointer; }
+  .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; margin-top:2px; cursor:pointer; accent-color:var(--accent); }
+  .flag-row .flag-text { font-size:.9rem; color:var(--text); }
+  .flag-row .flag-text small { display:block; color:var(--muted); font-size:.78rem; margin-top:2px; }
+
+  .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
+  .cover-preview.hidden { display:none; }
+  .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
+  .cov-right { flex:1; min-width:0; }
+  .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
+  .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
+
+  .steam-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--field); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px; margin-top:6px; cursor:pointer; font-size:.9rem; }
+  .steam-item:hover { border-color:var(--accent); }
+  .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
+
+  .lk-row { display:grid; grid-template-columns:auto 150px 1fr auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
+  .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
+  .lk-order { display:flex; flex-direction:column; gap:2px; }
+  .ord { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.85rem; line-height:1; padding:2px 5px; }
+  .ord:hover:not(:disabled) { color:var(--accent); }
+  .ord:disabled { opacity:.25; cursor:default; }
+  .ver-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:4px; }
+  .ver-del:hover { color:#ff6b6b; }
+  @media (max-width:600px) {
+    .lk-row { grid-template-columns:auto 1fr auto; }
+    .l-type { grid-column:2; }
+    .l-url  { grid-column:2; grid-row:2; }
+  }
+
+  .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
+  .dn-row input { padding:8px 10px; font-size:.9rem; }
+  .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
+  .dn-row .full { grid-column:1 / -1; }
+
+  .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
+  .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
+  .don-edit { position:absolute; top:10px; right:10px; }
+  .donate-box h3 { font-size:1.05rem; margin-bottom:6px; }
+  .donate-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
+  .donate-list { display:flex; flex-wrap:wrap; gap:10px; }
+  .don-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 14px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit; }
+  .don-btn:hover { border-color:var(--accent); }
+  .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
+  .don-ico img { width:13px; height:13px; }
+  body:not(.admin) #donate.no-methods { display:none; }
+
+  @media (min-width: 1650px) {
+    .donate {
+      position: fixed;
+      top: 152px;
+      left: calc(50vw - 824px);
+      width: 300px;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      z-index: 5;
+    }
+    .donate-box { padding: 14px 16px; }
+    .donate-box h3 { font-size: 1rem; }
+    .donate-box p { font-size: .82rem; margin-bottom: 10px; }
+  }
+
+  .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
+  .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:12px; align-items:center; }
+  .g-top button {
+    background:none; border:none; cursor:pointer;
+    font-size:1.1rem; line-height:1; padding:2px; opacity:.85;
+    color:#9aa0ab; text-shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+  .g-top button:hover { opacity:1; color:#e4e6eb; transform:scale(1.15); }
+  .g-grid { display:grid; grid-template-columns:250px 1fr; }
+  .g-cover-link { display:block; }
+  .g-cover-link img { transition:filter .15s; }
+  .g-cover-link:not(.no-link):hover img { filter:brightness(1.15); }
+  .g-cover-link.no-link { pointer-events:none; }
+  .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
+  .g-body { padding:24px; max-height:82vh; overflow:auto; }
+  .g-body h2 { margin-bottom:6px; }
+  .g-title-link { color:inherit; text-decoration:none; }
+  .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
+  .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
+  .lk { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:var(--field); }
+  .lk-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; font-size:1rem; }
+  .lk-ico img { width:19px; height:19px; }
+  .lk-info { flex:1; font-size:.92rem; line-height:1.35; }
+  .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
+  .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
+  .lk-btn:hover { filter:brightness(1.15); }
+  @media (max-width:640px) {
+    .g-grid { grid-template-columns:1fr; }
+    .g-cover { max-height:240px; min-height:0; }
+  }
+
+  footer {
+    position:fixed; bottom:0; left:0; right:0; z-index:10;
+    text-align:center; color:var(--muted); padding:12px; font-size:.8rem;
+    background:rgba(15,17,23,.88); border-top:1px solid var(--border);
+  }
+
+  .toasts { position:fixed; right:16px; bottom:56px; z-index:100; display:flex; flex-direction:column; gap:8px; max-width:min(340px, calc(100vw - 32px)); }
+  .toast {
+    background:#1f2330; border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:10px; padding:10px 14px; font-size:.87rem; color:var(--text);
+    box-shadow:0 6px 20px rgba(0,0,0,.45); animation:tin .25s ease; overflow-wrap:anywhere;
+  }
+  .toast.ok  { border-left-color:#3ecf8e; }
+  .toast.err { border-left-color:#ff6b6b; }
+  .toast.out { opacity:0; transition:opacity .35s; }
+  @keyframes tin { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+
+<div class="sticky-top">
+  <header>
+    <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
+    <div class="title-row">
+      <img id="siteLogo" class="site-logo" alt="">
+      <span id="logoFallback" class="logo-fallback">🌐</span>
+      <div class="title-text">
+        <h1>Русификаторы от Atanvaron</h1>
+        <p>Мои переводы и проекты — бесплатно</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" type="text" placeholder="Поиск по названию игры...">
+    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
+    <select id="sortBy" title="Сортировка">
+      <option value="az">А → Я</option>
+      <option value="za">Я → А</option>
+      <option value="dl">По переходам</option>
+      <option value="new">Сначала новые</option>
+    </select>
+    <select id="viewBy" title="Вид списка">
+      <option value="grid">Сетка</option>
+      <option value="list">Список</option>
+      <option value="compact">Компактно</option>
+    </select>
+    <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
+  </div>
+</div>
+
+<div class="grid view-grid" id="grid"></div>
+
+<section id="donate" class="donate">
+  <div class="donate-box">
+    <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
+    <h3 id="donTitle"></h3>
+    <p id="donText"></p>
+    <div class="donate-list" id="donateList"></div>
+  </div>
+</section>
+
+<footer>© 2026 Atanvaron</footer>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- Окно игры -->
+<div id="gameModal" class="overlay hidden">
+  <div class="modal game">
+    <div class="g-top">
+      <button id="gEdit" class="admin-only" title="Редактировать">✏️</button>
+      <button id="gDel" class="admin-only" title="Удалить">🗑️</button>
+      <button id="gClose" title="Закрыть">✕</button>
+    </div>
+    <div class="g-grid">
+      <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
+        <img id="gCover" class="g-cover" alt="Обложка">
+      </a>
+      <div class="g-body">
+        <h2 id="gTitle"></h2>
+        <div id="gStale" class="stale-badge" style="position:static; margin-top:6px; display:none;">🏷 Не обновляется</div>
+        <p id="gDesc" class="desc" style="margin-top:10px;"></p>
+        <h3>Ссылки</h3>
+        <div id="gLinks"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Форма добавления / редактирования.
+     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
+<div id="formModal" class="overlay hidden">
+  <div class="modal">
+    <h2 id="formModalTitle">Добавить русификатор</h2>
+    <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
+    <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
+    <div id="fNote" class="f-note"></div>
+    <label>Название игры *</label>
+    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
+    <div id="coverPreview" class="cover-preview hidden">
+      <img id="covImg" alt="Обложка">
+      <div class="cov-right">
+        <div id="covLabel" class="meta"></div>
+        <div id="covAlts"></div>
+      </div>
+    </div>
+    <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
+    <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
+
+    <label class="flag-row">
+      <input id="fStale" type="checkbox">
+      <span class="flag-text">🏷 Пометить «Не обновляется»
+        <small>Например, если вышел официальный перевод игры и версии больше не выходят. На плашке появится ярлык.</small>
+      </span>
+    </label>
+
+    <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
+    <div id="lkList"></div>
+    <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
+    <div class="modal-actions">
+      <button id="fCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="fSave" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Редактор блока донатов (только для админа).
+     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
+<div id="donateModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Блок донатов</h2>
+    <label>Заголовок</label>
+    <input id="dTitle" type="text" placeholder="☕ Поддержать автора">
+    <label>Подпись</label>
+    <textarea id="dText" style="min-height:60px; resize:vertical;"></textarea>
+    <label>Способы поддержки — у каждого название и ссылка ИЛИ реквизиты для копирования:</label>
+    <div id="dList"></div>
+    <button id="dAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить способ</button>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boosty, telegram). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <div class="modal-actions">
+      <button id="dCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Вход по токену -->
+<div id="loginModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Вход администратора</h2>
+    <p class="hint">Вставьте персональный токен GitHub (fine-grained) с правом <b>Contents: Read and write</b> на репозиторий сайта. Токен хранится только в вашем браузере.</p>
+    <label>Токен</label>
+    <input id="tokenInput" type="password" placeholder="github_pat_... или ghp_...">
+    <div class="modal-actions">
+      <button id="loginCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="loginOk" class="tool-btn primary" type="button">Войти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================== НАСТРОЙКИ — ЗАПОЛНИ СВОЁ ==================
+const CONFIG = {
+  owner: "ВАШ_НИК_GITHUB",
+  repo: "russifiers",
+  branch: "main",
+  dataFile: "data.json",
+  donateFile: "donate.json",
+  counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
+};
+const COUNTER_API = "https://abacus.jasoncameron.dev";
+
+// ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
+const DONATE_DEFAULT = {
+  title: "☕ Поддержать автора",
+  text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
+  methods: [
+    { name: "Boosty", url: "https://boosty.to/atanvaron/donate", icon: "boosty", color: "#F15F2C" },
+    { name: "ЮMoney", url: "https://yoomoney.ru/to/4100XXXXXXXXXXXX", color: "#8B3FFE" },
+    { name: "Карта — нажмите, чтобы скопировать", value: "0000 0000 0000 0000", color: "#2E7D32" }
+  ]
+};
+// ============================================================
+
+if (location.hostname.endsWith(".github.io")) {
+  CONFIG.owner = location.hostname.split(".")[0];
+  const seg = location.pathname.split("/").filter(Boolean);
+  if (seg.length) CONFIG.repo = seg[0];
+}
+
+const GH_API = "https://api.github.com";
+const LS_TOKEN = "russifiers_gh_token";
+const LS_DL = "russifiers_dl_cache_v1";
+const LS_SORT = "russifiers_sort";
+const LS_VIEW = "russifiers_view";
+const LS_STEAM_COMBO = "russifiers_steam_combo";
+const LS_APP_ROUTE = "russifiers_app_route";
+const LS_APPNAMES = "russifiers_appnames_v2";
+
+const $ = id => document.getElementById(id);
+const state = { projects: [], dataSha: null, donateSha: null, donate: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
+let dlCache = {}; try { dlCache = JSON.parse(localStorage.getItem(LS_DL)) || {}; } catch (e) {}
+const saveDl = () => localStorage.setItem(LS_DL, JSON.stringify(dlCache));
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
+const encPath = p => p.split("/").map(encodeURIComponent).join("/");
+const dedupe = arr => [...new Set(arr.filter(Boolean))];
+const pluralRu = (n, one, few, many) => {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+};
+
+// ---------- Тосты ----------
+function toast(msg, type = "info", ms = 4000) {
+  const d = document.createElement("div");
+  d.className = "toast " + type;
+  d.textContent = msg;
+  $("toasts").appendChild(d);
+  setTimeout(() => { d.classList.add("out"); setTimeout(() => d.remove(), 400); }, ms);
+}
+
+// ---------- Логотип сайта ----------
+// Ищет файл логотипа среди нескольких имён — расширение файла больше не важно.
+// Первый найденный становится лого в шапке и иконкой вкладки.
+(function setupLogo() {
+  const img = $("siteLogo");
+  const fav = document.createElement("link");
+  fav.rel = "icon";
+  const candidates = ["logo.png", "logo.jpg", "logo.jpeg", "logo.webp", "logo.gif"];
+  let i = 0;
+  function tryNext() {
+    if (i >= candidates.length) {           // ни одного файла нет — заглушка
+      img.style.display = "none";
+      $("logoFallback").style.display = "inline";
+      return;
+    }
+    const name = candidates[i++];
+    const probe = new Image();
+    probe.onload = () => {
+      img.src = name;
+      img.style.display = "block";
+      $("logoFallback").style.display = "none";
+      fav.type = name.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+      fav.href = name;
+      document.head.appendChild(fav);
+    };
+    probe.onerror = tryNext;                // файла нет — пробуем следующее имя
+    probe.src = name;
+  }
+  tryNext();
+})();
+
+// ---------- Каталог сервисов ----------
+// yadisk: у Simple Icons нет значка "yandexdisk" (404) — favicon-сервис + белый фон
+const SERVICES = {
+  yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
+              iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
+  gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
+  boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
+  pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
+              iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
+  github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","gist.github.com","raw.githubusercontent.com","gist.githubusercontent.com"] },
+  telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph","telesco.pe"] },
+  mega:     { name:"MEGA",          slug:"mega",        color:"#D9272E", hosts:["mega.nz","mega.io"] },
+  mediafire:{ name:"MediaFire",     slug:"mediafire",   color:"#1299F3", hosts:["mediafire.com"] },
+  dropbox:  { name:"Dropbox",       slug:"dropbox",     color:"#0061FF", hosts:["dropbox.com","dropboxusercontent.com"] },
+  cloudmr:  { name:"Облако Mail.ru",slug:"mailru",      color:"#005FF9", hosts:["cloud.mail.ru"] },
+  other:    { name:"Другое",        slug:"",            color:"#8A8F98", hosts:[] }
+};
+function detectService(url) {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    for (const [k, s] of Object.entries(SERVICES))
+      if (s.hosts.some(host => h === host || h.endsWith("." + host))) return k;
+  } catch (e) {}
+  return "other";
+}
+function makeIcon(type) {
+  const s = SERVICES[type] || SERVICES.other;
+  if (s.iconUrl)
+    return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.style.color='${s.txt || "#fff"}';this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
+  if (!s.slug) return `<span class="lk-ico" style="background:${s.color};color:${s.txt || "#fff"}">${esc(s.fallback || "🔗")}</span>`;
+  return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
+}
+
+// ---------- Обложки ----------
+// Вертикальная (library_600x900): старые зеркала первыми, новые пути — запасом.
+const steamTallURLs = appid => [
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
+];
+// Горизонтальная: у части новых игр старые пути отдают 404, поэтому новые первыми
+const steamHeaderURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
+  `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`
+];
+const steamCapsuleURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`
+];
+function phSVG(letter) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+function setCoverCascade(img, urls) {
+  let i = 0;
+  img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
+  img.src = urls[0];
+}
+function coverURLs(p) {
+  const c = p.cover || {};
+  const urls = [
+    c.url, ...(c.appid ? steamHeaderURLs(c.appid) : []),
+    c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+    phSVG((p.title[0] || "?").toUpperCase())
+  ];
+  return dedupe(urls);
+}
+function gameCoverURLs(p) {
+  const c = p.cover || {};
+  const urls = [
+    ...(c.appid ? steamTallURLs(c.appid) : []),
+    ...(c.appid ? steamHeaderURLs(c.appid) : []),
+    c.url, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+    phSVG((p.title[0] || "?").toUpperCase())
+  ];
+  return dedupe(urls);
+}
+
+function fetchTimeout(url, ms = 8000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
+}
+
+// ---------- Прокси для Steam ----------
+const STEAM_PROXIES = [
+  { name:"direct",         wrap: u => u },
+  { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { name:"allorigins",     wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { name:"allorigins-get", wrap: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json:"contents" },
+  { name:"cors-lol",       wrap: u => "https://api.cors.lol/?url=" + encodeURIComponent(u) },
+  { name:"cors-workers",   wrap: u => "https://test.cors.workers.dev/?" + u }
+];
+const failedCombos = new Set();
+
+// ---------- Поиск игр по названию ----------
+const SEARCH_SOURCES = [
+  { name:"community", url: t => "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(t),
+    parse: j => Array.isArray(j) ? j.map(x => ({ id:String(x.appid ?? ""), name:x.name || "", tiny:x.icon || x.logo || "" })) : [] },
+  { name:"storesearch", url: t => "https://store.steampowered.com/api/storesearch/?term=" + encodeURIComponent(t) + "&cc=US&l=russian",
+    parse: j => (j && Array.isArray(j.items)) ? j.items.map(x => ({ id:String(x.id ?? x.appid ?? ""), name:x.name || "", tiny:x.tiny_capsule || "" })) : [] },
+  { name:"htmlpage", url: t => "https://store.steampowered.com/search/?term=" + encodeURIComponent(t), html:true }
+];
+function parseSearchHTML(html) {
+  const out = [];
+  const dec = t => { const ta = document.createElement("textarea"); ta.innerHTML = t; return ta.value; };
+  const re = /<a[^>]*data-ds-appid="(\d+)"[^>]*>[\s\S]*?<span class="title">([^<]*)<\/span>/g;
+  let m;
+  while ((m = re.exec(html)) && out.length < 7) {
+    const id = m[1], name = dec(m[2] || "").trim();
+    if (id && name) out.push({ id, name, tiny: "" });
+  }
+  return out;
+}
+function comboList() {
+  const list = [];
+  const saved = localStorage.getItem(LS_STEAM_COMBO);
+  if (saved) {
+    const [s, p] = saved.split(":").map(Number);
+    if (SEARCH_SOURCES[s] && STEAM_PROXIES[p]) list.push([s, p]);
+  }
+  list.push([0, 0], [1, 0]);
+  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([0, p], [1, p]);
+  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([2, p]);
+  return list;
+}
+async function steamSearch(term) {
+  let anyAnswered = false;
+  for (const [s, p] of comboList()) {
+    const combo = s + ":" + p;
+    if (failedCombos.has(combo)) continue;
+    const src = SEARCH_SOURCES[s];
+    const url = STEAM_PROXIES[p].wrap(src.url(term));
+    try {
+      const r = await fetchTimeout(url, 15000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const text = await r.text();
+      let items;
+      if (src.html) items = parseSearchHTML(text);
+      else {
+        let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
+        items = src.parse(j);
+      }
+      items = items.filter(x => x.id && x.name);
+      if (items.length) {
+        localStorage.setItem(LS_STEAM_COMBO, combo);
+        return items.slice(0, 7);
+      }
+      anyAnswered = true;
+    } catch (e) {
+      failedCombos.add(combo);
+      console.warn("Steam-поиск: маршрут не ответил —", src.name + "/" + STEAM_PROXIES[p].name, "(", e.message, ")");
+    }
+  }
+  return anyAnswered ? [] : null;
+}
+
+// ---------- Информация об игре по AppID: название + канонические обложки ----------
+// Стратегия: быстрая попытка через запомненный удачный маршрут →
+// ГОНКА всех маршрутов одновременно (Promise.any), таймаут каждому 20 с.
+const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
+function cacheInfo(id, info) {
+  appInfoCache[id] = info;
+  const keys = Object.keys(appInfoCache);
+  if (keys.length > 300) delete appInfoCache[keys[0]];
+  localStorage.setItem(LS_APPNAMES, JSON.stringify(appInfoCache));
+}
+function cachedInfo(id) {
+  const v = appInfoCache[id];
+  if (!v) return null;
+  return typeof v === "string" ? { name: v, header: "", capsule: "" } : v;
+}
+const APP_ROUTES = [
+  { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&cc=US&l=russian`,
+    parse: (j, id) => {
+      const d = j && j[id];
+      if (d && d.success && d.data) {
+        return {
+          name: String(d.data.name || ""),
+          header: String(d.data.header_image || ""),
+          capsule: String(d.data.capsule_imagev5 || d.data.capsule_image || "")
+        };
+      }
+      return null;
+    } },
+  { name:"steamspy", url: id => `https://steamspy.com/api.php?request=appdetails&appid=${id}`,
+    parse: j => (j && j.name) ? { name: String(j.name), header: "", capsule: "" } : null },
+  { name:"htmlpage", url: id => `https://store.steampowered.com/app/${id}/?l=russian`, html: true }
+];
+function parseOgTitle(html) {
+  const m = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)
+        || html.match(/<title>([^<]+)<\/title>/i);
+  if (!m) return null;
+  let t = m[1].trim();
+  t = t.replace(/^Save \d+% on\s+/i, "").replace(/^(Купить|Сохранить \d+% на|Скидка \d+% на)\s+/i, "");
+  t = t.replace(/\s+(on Steam|в Steam)$/i, "");
+  return t || null;
+}
+function parseOg(html) {
+  const im = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+  return {
+    name: parseOgTitle(html) || "",
+    header: im ? im[1].replace(/^http:/, "https:") : "",
+    capsule: ""
+  };
+}
+async function tryRoute(route, proxy, appid, ms) {
+  const r = await fetchTimeout(proxy.wrap(route.url(appid)), ms);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  let text = await r.text();
+  if (proxy.json) { // обёртка allorigins/get: {"contents": "..."}
+    try { text = JSON.parse(text)[proxy.json] || ""; } catch (e) { throw new Error("нет обёртки"); }
+  }
+  let info;
+  if (route.html) {
+    info = parseOg(text);
+    if (!info.name && !info.header) throw new Error("og-теги не найдены");
+  } else {
+    let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
+    info = route.parse(j, appid);
+    if (!info || (!info.name && !info.header)) throw new Error("пустой ответ");
+  }
+  return info;
+}
+async function fetchAppInfo(appid) {
+  const cached = cachedInfo(appid);
+  if (cached && cached.header) return cached;
+
+  // Быстрая попытка через запомненный удачный маршрут
+  const saved = localStorage.getItem(LS_APP_ROUTE);
+  if (saved) {
+    const [ri, pi] = saved.split(":").map(Number);
+    if (APP_ROUTES[ri] && STEAM_PROXIES[pi]) {
+      try {
+        const info = await tryRoute(APP_ROUTES[ri], STEAM_PROXIES[pi], appid, 8000);
+        if (!info.name && cached?.name) info.name = cached.name;
+        cacheInfo(appid, info);
+        return info;
+      } catch (e) {
+        localStorage.removeItem(LS_APP_ROUTE);
+        console.warn("Инфо по AppID: сохранённый маршрут не ответил —", APP_ROUTES[ri].name + "/" + STEAM_PROXIES[pi].name, "(", e.message, ")");
+      }
+    }
+  }
+
+  // ГОНКА: все маршруты одновременно
+  const tasks = [];
+  for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
+    for (let ri = 0; ri < APP_ROUTES.length; ri++) {
+      const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
+      if (route.html && proxy.name === "direct") continue;
+      tasks.push(
+        tryRoute(route, proxy, appid, 20000)
+          .then(info => {
+            localStorage.setItem(LS_APP_ROUTE, ri + ":" + pi);
+            return info;
+          })
+          .catch(e => {
+            console.warn("Инфо по AppID: не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
+            throw e;
+          })
+      );
+    }
+  try {
+    const info = await Promise.any(tasks);
+    if (!info.name && cached?.name) info.name = cached.name;
+    cacheInfo(appid, info);
+    return info;
+  } catch (e) {
+    return cached && (cached.name || cached.header) ? cached : null;
+  }
+}
+
+const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
+const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
+
+// ---------- Приведение данных к плоскому списку ссылок ----------
+function migrate(p) {
+  if (!Array.isArray(p.links)) {
+    const flat = [];
+    for (const v of (p.versions || []))
+      for (const l of (v.links || []))
+        if (l && l.url) flat.push(l);
+    p.links = flat;
+  }
+  delete p.versions;
+  p.links = (p.links || []).filter(l => l && l.url).map(l => ({
+    type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0
+  }));
+  return p;
+}
+
+// ---------- GitHub API ----------
+function gh(path, opts = {}) {
+  const headers = { Accept: "application/vnd.github+json", ...(opts.headers || {}) };
+  if (state.token) headers.Authorization = "Bearer " + state.token;
+  return fetch(GH_API + path, { ...opts, headers }).then(async r => {
+    if (!r.ok) { let m = ""; try { m = (await r.json()).message || ""; } catch (e) {} throw new Error(`${r.status} ${m}`); }
+    return r.json();
+  });
+}
+function utf8B64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+async function getSha(file) {
+  try {
+    const j = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}?ref=${CONFIG.branch}`);
+    return j.sha;
+  } catch (e) { return null; }
+}
+async function putJson(file, obj, message, retried = false) {
+  const body = { message, content: utf8B64(JSON.stringify(obj, null, 2)), branch: CONFIG.branch };
+  const cached = file === CONFIG.dataFile ? state.dataSha : state.donateSha;
+  const sha = cached || await getSha(file);
+  if (sha) body.sha = sha;
+  try {
+    const res = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}`,
+      { method: "PUT", body: JSON.stringify(body) });
+    if (file === CONFIG.dataFile) state.dataSha = res.content.sha;
+    else state.donateSha = res.content.sha;
+  } catch (e) {
+    if (!retried && /42[02]|409/.test(e.message)) {
+      if (file === CONFIG.dataFile) state.dataSha = null; else state.donateSha = null;
+      return putJson(file, obj, message, true);
+    }
+    throw e;
+  }
+}
+const writeData = (projects, message) => putJson(CONFIG.dataFile, projects, message);
+async function loadData() {
+  const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
+  if (r.status === 404) { state.projects = []; state.dataSha = null; return; }
+  if (!r.ok) throw new Error("GitHub вернул " + r.status);
+  const data = await r.json();
+  if (!Array.isArray(data)) throw new Error("data.json имеет неверный формат");
+  state.projects = data.filter(p => p && p.title).map(migrate);
+  state.dataSha = null;
+}
+
+// ---------- Авторемонт обложек ----------
+const autoHealTried = new Set();
+const isConstructedUrl = (p) => {
+  const u = p.cover?.url;
+  if (!u || !p.cover?.appid) return false;
+  return new RegExp(`steamstatic\\.com\\/(steam|store_item_assets)\\/steam\\/apps\\/${p.cover.appid}\\/header\\.jpg$`, "i").test(u);
+};
+async function autoHealCovers() {
+  if (!state.token) return;
+  const need = state.projects.filter(p =>
+    p.cover?.appid && (!p.cover.url || isConstructedUrl(p)) &&
+    !cachedInfo(p.cover.appid)?.header && !autoHealTried.has(p.cover.appid));
+  if (!need.length) return;
+  let fixed = 0;
+  for (const p of need) {
+    autoHealTried.add(p.cover.appid);
+    try {
+      const info = await fetchAppInfo(p.cover.appid);
+      if (info?.header && info.header !== p.cover.url) {
+        p.cover.url = info.header;
+        if (info.capsule) p.cover.capsule = info.capsule;
+        fixed++;
+      }
+    } catch (e) {}
+    await new Promise(r => setTimeout(r, 350));
+  }
+  if (fixed) {
+    try {
+      await writeData(state.projects, "Обложки: канонические URL из Steam");
+      render();
+      toast(`Обложки обновлены автоматически: ${fixed} шт.`, "ok", 5000);
+    } catch (e) {
+      console.warn("Авторемонт обложек: не удалось сохранить —", e.message);
+    }
+  }
+}
+
+// ---------- Донаты ----------
+async function loadDonate() {
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.donateFile}?t=${Date.now()}`);
+    if (r.ok) {
+      const j = await r.json();
+      if (j && typeof j === "object" && Array.isArray(j.methods)) { state.donate = j; return; }
+    }
+  } catch (e) {}
+  state.donate = DONATE_DEFAULT;
+}
+function renderDonate() {
+  const sec = $("donate");
+  const d = state.donate;
+  const methods = (d && Array.isArray(d.methods))
+    ? d.methods.filter(m => m && m.name && (m.url || m.value)) : [];
+  if (!methods.length) {
+    sec.classList.add("no-methods");
+    $("donTitle").textContent = "Блок донатов выключен";
+    $("donText").textContent = "Нажми ✏️, чтобы настроить способы поддержки.";
+    $("donateList").innerHTML = "";
+    return;
+  }
+  sec.classList.remove("no-methods");
+  $("donTitle").textContent = d.title || "Поддержать автора";
+  $("donText").textContent = d.text || "";
+  const box = $("donateList");
+  box.innerHTML = "";
+  for (const m of methods) {
+    const ico = m.icon
+      ? `<span class="don-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
+      : `<span class="don-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
+    if (m.url) {
+      box.insertAdjacentHTML("beforeend", `<a class="don-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
+    } else {
+      box.insertAdjacentHTML("beforeend", `<button type="button" class="don-btn don-copy" data-value="${esc(m.value)}" data-label="${esc(m.name)}" title="Нажмите, чтобы скопировать">${ico}<span>${esc(m.name)}: ${esc(m.value)}</span></button>`);
+    }
+  }
+}
+ $("donateList").addEventListener("click", async e => {
+  const b = e.target.closest(".don-copy");
+  if (!b) return;
+  try {
+    await navigator.clipboard.writeText(b.dataset.value);
+    toast("Скопировано: " + b.dataset.label, "ok", 2500);
+  } catch (err) {
+    toast("Не удалось скопировать — выделите реквизит вручную", "err");
+  }
+});
+function addDonateRow(m = {}) {
+  const box = document.createElement("div");
+  box.className = "dn-row";
+  box.innerHTML = `
+    <input class="dn-name" placeholder="Название (Boosty, ЮMoney, Карта…)" value="${esc(m.name || "")}">
+    <input class="dn-color" type="color" value="${esc(m.color || "#6c5ce7")}" title="Цвет значка">
+    <input class="dn-icon" placeholder="иконка (boosty)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
+    <input class="dn-url full" placeholder="https:// ссылка (необязательно)" value="${esc(m.url || "")}">
+    <input class="dn-val full" placeholder="…или реквизиты для копирования (необязательно)" value="${esc(m.value || "")}">
+    <button type="button" class="ver-del" title="Убрать способ">✕</button>`;
+  $("dList").appendChild(box);
+}
+ $("donEdit").addEventListener("click", () => {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const d = state.donate || {};
+  $("dTitle").value = d.title || "";
+  $("dText").value = d.text || "";
+  $("dList").innerHTML = "";
+  (d.methods?.length ? d.methods : [{}]).forEach(addDonateRow);
+  $("donateModal").classList.remove("hidden");
+});
+ $("dAdd").addEventListener("click", () => addDonateRow());
+ $("dList").addEventListener("click", e => {
+  if (e.target.closest(".ver-del")) e.target.closest(".dn-row").remove();
+});
+const closeDonate = () => $("donateModal").classList.add("hidden");
+ $("dCancel").addEventListener("click", closeDonate);
+ $("dSaveBtn").addEventListener("click", async () => {
+  const btn = $("dSaveBtn");
+  if (btn.disabled) return;
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const data = { title: $("dTitle").value.trim(), text: $("dText").value.trim(), methods: [] };
+  for (const b of document.querySelectorAll("#dList .dn-row")) {
+    const name = b.querySelector(".dn-name").value.trim();
+    if (!name) continue;
+    const m = { name, color: b.querySelector(".dn-color").value };
+    const icon = b.querySelector(".dn-icon").value.trim();
+    if (icon) m.icon = icon;
+    const url = b.querySelector(".dn-url").value.trim();
+    const val = b.querySelector(".dn-val").value.trim();
+    if (url) {
+      if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
+      m.url = url;
+    }
+    if (val) m.value = val;
+    if (m.url || m.value) data.methods.push(m);
+  }
+  btn.disabled = true;
+  try {
+    await putJson(CONFIG.donateFile, data, "Обновлён блок донатов");
+    state.donate = data;
+    renderDonate();
+    closeDonate();
+    toast("Блок донатов обновлён", "ok", 4000);
+  } catch (e) {
+    toast("Не удалось сохранить donate.json: " + e.message, "err", 6000);
+  }
+  btn.disabled = false;
+});
+
+// ---------- Счётчик переходов ----------
+const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
+const linkKey = (p, l) => `${p.id}_${hstr(l.url)}`;
+const getDl = (p, l) => Math.max(l.dl || 0, dlCache[linkKey(p, l)] || 0);
+const totalDl = p => (p.links || []).reduce((s, l) => s + getDl(p, l), 0);
+async function remoteGet(key) {
+  try {
+    const r = await fetch(`${COUNTER_API}/get/${CONFIG.counterNS}/${key}`);
+    if (r.ok) return (await r.json()).value || 0;
+  } catch (e) {}
+  return null;
+}
+const remoteHit = key => fetch(`${COUNTER_API}/hit/${CONFIG.counterNS}/${key}`).catch(() => {});
+
+let lastSync = 0;
+async function syncCounters() {
+  if (Date.now() - lastSync < 15000) return;
+  lastSync = Date.now();
+  let dirty = false;
+  for (const p of state.projects)
+    for (const l of (p.links || [])) {
+      const k = linkKey(p, l);
+      const remote = await remoteGet(k);
+      if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
+    }
+  if (dirty) saveDl();
+  render();
+}
+
+// ---------- Сортировка ----------
+const SORTS = {
+  az:  { fn: (a, b) => a.title.localeCompare(b.title, "ru", { sensitivity: "base" }) },
+  za:  { fn: (a, b) => b.title.localeCompare(a.title, "ru", { sensitivity: "base" }) },
+  dl:  { fn: (a, b) => totalDl(b) - totalDl(a) },
+  new: { fn: (a, b) => (b.created || 0) - (a.created || 0) }
+};
+function currentSort() {
+  const v = localStorage.getItem(LS_SORT);
+  return SORTS[v] ? v : "az";
+}
+
+// ---------- Вид списка ----------
+function currentView() {
+  const v = localStorage.getItem(LS_VIEW);
+  return ["grid", "list", "compact"].includes(v) ? v : "grid";
+}
+function applyView() {
+  grid.classList.remove("view-grid", "view-list", "view-compact");
+  grid.classList.add("view-" + currentView());
+  $("viewBy").value = currentView();
+}
+ $("viewBy").addEventListener("change", e => {
+  localStorage.setItem(LS_VIEW, e.target.value);
+  applyView();
+  render();
+});
+
+// ---------- Отрисовка ----------
+const grid = $("grid");
+let query = "";
+
+function render() {
+  const view = currentView();
+  const list = state.projects
+    .filter(p => !query || p.title.toLowerCase().includes(query))
+    .sort(SORTS[currentSort()].fn);
+
+  // Счётчик русификаторов: всего / найдено при поиске
+  const total = state.projects.length;
+  $("statCount").textContent = query
+    ? `Найдено: ${list.length} из ${total}`
+    : `${total} ${pluralRu(total, "русификатор", "русификатора", "русификаторов")}`;
+
+  grid.innerHTML = "";
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">${state.token ? "Пока ничего нет — нажмите «Добавить русификатор»" : "Пока ничего не опубликовано 😕"}</div>`;
+    return;
+  }
+  for (const p of list) {
+    // перечень сервисов из ссылок: «Яндекс.Диск • Google Drive • Boosty»
+    const services = dedupe((p.links || [])
+      .map(l => (SERVICES[l.type] || SERVICES.other).name));
+    grid.insertAdjacentHTML("beforeend", `
+      <div class="card" data-id="${esc(p.id)}">
+        ${p.stale ? '<div class="stale-badge">🏷 Не обновляется</div>' : ""}
+        <div class="card-actions admin-only">
+          <button class="icon-btn edit" title="Редактировать">✏️</button>
+          <button class="icon-btn del" title="Удалить">🗑️</button>
+        </div>
+        <img class="cover" alt="">
+        <h2>${esc(p.title)}</h2>
+        ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
+        ${services.length ? `<div class="meta">${esc(services.join(" • "))}</div>` : ""}
+      </div>`);
+    // в компактном виде картинки скрыты — не грузим их зря
+    if (view !== "compact")
+      setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
+  }
+}
+
+ $("sortBy").value = currentSort();
+ $("sortBy").addEventListener("change", e => {
+  localStorage.setItem(LS_SORT, e.target.value);
+  render();
+});
+ $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
+
+// ---------- Удаление ----------
+async function deleteProject(id) {
+  if (!state.token) { alert("Войдите как администратор (🔐 вверху справа)"); return false; }
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return false;
+  if (!confirm(`Удалить «${p.title}»? Запись исчезнет с сайта (можно вернуть откатом коммита в истории data.json).`)) return false;
+  state.projects = state.projects.filter(x => x.id !== id);
+  render();
+  try {
+    await writeData(state.projects, "Удалён: " + p.title);
+    toast("Удалено: " + p.title, "ok", 3000);
+  } catch (e) {
+    toast("Запись убрана со страницы, но data.json не обновлён: " + e.message, "err", 6000);
+  }
+  return true;
+}
+
+grid.addEventListener("click", e => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  const p = state.projects.find(x => x.id === card.dataset.id);
+  if (!p) return;
+  if (e.target.closest(".edit")) { openForm(p.id); return; }
+  if (e.target.closest(".del")) { deleteProject(p.id); return; }
+  openGame(p.id);
+});
+
+// ---------- Окно игры ----------
+let openedId = null;
+const steamStoreURL = p => p.cover?.appid ? `https://store.steampowered.com/app/${p.cover.appid}/` : null;
+
+function openGame(id) {
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+  openedId = id;
+
+  const store = steamStoreURL(p);
+  const titleEl = $("gTitle");
+  if (store) {
+    titleEl.innerHTML = `<a class="g-title-link" href="${esc(store)}" target="_blank" rel="noopener" title="Открыть страницу игры в Steam">${esc(p.title)}</a>`;
+  } else {
+    titleEl.textContent = p.title;
+  }
+  const coverLink = $("gCoverLink");
+  if (store) {
+    coverLink.href = store;
+    coverLink.classList.remove("no-link");
+    coverLink.title = "Открыть страницу игры в Steam";
+  } else {
+    coverLink.removeAttribute("href");
+    coverLink.classList.add("no-link");
+    coverLink.title = "";
+  }
+
+  // Ярлык «Не обновляется» под названием
+  $("gStale").style.display = p.stale ? "inline-flex" : "none";
+
+  $("gDesc").textContent = p.description || "";
+  $("gDesc").style.display = p.description ? "" : "none";
+
+  setCoverCascade($("gCover"), gameCoverURLs(p));
+
+  const box = $("gLinks");
+  box.innerHTML = "";
+  const links = p.links || [];
+  if (!links.length) box.innerHTML = '<p class="hint">Ссылки пока не добавлены.</p>';
+  links.forEach((l, i) => {
+    const s = SERVICES[l.type] || SERVICES.other;
+    box.insertAdjacentHTML("beforeend", `
+      <div class="lk">
+        ${makeIcon(l.type)}
+        <div class="lk-info"><b>${esc(s.name)}</b>
+          <span class="cnt">Переходов: ${getDl(p, l)}</span></div>
+        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Перейти</a>
+      </div>`);
+  });
+  $("gameModal").classList.remove("hidden");
+}
+
+ $("gLinks").addEventListener("click", e => {
+  const a = e.target.closest(".lk-btn");
+  if (!a) return;
+  const p = state.projects.find(x => x.id === openedId);
+  if (!p) return;
+  const l = (p.links || [])[+a.dataset.i];
+  if (!l) return;
+  const k = linkKey(p, l);
+  dlCache[k] = getDl(p, l) + 1;
+  saveDl();
+  remoteHit(k);
+  a.closest(".lk").querySelector(".cnt").textContent = "Переходов: " + dlCache[k];
+});
+
+ $("gEdit").addEventListener("click", () => {
+  if (!openedId) return;
+  $("gameModal").classList.add("hidden");
+  openForm(openedId);
+});
+ $("gDel").addEventListener("click", async () => {
+  if (!openedId) return;
+  if (await deleteProject(openedId)) $("gameModal").classList.add("hidden");
+});
+ $("gClose").addEventListener("click", () => $("gameModal").classList.add("hidden"));
+
+// ---------- Вход администратора ----------
+function setAdmin(on) {
+  document.body.classList.toggle("admin", on);
+  $("authBtn").textContent = on ? "🚪" : "🔐";
+  $("authBtn").title = on
+    ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
+    : "Вход администратора";
+}
+ $("authBtn").addEventListener("click", () => {
+  if (state.token) {
+    if (!confirm("Выйти из режима администратора?")) return;
+    state.token = ""; state.user = "";
+    localStorage.removeItem(LS_TOKEN);
+    setAdmin(false); render();
+  } else {
+    $("loginModal").classList.remove("hidden");
+    $("tokenInput").focus();
+  }
+});
+ $("loginOk").addEventListener("click", async () => {
+  const t = $("tokenInput").value.trim();
+  if (!t) return;
+  const old = state.token;
+  state.token = t;
+  try {
+    const u = await gh("/user");
+    state.user = u.login;
+    localStorage.setItem(LS_TOKEN, t);
+    setAdmin(true);
+    $("loginModal").classList.add("hidden");
+    $("tokenInput").value = "";
+    autoHealCovers();
+  } catch (e) {
+    state.token = old;
+    alert("GitHub не принял токен: " + e.message);
+  }
+});
+ $("loginCancel").addEventListener("click", () => $("loginModal").classList.add("hidden"));
+ $("tokenInput").addEventListener("keydown", e => { if (e.key === "Enter") $("loginOk").click(); });
+
+// ---------- Форма ----------
+let editId = null;
+let searchTimer = null, searchSeq = 0, appIdTimer = null, appIdSeq = 0;
+let titlePick = null, lastFound = [], titleAuto = false;
+
+const setNote = html => { $("fNote").innerHTML = html || ""; };
+
+function effectiveCover() {
+  const url = $("fCoverUrl").value.trim();
+  if (url) return { url };
+  const aid = extractAppId($("fAppId").value);
+  if (aid) {
+    const info = cachedInfo(aid) || {};
+    const found = lastFound.find(x => x.id === aid);
+    return {
+      appid: aid,
+      name: found?.name || info.name || "",
+      header: info.header || "",
+      capsule: info.capsule || ""
+    };
+  }
+  return titlePick;
+}
+
+function updateCoverPreview() {
+  const box = $("coverPreview"), img = $("covImg"), label = $("covLabel"), alts = $("covAlts");
+  const c = effectiveCover();
+  if (!c) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  alts.innerHTML = "";
+  if (c.url) {
+    label.textContent = "Обложка: своя ссылка на картинку";
+    setCoverCascade(img, [c.url, phSVG("?")]);
+  } else {
+    label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
+    setCoverCascade(img, dedupe([
+      c.header, ...(c.appid ? steamHeaderURLs(c.appid) : []),
+      c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
+      phSVG("?")
+    ]));
+    const explicit = $("fAppId").value.trim() || $("fCoverUrl").value.trim();
+    const others = lastFound.filter(x => x.id !== String(c.appid)).slice(0, 5);
+    if (!explicit && others.length) {
+      alts.innerHTML = '<span class="hint">Не та игра? Выберите другую:</span>' + others.map(x =>
+        `<button type="button" class="steam-item" data-id="${esc(x.id)}" data-name="${esc(x.name)}">
+           <img src="${esc(x.tiny || steamHeaderURLs(x.id)[0])}" alt="" onerror="this.onerror=null;this.src='${steamHeaderURLs(x.id)[1]}'">
+           <span>${esc(x.name)}</span>
+         </button>`).join("");
+    }
+  }
+}
+
+function queueTitleSearch(immediate = false) {
+  clearTimeout(searchTimer);
+  const seq = ++searchSeq;
+  const q = $("fTitle").value.trim();
+  if (q.length < 2 || $("fCoverUrl").value.trim() || extractAppId($("fAppId").value)) {
+    updateCoverPreview();
+    return;
+  }
+  const run = async () => {
+    $("coverPreview").classList.remove("hidden");
+    $("covImg").src = phSVG("…");
+    $("covAlts").innerHTML = "";
+    $("covLabel").textContent = "Ищу игру в Steam…";
+    const res = await steamSearch(q);
+    if (seq !== searchSeq) return;
+    if (res && res.length) {
+      lastFound = res;
+      titlePick = { appid: res[0].id, name: res[0].name };
+      updateCoverPreview();
+    } else if (res) {
+      lastFound = []; titlePick = null;
+      $("covImg").src = phSVG("?");
+      $("covLabel").textContent = "В Steam по этому названию ничего не найдено — проверьте название или вставьте ссылку / AppID в первое поле";
+    } else {
+      lastFound = []; titlePick = null;
+      $("covImg").src = phSVG("?");
+      $("covLabel").innerHTML = 'Steam-поиск заблокирован в этой сети (отключите блокировщик рекламы для сайта или впишите AppID в первое поле) <button type="button" class="retry-search">↻ Повторить</button>';
+    }
+  };
+  if (immediate) run();
+  else searchTimer = setTimeout(run, 500);
+}
+
+function queueAppIdLookup(immediate = false) {
+  clearTimeout(appIdTimer);
+  const seq = ++appIdSeq;
+  const raw = $("fAppId").value.trim();
+  const appid = extractAppId(raw);
+  updateCoverPreview();
+  if (!appid) return;
+  if ((titleAuto || !$("fTitle").value.trim())) {
+    const slugName = titleFromSlug(raw);
+    if (slugName) {
+      $("fTitle").value = slugName;
+      setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное название и обложку из Steam…");
+    } else {
+      setNote("Получаю название и обложку из Steam…");
+    }
+  }
+  const run = async () => {
+    const info = await fetchAppInfo(appid);
+    if (seq !== appIdSeq) return;
+    if (info && (info.name || info.header)) {
+      if (info.name) { titleAuto = true; $("fTitle").value = info.name; }
+      updateCoverPreview();
+      setNote(info.header
+        ? "Название и обложка из Steam (точный адрес картинки) — можно отредактировать вручную."
+        : "Название из Steam — можно отредактировать вручную.");
+    } else {
+      setNote(`Steam API недоступен из этой сети. Впиши название вручную — обложка по AppID подтянется. Сверить название: <a href="https://store.steampowered.com/app/${appid}/" target="_blank" rel="noopener">страница игры в Steam</a>`);
+    }
+  };
+  if (immediate) run();
+  else appIdTimer = setTimeout(run, 450);
+}
+
+ $("fAppId").addEventListener("input", () => queueAppIdLookup(false));
+ $("fTitle").addEventListener("input", () => {
+  titleAuto = false;
+  setNote("");
+  if (extractAppId($("fAppId").value)) { updateCoverPreview(); return; }
+  queueTitleSearch(false);
+});
+ $("fCoverUrl").addEventListener("input", () => {
+  if ($("fCoverUrl").value.trim()) updateCoverPreview();
+  else if (extractAppId($("fAppId").value)) updateCoverPreview();
+  else queueTitleSearch(false);
+});
+ $("coverPreview").addEventListener("click", e => {
+  if (e.target.closest(".retry-search")) { failedCombos.clear(); queueTitleSearch(true); return; }
+  const b = e.target.closest(".steam-item");
+  if (!b) return;
+  titlePick = null;
+  $("fAppId").value = b.dataset.id;
+  $("fTitle").value = b.dataset.name;
+  titleAuto = true;
+  appIdSeq++;
+  setNote("");
+  queueAppIdLookup(true);
+  updateCoverPreview();
+});
+
+function openForm(id = null) {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  editId = id;
+  searchSeq++; appIdSeq++;
+  clearTimeout(searchTimer); clearTimeout(appIdTimer);
+  titlePick = null; lastFound = []; titleAuto = false;
+  const p = id ? state.projects.find(x => x.id === id) : null;
+  $("formModalTitle").textContent = p ? "Редактировать русификатор" : "Добавить русификатор";
+  $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
+  $("fTitle").value = p ? p.title : "";
+  $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
+  $("fStale").checked = !!(p?.stale);
+  setNote("");
+  $("lkList").innerHTML = "";
+  const links = p?.links?.length ? p.links : [{}];
+  links.forEach(addLinkRow);
+  refreshOrder();
+  updateCoverPreview();
+  if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
+  $("formModal").classList.remove("hidden");
+}
+const closeForm = () => $("formModal").classList.add("hidden");
+
+function addLinkRow(l = {}) {
+  const box = document.createElement("div");
+  box.className = "lk-row";
+  const opts = Object.entries(SERVICES)
+    .map(([k, s]) => `<option value="${k}" ${l.type === k ? "selected" : ""}>${s.name}</option>`).join("");
+  box.innerHTML = `
+    <div class="lk-order">
+      <button type="button" class="ord up" title="Поднять выше">▲</button>
+      <button type="button" class="ord down" title="Опустить ниже">▼</button>
+    </div>
+    <select class="l-type">${opts}</select>
+    <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">
+    <button type="button" class="ver-del" title="Убрать ссылку">✕</button>`;
+  $("lkList").appendChild(box);
+}
+
+function refreshOrder() {
+  const rows = [...$("lkList").querySelectorAll(".lk-row")];
+  rows.forEach((r, i) => {
+    r.querySelector(".ord.up").disabled = i === 0;
+    r.querySelector(".ord.down").disabled = i === rows.length - 1;
+  });
+}
+
+ $("btnAdd").addEventListener("click", () => openForm());
+ $("fAddLink").addEventListener("click", () => { addLinkRow(); refreshOrder(); });
+ $("fCancel").addEventListener("click", closeForm);
+
+ $("lkList").addEventListener("click", e => {
+  const row = e.target.closest(".lk-row");
+  if (!row) return;
+  if (e.target.closest(".ver-del")) { row.remove(); refreshOrder(); return; }
+  if (e.target.closest(".ord.up") && row.previousElementSibling) {
+    row.previousElementSibling.before(row);
+    refreshOrder();
+  } else if (e.target.closest(".ord.down") && row.nextElementSibling) {
+    row.nextElementSibling.after(row);
+    refreshOrder();
+  }
+});
+ $("lkList").addEventListener("input", e => {
+  if (!e.target.classList.contains("l-url")) return;
+  const sel = e.target.closest(".lk-row").querySelector(".l-type");
+  const det = detectService(e.target.value.trim());
+  if (det !== "other") sel.value = det;
+});
+
+// ---------- Сохранение ----------
+ $("fSave").addEventListener("click", async () => {
+  const btn = $("fSave");
+  if (btn.disabled) return;
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
+
+  const title = $("fTitle").value.trim();
+  if (!title) { alert("Введите название игры"); return; }
+
+  const links = [];
+  for (const b of document.querySelectorAll("#lkList .lk-row")) {
+    const url = b.querySelector(".l-url").value.trim();
+    if (!url) continue;
+    if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
+    links.push({ type: b.querySelector(".l-type").value, url, dl: 0 });
+  }
+  if (!links.length) { alert("Добавьте хотя бы одну ссылку на скачивание"); return; }
+
+  const oldMap = new Map();
+  if (editId) {
+    const p = migrate(state.projects.find(x => x.id === editId));
+    (p.links || []).forEach(l => oldMap.set(l.url, l));
+  }
+  links.forEach(l => { const o = oldMap.get(l.url); if (o) l.dl = o.dl || 0; });
+
+  const c = effectiveCover();
+  let cover = null;
+  if (c) {
+    if (c.url) cover = { url: c.url };
+    else {
+      cover = { appid: c.appid, name: c.name || appInfoCache[c.appid]?.name || "" };
+      cover.url = c.header || steamHeaderURLs(c.appid)[0];
+      if (c.capsule) cover.capsule = c.capsule;
+    }
+  }
+
+  // Ярлык «Не обновляется»: сохраняем/снимаем флаг
+  const stale = $("fStale").checked;
+
+  if (editId) {
+    const p = state.projects.find(x => x.id === editId);
+    Object.assign(p, { title, cover, links, stale });
+    delete p.tags;
+  } else {
+    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, cover, links, stale, created: Date.now() });
+  }
+
+  btn.disabled = true; btn.textContent = "Публикую…";
+  try {
+    await writeData(state.projects, (editId ? "Обновлён: " : "Добавлен: ") + title);
+  } catch (e) {
+    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
+    btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
+    return;
+  }
+  btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
+  render();
+  closeForm();
+  toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
+});
+
+// Закрытие модалок.
+// Формы (русификатор и донаты) защищены от случайного закрытия: клик мимо и Esc игнорируются.
+for (const m of [$("loginModal"), $("gameModal")]) {
+  m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
+}
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("loginModal").classList.add("hidden"); $("gameModal").classList.add("hidden"); }
+});
+
+function banner(text) {
+  const d = document.createElement("div");
+  d.className = "banner";
+  d.innerHTML = text;
+  grid.before(d);
+}
+
+// ---------- Старт ----------
+(async function init() {
+  setAdmin(!!state.token);
+  await loadDonate();
+  renderDonate();
+  applyView();
+  if (state.token) {
+    gh("/user").then(u => { state.user = u.login; setAdmin(true); })
+      .then(() => autoHealCovers())
+      .catch(e => {
+        if (/401/.test(e.message)) {
+          state.token = ""; localStorage.removeItem(LS_TOKEN); setAdmin(false);
+          banner("⚠️ Токен истёк или отозван. Выпустите новый на GitHub и войдите заново.");
+        }
+      });
+  }
+  if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
+    grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
+    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и <b>DONATE_DEFAULT</b> — см. настройки в начале скрипта.");
+    return;
+  }
+  try { await loadData(); }
+  catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
+  render();
+})();
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Русификаторы от Atanvaron</title>
+<meta name="description" content="Бесплатные русификаторы для игр от Atanvaron">
+<style>
+  :root {
+    --bg:#0f1117; --card:#1a1d27; --accent:#6c5ce7;
+    --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
+
+  .sticky-top {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(15,17,23,.88);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+  }
+  header { position:relative; text-align:center; padding:0 20px 8px; }
+  .title-row { display:flex; align-items:stretch; justify-content:center; gap:16px; }
+  .title-text { display:flex; flex-direction:column; justify-content:space-between; text-align:left; }
+  .title-text h1 { font-size:2rem; margin-bottom:4px; }
+  .title-text p { color:var(--muted); font-size:.92rem; }
+  .site-logo {
+    display:none;
+    align-self:stretch;
+    max-height:64px;
+    width:auto;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    border:2px solid var(--accent);
+    border-radius:50%;
+    box-shadow:0 3px 16px rgba(108,92,231,.45);
+  }
+  .logo-fallback { display:none; align-self:center; font-size:2.4rem; }
+  @media (max-width:640px) {
+    .title-text h1 { font-size:1.45rem; }
+    .site-logo { max-height:48px; }
+  }
+
+  .auth-btn {
+    position:absolute; top:8px; right:22px;
+    background:none; border:none; cursor:pointer;
+    font-size:1.1rem; opacity:.4; padding:6px; line-height:1;
+  }
+  .auth-btn:hover { opacity:.9; }
+
+  .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
+  #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
+  #search:focus { outline:none; border-color:var(--accent); }
+  #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  .stat-chip {
+    align-self:center; padding:12px 14px; background:var(--card);
+    border:1px solid var(--border); border-radius:10px;
+    color:var(--muted); font-size:.9rem; white-space:nowrap;
+  }
+  .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
+  .tool-btn:hover { border-color:var(--accent); }
+  .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .tool-btn:disabled { opacity:.5; cursor:default; }
+  body:not(.admin) .admin-only { display:none !important; }
+
+  .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
+
+  .grid { max-width:1000px; margin:20px auto 30px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; }
+  .card { position:relative; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:transform .15s,border-color .15s; }
+  .card:hover { transform:translateY(-4px); border-color:var(--accent); }
+  .card h2 { font-size:1.15rem; padding-right:56px; }
+  .card:hover h2 { color:#a99cf5; }
+  .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
+  .meta { font-size:.85rem; color:var(--muted); }
+  .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
+  .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
+  .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; z-index:2; }
+  .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
+  .icon-btn:hover { opacity:1; }
+
   .grid.view-list { grid-template-columns:1fr; }
   .grid.view-list .card { display:grid; grid-template-columns:230px 1fr; gap:4px 16px; align-items:start; padding:12px; }
   .grid.view-list .card .cover { grid-column:1; grid-row:1 / span 3; width:100%; height:100%; min-height:110px; }
