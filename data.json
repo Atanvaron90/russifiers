@@ -1,5 +1,28 @@
 [
   {
+    "id": "ticket-to-ride-mvlnt3di",
+    "title": "Ticket to Ride",
+    "cover": {
+      "appid": "2477010",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2477010/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/5h8qJdRRoqTjow",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792801640790
+  },
+  {
     "id": "the-king-s-dilemma-chronicles-mvlnsgkg",
     "title": "The King's Dilemma: Chronicles",
     "cover": {
