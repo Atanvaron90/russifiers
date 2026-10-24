@@ -920,13 +920,18 @@
     "title": "Escape Tales: The Awakening",
     "cover": {
       "appid": "2921150",
-      "name": "",
+      "name": "Escape Tales: The Awakening",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2921150/capsule_616x353.jpg?t=1729789091"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/zfqaIg2AX9HKtA",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/18d5fd43-d73d-4eb8-8550-2393aa72edc4?isFromShowcase=true",
         "dl": 0
       }
     ],
