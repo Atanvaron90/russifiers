@@ -1,5 +1,22 @@
 [
   {
+    "id": "сэкономьте-10-при-покупке-tape-to-tape-mvlnfaby",
+    "title": "Сэкономьте 10% при покупке Tape to Tape",
+    "cover": {
+      "appid": "1566200",
+      "name": "Сэкономьте 10% при покупке Tape to Tape",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1566200/19876816fec67180615cc23cf87ac27660a97311/capsule_616x353_alt_assets_2.jpg?t=1792785759"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/kxWX3-xgwI2p4g",
+        "dl": 0
+      }
+    ],
+    "created": 1792800996622
+  },
+  {
     "id": "talisman-origins-classic-mvlne9km",
     "title": "Talisman: Origins (Classic)",
     "cover": {
