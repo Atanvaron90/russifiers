@@ -53,8 +53,7 @@
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
 
-  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место.
-     На мобильном ширина поля подгоняется под подсказку (var --ph-w считается в JS) */
+  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место */
   .search-wrap { position:relative; flex:1; min-width:180px; }
   #search { width:100%; padding:12px 46px 12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
@@ -111,6 +110,8 @@
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
+  /* Кнопка админа всегда у правого края панели */
+  #btnAdd { margin-left:auto; }
   body:not(.admin) .admin-only { display:none !important; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
@@ -171,8 +172,8 @@
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
      прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px).
-     Шапка: 2 строки — [поиск + шестерёнка] и [счётчик + Добавить].
-     Сортировка и вид спрятаны в шестерёнку */
+     Шапка: 2 строки — поиск заполняет всю строку, шестерёнка справа;
+     счётчик слева, «Добавить» после него. Сортировка и вид — в шестерёнке */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -201,12 +202,13 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Шапка в 2 строки: сортировка и вид скрыты (они в шестерёнке) */
+    /* Шапка в 2 строки: поиск заполняет строку, шестерёнка справа;
+       счётчик слева, «Добавить» после него */
     .toolbar { padding:0 12px; row-gap:10px; }
     .toolbar .m-hide { display:none !important; }
-    .gear-btn { display:inline-flex; order:2; margin-left:auto; }
-    .search-wrap { order:1; flex:0 0 auto; min-width:0; width:calc(var(--ph-w, 150px) + 62px); }
-    .stat-chip { order:3; margin-left:auto; }
+    .search-wrap { order:1; flex:1 1 auto; min-width:0; }
+    .gear-btn { display:inline-flex; order:2; }
+    .stat-chip { order:3; margin-left:0; }
     #btnAdd { order:4; margin-left:0; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
@@ -1399,16 +1401,12 @@ let mqResizeTimer = null;
 window.addEventListener("resize", () => {
   clearTimeout(mqResizeTimer);
   mqResizeTimer = setTimeout(() => {
-    fitSearchWidth();
-    fitAdminLabel();
     if (currentView() === "compact") setupMarquees();
   }, 200);
 });
 // Пересчёт после загрузки веб-шрифтов (ширина текста меняется)
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
-    fitSearchWidth();
-    fitAdminLabel();
     if (currentView() === "compact") setupMarquees();
   });
 }
@@ -1542,7 +1540,6 @@ function setAdmin(on) {
   $("authBtn").title = on
     ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
     : "Вход администратора";
-  fitAdminLabel();
 }
  $("authBtn").addEventListener("click", () => {
   if (state.token) {
@@ -1940,30 +1937,6 @@ function banner(text) {
   btn.addEventListener("click", toTop);
 })();
 
-// ---------- Подгонка ширины поиска под подсказку (для мобильной версии) ----------
-// Измеряем фактическую ширину текста плейсхолдера и записываем в CSS-переменную
-// --ph-w. В мобильном медиазапросе ширина поля = подсказка + паддинги + кнопка фильтра.
-function fitSearchWidth() {
-  const inp = $("search");
-  if (!inp) return;
-  const probe = document.createElement("span");
-  const cs = getComputedStyle(inp);
-  probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font:${cs.font};letter-spacing:${cs.letterSpacing};`;
-  probe.textContent = inp.placeholder || "";
-  document.body.appendChild(probe);
-  const w = Math.ceil(probe.getBoundingClientRect().width);
-  probe.remove();
-  document.documentElement.style.setProperty("--ph-w", w + "px");
-}
-
-// ---------- Короткая подпись кнопки админа на мобильном ----------
-// Чтобы счётчик и кнопка умещались на одной строке в мобильной шапке
-function fitAdminLabel() {
-  const btn = $("btnAdd");
-  if (!btn) return;
-  btn.textContent = isNarrowScreen() ? "Добавить" : "Добавить русификатор";
-}
-
 // ---------- Панель настроек (мобильная шестерёнка) ----------
 (function setupGear() {
   const gear = $("gearBtn"), panel = $("settingsPanel");
@@ -1981,8 +1954,6 @@ function fitAdminLabel() {
   await loadDonate();
   renderDonate();
   applyView();
-  fitSearchWidth();
-  fitAdminLabel();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
       .then(() => autoHealCovers())
