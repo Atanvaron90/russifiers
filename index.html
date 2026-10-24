@@ -87,14 +87,15 @@
   }
   .icon-btn:hover { opacity: 1; border-color: var(--accent); color: #a99cf5; }
 
-  /* Ярлык «Не обновляется»: жёлтый, квадрат со скруглением,
-     выровнен с обложкой (верхний край совпадает с кромкой картинки) */
+  /* Ярлык: квадрат со скруглением, выровнен с обложкой (отступ 16px — как поля плашки).
+     Цвет фона/текста задаётся инлайн из данных ярлыка */
   .stale-badge {
     position:absolute; top:16px; left:16px; z-index:2;
     display:inline-flex; align-items:center; gap:5px;
-    background:#F5C518; border:1px solid rgba(0,0,0,.25);
-    color:#1c1c1c; font-size:.72rem; font-weight:700;
+    border:1px solid rgba(0,0,0,.2);
+    font-size:.72rem; font-weight:700;
     padding:4px 9px; border-radius:10px;
+    white-space:nowrap;
   }
 
   /* Компактный вид: список названий в столбик без плашек и промежутков */
@@ -116,9 +117,8 @@
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
-  /* МОБИЛЬНАЯ ВЕРСИЯ (6-дюймовые экраны и меньше):
-     «Сетка» рисуется списком — обложка ЦЕЛИКОМ (без обрезки),
-     колонка обложки адаптивна, текст выровнен по её высоте */
+  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком,
+     колонка обложки адаптивна; ярлык — та же квадратная форма, уменьшенная */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -127,25 +127,22 @@
     }
     .grid:not(.view-compact) .card .cover {
       grid-column:1; grid-row:1 / span 3;
-      width:100%;              /* вся ширина колонки */
-      height:auto;             /* НИКАКОГО растяжения — пропорции сохраняются */
-      aspect-ratio:460/215;    /* картинка видна целиком */
+      width:100%; height:auto;
+      aspect-ratio:460/215;
       border-radius:8px;
       align-self:center;
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
     .grid:not(.view-compact) .card .meta { grid-column:2; }
-    .grid:not(.view-compact) .card h2 {
-      font-size:1rem; padding-right:8px; margin-top:0;
-    }
+    .grid:not(.view-compact) .card h2 { font-size:1rem; padding-right:8px; margin-top:0; }
     body.admin .grid:not(.view-compact) .card h2 { padding-right:84px; }
     .grid:not(.view-compact) .card .desc { font-size:.84rem; flex-grow:0; }
     .grid:not(.view-compact) .card .meta { font-size:.74rem; }
     .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
     .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
     .grid:not(.view-compact) .card .stale-badge {
-      top:6px; left:6px; font-size:.62rem; padding:3px 7px;
+      top:6px; left:6px; font-size:.62rem; padding:3px 7px; border-radius:8px;
     }
     .grid.view-compact { max-width:none; padding:0 8px; }
     .toolbar { padding:0 12px; }
@@ -166,7 +163,18 @@
   .flag-row { display:flex; align-items:flex-start; gap:10px; margin-top:14px; cursor:pointer; }
   .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; margin-top:2px; cursor:pointer; accent-color:var(--accent); }
   .flag-row .flag-text { font-size:.9rem; color:var(--text); }
-  .flag-row .flag-text small { display:block; color:var(--muted); font-size:.78rem; margin-top:2px; }
+
+  /* Редактор ярлыка: текст + цвет + готовые варианты */
+  .badge-edit { display:grid; grid-template-columns:1fr 48px; gap:8px; margin-top:8px; align-items:center; }
+  .badge-edit input[type="color"] { padding:2px; height:42px; cursor:pointer; }
+  .badge-presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center; }
+  .badge-chip {
+    display:inline-flex; align-items:center;
+    border:1px solid rgba(0,0,0,.2); border-radius:10px;
+    font-size:.75rem; font-weight:700; padding:4px 10px;
+    cursor:pointer; font-family:inherit;
+  }
+  .badge-chip:hover { filter:brightness(1.08); }
 
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
   .cover-preview.hidden { display:none; }
@@ -246,12 +254,13 @@
   .g-body h2 { margin-bottom:6px; }
   .g-title-link { color:inherit; text-decoration:none; }
   .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
-  /* Ярлык в окне игры: тот же жёлтый квадрат со скруглением */
+  /* Ярлык в окне игры: та же квадратная форма; цвет — инлайн из данных */
   #gStale {
-    position:static; margin-top:6px; display:none;
-    background:#F5C518; border:1px solid rgba(0,0,0,.25);
-    color:#1c1c1c; font-size:.72rem; font-weight:700;
-    padding:4px 9px; border-radius:10px;
+    margin-top:8px; display:none;
+    align-self:flex-start;
+    border:1px solid rgba(0,0,0,.2);
+    font-size:.72rem; font-weight:700;
+    padding:4px 9px; border-radius:10px; white-space:nowrap;
   }
   .g-body h3 { font-size:.95rem; margin:16px 0 2px; color:var(--muted); }
   .lk { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; margin-top:10px; background:var(--field); }
@@ -361,7 +370,7 @@
       </a>
       <div class="g-body">
         <h2 id="gTitle"></h2>
-        <div id="gStale" style="display:none;">🏷 Не обновляется</div>
+        <div id="gStale" style="display:none;"></div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Ссылки</h3>
         <div id="gLinks"></div>
@@ -390,12 +399,16 @@
     <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
 
+    <label>Ярлык на плашке — например «Не обновляется», если вышел официальный перевод игры:</label>
     <label class="flag-row">
-      <input id="fStale" type="checkbox">
-      <span class="flag-text">🏷 Пометить «Не обновляется»
-        <small>Например, если вышел официальный перевод игры и версии больше не выходят. На плашке появится ярлык.</small>
-      </span>
+      <input id="fBadgeOn" type="checkbox">
+      <span class="flag-text">Показывать ярлык</span>
     </label>
+    <div class="badge-edit">
+      <input id="fBadgeText" type="text" placeholder="Текст ярлыка (напр. Не обновляется)">
+      <input id="fBadgeColor" type="color" value="#F5C518" title="Цвет фона ярлыка">
+    </div>
+    <div id="badgePresets" class="badge-presets"></div>
 
     <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
     <div id="lkList"></div>
@@ -495,6 +508,33 @@ const pluralRu = (n, one, few, many) => {
   if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
   return many;
 };
+
+// ---------- Ярлыки на плашках ----------
+// Формат в data.json: badge: { text, color }. Старый флаг stale:true
+// автоматически превращается в ярлык по умолчанию (миграция в migrate()).
+const BADGE_DEFAULT = { text: "Не обновляется", color: "#F5C518" };
+const BADGE_ALPHA = 0.88; // «чуть прозрачный» фон
+const hexToRgb = h => {
+  const m = String(h || "").replace("#", "").trim();
+  const v = m.length === 3 ? m.split("").map(c => c + c).join("") : m;
+  if (!/^[0-9a-fA-F]{6}$/.test(v)) return null;
+  const n = parseInt(v, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+// Цвет текста ярлыка: тёмный на светлом фоне, белый на тёмном
+const badgeTextColor = c => {
+  const rgb = hexToRgb(c);
+  if (!rgb) return "#1c1c1c";
+  const lum = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  return lum > 140 ? "#1c1c1c" : "#ffffff";
+};
+function badgeStyle(color, alpha = BADGE_ALPHA) {
+  const rgb = hexToRgb(color) || hexToRgb(BADGE_DEFAULT.color);
+  return `background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha});color:${badgeTextColor(color)}`;
+}
+const badgeHTML = p => (p?.badge?.text)
+  ? `<div class="stale-badge" style="${badgeStyle(p.badge.color)}">${esc(p.badge.text)}</div>`
+  : "";
 
 // ---------- Тосты ----------
 function toast(msg, type = "info", ms = 4000) {
@@ -817,7 +857,7 @@ async function fetchAppInfo(appid) {
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
-// ---------- Приведение данных к плоскому списку ссылок ----------
+// ---------- Приведение данных к плоскому списку ссылок + миграция ярлыков ----------
 function migrate(p) {
   if (!Array.isArray(p.links)) {
     const flat = [];
@@ -830,6 +870,10 @@ function migrate(p) {
   p.links = (p.links || []).filter(l => l && l.url).map(l => ({
     type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0
   }));
+  // Миграция: старый флаг stale:true → ярлык по умолчанию
+  if (p.stale && !p.badge) p.badge = { ...BADGE_DEFAULT };
+  delete p.stale;
+  if (p.badge && !p.badge.text) delete p.badge;
   return p;
 }
 
@@ -1117,7 +1161,7 @@ function render() {
       .map(l => (SERVICES[l.type] || SERVICES.other).name));
     grid.insertAdjacentHTML("beforeend", `
       <div class="card" data-id="${esc(p.id)}">
-        ${p.stale ? '<div class="stale-badge">🏷 Не обновляется</div>' : ""}
+        ${badgeHTML(p)}
         <div class="card-actions admin-only">
           <button class="icon-btn edit" title="Редактировать">✏️</button>
           <button class="icon-btn del" title="Удалить">🗑️</button>
@@ -1189,8 +1233,17 @@ function openGame(id) {
   coverLink.classList.add("no-link");
   coverLink.removeAttribute("title");
 
-  // Ярлык «Не обновляется» под названием
-  $("gStale").style.display = p.stale ? "inline-flex" : "none";
+  // Ярлык под названием: текст и цвет из данных
+  const st = $("gStale");
+  const b = p.badge;
+  if (b?.text) {
+    st.textContent = b.text;
+    st.style.background = badgeStyle(b.color).match(/background:([^;]+)/)[1];
+    st.style.color = badgeTextColor(b.color);
+    st.style.display = "inline-flex";
+  } else {
+    st.style.display = "none";
+  }
 
   $("gDesc").textContent = p.description || "";
   $("gDesc").style.display = p.description ? "" : "none";
@@ -1423,6 +1476,33 @@ function queueAppIdLookup(immediate = false) {
   updateCoverPreview();
 });
 
+// Готовые ярлыки: собираем из уже используемых на сайте записях
+function renderBadgePresets() {
+  const seen = new Map();
+  for (const p of state.projects) {
+    const b = p.badge;
+    if (b?.text) seen.set(b.text + "|" + (b.color || ""), b);
+  }
+  const box = $("badgePresets");
+  const items = [...seen.values()];
+  box.innerHTML = items.length
+    ? '<span class="hint">Готовые ярлыки из используемых — клик, чтобы подставить:</span>'
+    : "";
+  for (const b of items.slice(0, 12)) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "badge-chip";
+    chip.textContent = b.text;
+    chip.style.cssText = badgeStyle(b.color);
+    chip.addEventListener("click", () => {
+      $("fBadgeOn").checked = true;
+      $("fBadgeText").value = b.text;
+      $("fBadgeColor").value = b.color || BADGE_DEFAULT.color;
+    });
+    box.appendChild(chip);
+  }
+}
+
 function openForm(id = null) {
   if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
   editId = id;
@@ -1434,7 +1514,12 @@ function openForm(id = null) {
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
   $("fTitle").value = p ? p.title : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
-  $("fStale").checked = !!(p?.stale);
+  // Ярлык: галочка, текст, цвет + готовые варианты из используемых
+  const b = p?.badge;
+  $("fBadgeOn").checked = !!b;
+  $("fBadgeText").value = b?.text || BADGE_DEFAULT.text;
+  $("fBadgeColor").value = b?.color || BADGE_DEFAULT.color;
+  renderBadgePresets();
   setNote("");
   $("lkList").innerHTML = "";
   const links = p?.links?.length ? p.links : [{}];
@@ -1529,15 +1614,28 @@ function refreshOrder() {
     }
   }
 
-  // Ярлык «Не обновляется»: сохраняем/снимаем флаг
-  const stale = $("fStale").checked;
+  // Ярлык: галочка + текст (пустой текст → значение по умолчанию) + цвет
+  let badge = null;
+  if ($("fBadgeOn").checked) {
+    badge = {
+      text: $("fBadgeText").value.trim() || BADGE_DEFAULT.text,
+      color: $("fBadgeColor").value || BADGE_DEFAULT.color
+    };
+  }
 
   if (editId) {
     const p = state.projects.find(x => x.id === editId);
-    Object.assign(p, { title, cover, links, stale });
+    Object.assign(p, { title, cover, links });
+    if (badge) p.badge = badge; else delete p.badge;
     delete p.tags;
+    delete p.stale;
   } else {
-    state.projects.unshift({ id: `${slugify(title)}-${Date.now().toString(36)}`, title, cover, links, stale, created: Date.now() });
+    state.projects.unshift({
+      id: `${slugify(title)}-${Date.now().toString(36)}`,
+      title, cover, links,
+      ...(badge ? { badge } : {}),
+      created: Date.now()
+    });
   }
 
   btn.disabled = true; btn.textContent = "Публикую…";
