@@ -696,7 +696,7 @@
     "title": "Exploding Kittens® 2",
     "cover": {
       "appid": "2999030",
-      "name": "",
+      "name": "Сэкономьте 70% при покупке Exploding Kittens® 2",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2999030/821be9a55cbc7863392bf603e7ad0d178477d20e/capsule_616x353.jpg?t=1787313738"
     },
     "links": [
@@ -709,9 +709,15 @@
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1lGZSLOkpL-LJ6LzY7_JJ0fl--LQ5O7fh?usp=sharing",
         "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1093016",
+        "dl": 0
       }
     ],
-    "created": 1792798733932
+    "created": 1792798733932,
+    "stale": false
   },
   {
     "id": "evergreen-the-board-game-mvlm1480",
