@@ -11,6 +11,9 @@
     --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  /* overflow-x:clip не создаёт скролл-контейнер — липкая шапка работает,
+     а страница больше не растягивается длинными однострочными названиями */
+  html, body { overflow-x: clip; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
 
   .sticky-top {
@@ -49,10 +52,40 @@
   .auth-btn:hover { opacity:.9; }
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
-  #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
+
+  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место */
+  .search-wrap { position:relative; flex:1; min-width:180px; }
+  #search { width:100%; padding:12px 46px 12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
-  #sortBy, #viewBy, #filterBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
-  #filterBy { max-width:230px; }
+  .filter-btn {
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--field); border:1px solid var(--border); border-radius:8px;
+    color:var(--muted); cursor:pointer;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .filter-btn:hover { border-color:var(--accent); color:var(--text); }
+  .filter-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .filter-panel {
+    position:absolute; top:calc(100% + 8px); left:0; right:0; z-index:30;
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:12px; box-shadow:0 12px 30px rgba(0,0,0,.5);
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  }
+  .filter-panel.hidden { display:none; }
+  .filter-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
+  .f-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--border); border-radius:10px;
+    padding:6px 12px; font-size:.82rem; font-weight:600;
+    cursor:pointer; font-family:inherit; background:var(--field); color:var(--text);
+  }
+  .f-chip:hover { border-color:var(--accent); }
+  .f-chip.sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .f-chip .n { opacity:.65; font-weight:400; }
+
+  #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
@@ -99,7 +132,7 @@
     white-space:nowrap;
   }
 
-  /* Компактный вид: список названий в столбик без плашек и промежутков */
+  /* Список (компактный): названия в столбик; длинные — бегущей строкой */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
     background:none; border:none; border-radius:0;
@@ -108,7 +141,18 @@
   .grid.view-compact .card:hover { transform:none; border-color:transparent; background:rgba(108,92,231,.09); }
   .grid.view-compact .card h2 {
     font-size:1rem; font-weight:500; padding-right:40px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; overflow:hidden;
+  }
+  .grid.view-compact .card h2 > span { display:inline-block; }
+  .grid.view-compact .card h2.mq > span {
+    animation: mqmove var(--mq-dur,8s) ease-in-out infinite alternate;
+  }
+  @keyframes mqmove {
+    0%, 12%  { transform: translateX(0); }
+    88%, 100% { transform: translateX(var(--mq-x, -40px)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grid.view-compact .card h2.mq > span { animation: none; }
   }
   .grid.view-compact .card:hover h2 { color:#a99cf5; }
   .grid.view-compact .card .cover,
@@ -131,7 +175,7 @@
       width:100%; height:auto;
       aspect-ratio:460/215;
       border-radius:8px;
-      align-self:start;
+      align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
@@ -149,6 +193,7 @@
       padding:3px 8px; border-radius:8px;
     }
     .grid.view-compact { max-width:none; padding:0 8px; }
+    body.admin .grid.view-compact .card h2 { padding-right:84px; }
     .toolbar { padding:0 12px; }
   }
 
@@ -334,11 +379,16 @@
   </header>
 
   <div class="toolbar">
-    <input id="search" type="text" placeholder="Поиск по названию игры...">
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="Поиск по названию игры...">
+      <button id="filterBtn" class="filter-btn" type="button" title="Фильтр по ярлыкам">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M1.5 2h13l-5.2 6.1v4.4l-2.6 1.4V8.1L1.5 2z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div id="filterPanel" class="filter-panel hidden"></div>
+    </div>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
-    <select id="filterBy" title="Фильтр по ярлыкам">
-      <option value="">Все записи</option>
-    </select>
     <select id="sortBy" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
@@ -347,7 +397,7 @@
     </select>
     <select id="viewBy" title="Вид списка">
       <option value="grid">Сетка</option>
-      <option value="compact">Компактно</option>
+      <option value="compact">Список</option>
     </select>
     <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
   </div>
@@ -1159,37 +1209,58 @@ function applyView() {
   render();
 });
 
-// ---------- Фильтр по ярлыкам ----------
-// Собирает все используемые ярлыки (текст + количество записей) в выпадающий список.
-// Выбор запоминается; если ярлык исчез со всех записей — фильтр сбрасывается на «Все».
+// ---------- Фильтр по ярлыкам (панель внутри строки поиска) ----------
 function currentFilter() {
   return localStorage.getItem(LS_FILTER) || "";
 }
-function rebuildFilterOptions() {
-  const sel = $("filterBy");
-  const cur = currentFilter();
+function filterCounts() {
   const counts = new Map();
   for (const p of state.projects) {
-    if (p.badge?.text) {
-      const t = p.badge.text;
-      counts.set(t, (counts.get(t) || 0) + 1);
-    }
+    if (p.badge?.text) counts.set(p.badge.text, (counts.get(p.badge.text) || 0) + 1);
   }
-  const valid = cur === "" || counts.has(cur);
-  const active = valid ? cur : "";
-  if (!valid) localStorage.setItem(LS_FILTER, "");
-  let html = '<option value="">Все записи</option>';
-  for (const [t, n] of counts)
-    html += `<option value="${esc(t)}">${esc(t)} (${n})</option>`;
-  sel.innerHTML = html;
-  sel.value = active;
-  // Рамка селекта подкрашивается цветом выбранного ярлыка
-  const badge = active ? state.projects.find(p => p.badge?.text === active)?.badge : null;
-  sel.style.borderColor = badge ? badge.color : "";
+  return counts;
 }
- $("filterBy").addEventListener("change", e => {
-  localStorage.setItem(LS_FILTER, e.target.value);
+function renderFilterPanel() {
+  const cur = currentFilter();
+  const counts = filterCounts();
+  let html = '<div class="f-title">Фильтр по ярлыкам</div>';
+  html += `<button type="button" class="f-chip ${cur === "" ? "sel" : ""}" data-f="">Все записи</button>`;
+  for (const [t, n] of counts) {
+    const b = state.projects.find(p => p.badge?.text === t)?.badge;
+    html += `<button type="button" class="f-chip ${cur === t ? "sel" : ""}" data-f="${esc(t)}" style="${badgeStyle(b?.color)}">${esc(t)} <span class="n">${n}</span></button>`;
+  }
+  $("filterPanel").innerHTML = html;
+}
+function updateFilterBtn() {
+  const cur = currentFilter();
+  const btn = $("filterBtn");
+  btn.classList.toggle("on", !!cur);
+  btn.title = cur ? `Фильтр: ${cur} — нажмите, чтобы изменить` : "Фильтр по ярлыкам";
+}
+function toggleFilterPanel(force) {
+  const panel = $("filterPanel");
+  const open = typeof force === "boolean" ? force : panel.classList.contains("hidden");
+  if (open) renderFilterPanel();
+  panel.classList.toggle("hidden", !open);
+}
+ $("filterBtn").addEventListener("click", e => {
+  e.stopPropagation();
+  toggleFilterPanel();
+});
+ $("filterPanel").addEventListener("click", e => {
+  const chip = e.target.closest(".f-chip");
+  if (!chip) return;
+  localStorage.setItem(LS_FILTER, chip.dataset.f || "");
+  toggleFilterPanel(false);
   render();
+});
+// Закрытие панели кликом мимо (кроме клика по самой кнопке — у неё stopPropagation)
+document.addEventListener("click", e => {
+  const panel = $("filterPanel");
+  if (!panel.classList.contains("hidden") &&
+      !panel.contains(e.target) && e.target !== $("filterBtn") && !$("filterBtn").contains(e.target)) {
+    toggleFilterPanel(false);
+  }
 });
 
 // ---------- Отрисовка ----------
@@ -1198,7 +1269,6 @@ let query = "";
 
 function render() {
   const view = currentView();
-  rebuildFilterOptions();
   const fval = currentFilter();
 
   const list = state.projects
@@ -1206,7 +1276,10 @@ function render() {
     .filter(p => !fval || p.badge?.text === fval)
     .sort(SORTS[currentSort()].fn);
 
-  // Счётчик: всего / найдено при активном поиске или фильтре
+  // Кнопка фильтра: подсветка при активном фильтре
+  updateFilterBtn();
+
+  // Счётчик русификаторов: всего / найдено при активном поиске или фильтре
   const total = state.projects.length;
   $("statCount").textContent = (query || fval)
     ? `Найдено: ${list.length} из ${total}`
@@ -1231,13 +1304,29 @@ function render() {
           <button class="icon-btn del" title="Удалить">🗑️</button>
         </div>
         <img class="cover" alt="">
-        <h2>${esc(p.title)}</h2>
+        <h2><span>${esc(p.title)}</span></h2>
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         ${services.length ? `<div class="meta">${esc(services.join(" • "))}</div>` : ""}
       </div>`);
     // в компактном виде картинки скрыты — не грузим их зря
     if (view !== "compact")
       setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
+  }
+
+  // Список: длинные названия → бегущая строка (без масштабирования страницы)
+  if (view === "compact") {
+    grid.querySelectorAll(".card h2").forEach(h => {
+      const span = h.querySelector("span");
+      if (!span) return;
+      const cs = getComputedStyle(h);
+      const avail = h.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      if (span.scrollWidth > avail + 1) {
+        const d = span.scrollWidth - avail + 12; // небольшой запас, чтобы хвост уходил полностью
+        h.style.setProperty("--mq-x", -d + "px");
+        h.style.setProperty("--mq-dur", Math.max(5, Math.round(d / 26)) + "s");
+        h.classList.add("mq");
+      }
+    });
   }
 }
 
@@ -1722,7 +1811,11 @@ for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { $("loginModal").classList.add("hidden"); $("gameModal").classList.add("hidden"); }
+  if (e.key === "Escape") {
+    $("loginModal").classList.add("hidden");
+    $("gameModal").classList.add("hidden");
+    toggleFilterPanel(false);
+  }
 });
 
 function banner(text) {
