@@ -1293,12 +1293,17 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/cVuWKwrEXIkYhw",
         "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/e3188483-fd06-477d-baee-48477e7bc5f6?isFromShowcasePreview=true",
+        "dl": 0
       }
     ],
     "created": 1792788891610,
     "badge": {
       "text": "Не обновляется",
-      "color": "#F5C518"
+      "color": "#f5c518"
     }
   },
   {
