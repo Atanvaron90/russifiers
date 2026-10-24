@@ -273,8 +273,8 @@
     "title": "Ticket to Ride",
     "cover": {
       "appid": "2477010",
-      "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2477010/header.jpg"
+      "name": "Сэкономьте 70% при покупке Ticket to Ride®",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2477010/4751c635779e064bbb3ccaaf257618e295881114/capsule_616x353_alt_assets_10.jpg?t=1792584181"
     },
     "links": [
       {
@@ -285,6 +285,11 @@
       {
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/18a75e93-65aa-4c4d-a703-de1d9cb862ff?isFromShowcase=true",
         "dl": 0
       }
     ],
