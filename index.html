@@ -75,7 +75,7 @@
     display:flex; flex-direction:column; gap:8px; align-items:stretch;
   }
   .filter-panel { left:0; right:0; }
-  .settings-panel { right:0; width:190px; }
+  .settings-panel { right:0; width:200px; }
   .filter-panel.hidden, .settings-panel.hidden { display:none; }
   .filter-panel .f-title, .settings-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
   .f-chip {
@@ -87,34 +87,31 @@
   .f-chip:hover { border-color:var(--accent); }
   .f-chip.sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
   .f-chip .n { opacity:.65; font-weight:400; }
-  .s-row { display:flex; gap:8px; }
-  .s-row label { flex:1; font-size:.72rem; color:var(--muted); }
+  .s-row label { display:block; font-size:.72rem; color:var(--muted); }
   .s-row select { margin-top:4px; padding:8px 10px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; cursor:pointer; width:100%; }
+  /* Шестерёнка настроек: только на мобильных (на десктопе сортировка и вид открыто) */
   .gear-btn {
     padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px;
     color:var(--muted); cursor:pointer; font-size:1rem;
-    display:inline-flex; align-items:center; justify-content:center;
+    display:none; align-items:center; justify-content:center;
     transition: color .15s, border-color .15s;
   }
   .gear-btn:hover { border-color:var(--accent); color:var(--text); }
   .gear-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
 
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  /* Счётчик: перед кнопкой админа; для посетителя — крайний правый элемент */
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
     color:var(--text); font-size:.95rem; white-space:nowrap;
+    margin-left:auto;
   }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
-  /* Кнопка админа всегда у правого края панели */
-  #btnAdd { margin-left:auto; }
   body:not(.admin) .admin-only { display:none !important; }
-  /* Счётчик занимает крайнее правое положение для посетителей */
-  .stat-chip { margin-left:auto; }
-  body.admin .stat-chip { margin-left:0; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
 
@@ -123,8 +120,7 @@
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
   .card:hover h2 { color:#a99cf5; }
-  /* Обложка: header 460×215 — единый горизонтальный формат,
-     чуть обрезается при вписывании в карточку, ряд ровный */
+  /* Обложка: header 460×215 — единый горизонтальный формат, чуть обрезается при вписывании */
   .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
@@ -174,7 +170,9 @@
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
-     прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px) */
+     прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px).
+     Шапка: 2 строки — [поиск + шестерёнка] и [счётчик + Добавить].
+     Сортировка и вид спрятаны в шестерёнку */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -203,20 +201,16 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Мобильная шапка: 2 строки — поиск (по ширине подсказки) и счётчик в первой,
-       шестерёнка во второй; сортировка и вид спрятаны в панель настроек */
-    .search-wrap { flex:0 0 auto; min-width:0; width:calc(var(--ph-w, 150px) + 62px); }
-    #filterBy-legacy { display:none; }
+    /* Шапка в 2 строки: сортировка и вид скрыты (они в шестерёнке) */
+    .toolbar { padding:0 12px; row-gap:10px; }
+    .toolbar .m-hide { display:none !important; }
+    .gear-btn { display:inline-flex; order:2; margin-left:auto; }
+    .search-wrap { order:1; flex:0 0 auto; min-width:0; width:calc(var(--ph-w, 150px) + 62px); }
+    .stat-chip { order:3; margin-left:auto; }
+    #btnAdd { order:4; margin-left:0; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
-    .toolbar { padding:0 12px; }
-    .toolbar .m-hide { display:none !important; } /* сортировка и вид — в шестерёнку */
-    .gear-btn { display:inline-flex; }
   }
-
-  /* На десктопе шестерёнка не нужна */
-  .gear-btn { display:none; }
-  .settings-panel { display:none; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -420,8 +414,9 @@
       <option value="grid">Сетка</option>
       <option value="compact">Список</option>
     </select>
-    <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
+    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
+    <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
     <div id="settingsPanel" class="settings-panel hidden">
       <div class="f-title">Настройки поиска</div>
       <div class="s-row">
@@ -443,7 +438,6 @@
         </label>
       </div>
     </div>
-    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
   </div>
 </div>
 
@@ -1244,10 +1238,9 @@ function currentView() {
 function applyView() {
   grid.classList.remove("view-grid", "view-list", "view-compact");
   grid.classList.add("view-" + currentView());
-  // Синхронизация обоих селектов (десктопный и мобильный из настроек)
+  // Синхронизация обоих селектов (десктопного и мобильного из настроек)
   $("viewBy").value = currentView();
-  const m = $("viewByM");
-  if (m) m.value = currentView();
+  $("viewByM").value = currentView();
 }
  $("viewBy").addEventListener("change", e => {
   localStorage.setItem(LS_VIEW, e.target.value);
@@ -1407,6 +1400,7 @@ window.addEventListener("resize", () => {
   clearTimeout(mqResizeTimer);
   mqResizeTimer = setTimeout(() => {
     fitSearchWidth();
+    fitAdminLabel();
     if (currentView() === "compact") setupMarquees();
   }, 200);
 });
@@ -1414,6 +1408,7 @@ window.addEventListener("resize", () => {
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     fitSearchWidth();
+    fitAdminLabel();
     if (currentView() === "compact") setupMarquees();
   });
 }
@@ -1547,6 +1542,7 @@ function setAdmin(on) {
   $("authBtn").title = on
     ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
     : "Вход администратора";
+  fitAdminLabel();
 }
  $("authBtn").addEventListener("click", () => {
   if (state.token) {
@@ -1960,13 +1956,21 @@ function fitSearchWidth() {
   document.documentElement.style.setProperty("--ph-w", w + "px");
 }
 
+// ---------- Короткая подпись кнопки админа на мобильном ----------
+// Чтобы счётчик и кнопка умещались на одной строке в мобильной шапке
+function fitAdminLabel() {
+  const btn = $("btnAdd");
+  if (!btn) return;
+  btn.textContent = isNarrowScreen() ? "Добавить" : "Добавить русификатор";
+}
+
 // ---------- Панель настроек (мобильная шестерёнка) ----------
 (function setupGear() {
   const gear = $("gearBtn"), panel = $("settingsPanel");
   gear.addEventListener("click", e => {
     e.stopPropagation();
-    const open = panel.classList.toggle("hidden");
-    gear.classList.toggle("on", !open);
+    const hidden = panel.classList.toggle("hidden");
+    gear.classList.toggle("on", !hidden);
   });
   panel.addEventListener("click", e => e.stopPropagation());
 })();
@@ -1978,6 +1982,7 @@ function fitSearchWidth() {
   renderDonate();
   applyView();
   fitSearchWidth();
+  fitAdminLabel();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
       .then(() => autoHealCovers())
