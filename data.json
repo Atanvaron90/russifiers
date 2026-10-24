@@ -1,5 +1,24 @@
 [
   {
+    "id": "the-king-s-dilemma-chronicles-mvlnsgkg",
+    "title": "The King's Dilemma: Chronicles",
+    "cover": {
+      "appid": "2069180",
+      "name": "The King's Dilemma: Chronicles",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069180/header.jpg?t=1677494055",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069180/capsule_184x69.jpg?t=1677494055"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zW2Ra_C28FNgEQ",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792801611232
+  },
+  {
     "id": "the-isle-of-cats-mvlnrk0y",
     "title": "The Isle of Cats",
     "cover": {
