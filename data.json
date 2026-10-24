@@ -1,5 +1,23 @@
 [
   {
+    "id": "twilight-struggle-red-sea-mvlo02q9",
+    "title": "Twilight Struggle: Red Sea",
+    "cover": {
+      "appid": "1276130",
+      "name": "Twilight Struggle: Red Sea",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1276130/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/pljHb4HalXsDHw",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792801966545
+  },
+  {
     "id": "twilight-struggle-mvlnzm67",
     "title": "Twilight Struggle",
     "cover": {
