@@ -841,13 +841,18 @@
     "title": "Fury of Dracula: Digital Edition",
     "cover": {
       "appid": "958530",
-      "name": "",
+      "name": "Fury of Dracula: Digital Edition",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/958530/capsule_616x353.jpg?t=1760518039"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/DsM_AYDZLKw1-Q",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/c7f048c3-ddcc-4553-b708-0e115b1d04a5?isFromShowcase=true",
         "dl": 0
       }
     ],
