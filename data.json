@@ -105,6 +105,11 @@
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1NZ1i8y9rchJeT6jiuFSHg2D27gGypO7N?usp=sharing",
         "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1072852",
+        "dl": 0
       }
     ],
     "stale": false,
@@ -152,8 +157,8 @@
     "title": "Ticket to Ride",
     "cover": {
       "appid": "2477010",
-      "name": "Сэкономьте 70% при покупке Ticket to Ride®",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2477010/4751c635779e064bbb3ccaaf257618e295881114/capsule_616x353_alt_assets_10.jpg?t=1792584181"
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2477010/header.jpg"
     },
     "links": [
       {
@@ -164,11 +169,6 @@
       {
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
-        "dl": 0
-      },
-      {
-        "type": "pda4",
-        "url": "https://4pda.to/forum/index.php?showtopic=1081524",
         "dl": 0
       }
     ],
