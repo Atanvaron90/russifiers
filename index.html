@@ -104,7 +104,10 @@
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
   .card:hover h2 { color:#a99cf5; }
-  .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
+  /* Обложка: естественные пропорции источника, БЕЗ обрезки (object-fit не нужен при
+     height:auto). Разные источники (header 460×215, capsule 616×353, hero-баннеры)
+     показываются целиком — плашка совпадает с окном игры */
+  .cover { display:block; width:100%; height:auto; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
@@ -152,8 +155,8 @@
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
-  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком,
-     прижата К ВЕРХУ плашки, чтобы совпадать с ярлыком (оба на отступе 10px) */
+  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком (естественные
+     пропорции, без обрезки), прижата К ВЕРХУ плашки — совпадает с ярлыком (10px) */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -163,7 +166,6 @@
     .grid:not(.view-compact) .card .cover {
       grid-column:1; grid-row:1 / span 3;
       width:100%; height:auto;
-      aspect-ratio:460/215;
       border-radius:8px;
       align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
     }
@@ -182,6 +184,9 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
+    /* Поиск укорочен, счётчик — в конец строки (прижат вправо) */
+    .search-wrap { flex:1 1 auto; max-width:62%; }
+    .stat-chip { order:9; margin-left:auto; align-self:center; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
     .toolbar { padding:0 12px; }
@@ -312,11 +317,12 @@
   .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
   .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
   .lk-btn:hover { filter:brightness(1.15); }
-  /* Мобильное окно игры: горизонтальная обложка сверху (без обрезки), под ней — текст и ссылки */
+  /* Мобильное окно игры: горизонтальная обложка сверху — ЦЕЛИКОМ (естественные
+     пропорции, без обрезки), под ней — текст и ссылки */
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
     .g-cover-link { order:-1; }
-    .g-cover { height:auto; max-height:none; aspect-ratio:460/215; min-height:0; }
+    .g-cover { height:auto; max-height:none; min-height:0; }
     .g-body { padding:18px; }
   }
 
@@ -370,7 +376,7 @@
 
   <div class="toolbar">
     <div class="search-wrap">
-      <input id="search" type="text" placeholder="Поиск по названию игры...">
+      <input id="search" type="text" placeholder="Поиск по названию">
       <button id="filterBtn" class="filter-btn" type="button" title="Фильтр по ярлыкам">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M1.5 2h13l-5.2 6.1v4.4l-2.6 1.4V8.1L1.5 2z" fill="currentColor"/>
@@ -378,7 +384,6 @@
       </button>
       <div id="filterPanel" class="filter-panel hidden"></div>
     </div>
-    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <select id="sortBy" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
@@ -390,6 +395,7 @@
       <option value="compact">Список</option>
     </select>
     <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
+    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
   </div>
 </div>
 
@@ -702,6 +708,8 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
+// Горизонтальный каскад — одинаков для плашек и мобильного окна игры:
+// канонический URL → header → capsule → заглушка (плашка и окно показывают одну картинку)
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
@@ -711,16 +719,13 @@ function coverURLs(p) {
   ];
   return dedupe(urls);
 }
-// Обложки для окна игры: на мобильных — только горизонтальные (свой URL → header → capsule → заглушка),
-// на десктопе — вертикальные первыми, как раньше
+// Обложки для окна игры: на десктопе — вертикальные первыми, затем тот же
+// горизонтальный каскад, что у плашек; на мобильных — только горизонтальный
 function gameCoverURLs(p) {
   const c = p.cover || {};
   const urls = [];
   if (!isNarrowScreen() && c.appid) urls.push(...steamTallURLs(c.appid));
-  if (c.appid) urls.push(...steamHeaderURLs(c.appid));
-  urls.push(c.url, c.capsule);
-  if (c.appid) urls.push(...steamCapsuleURLs(c.appid));
-  urls.push(phSVG((p.title[0] || "?").toUpperCase()));
+  urls.push(...coverURLs(p));
   return dedupe(urls);
 }
 
@@ -1417,9 +1422,6 @@ function openGame(id) {
   } else {
     st.style.display = "none";
   }
-
-  $("gDesc").textContent = p.description || "";
-  $("gDesc").style.display = p.description ? "" : "none";
 
   setCoverCascade($("gCover"), gameCoverURLs(p));
 
