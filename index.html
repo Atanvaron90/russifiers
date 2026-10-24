@@ -74,9 +74,18 @@
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
-  .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; z-index:2; }
-  .icon-btn { background:rgba(15,17,23,.8); border:none; cursor:pointer; font-size:1.05rem; opacity:.75; padding:4px 5px; border-radius:6px; }
-  .icon-btn:hover { opacity:1; }
+
+  .card-actions { position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:2; }
+  /* Единый стиль квадратных кнопок-иконок: 38×38, скруглённые углы */
+  .icon-btn {
+    background: rgba(31,35,48,.92); border: 1px solid var(--border);
+    cursor: pointer; font-size: 1.05rem; opacity: .85;
+    width: 38px; height: 38px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.35);
+    transition: opacity .15s, border-color .15s, color .15s;
+  }
+  .icon-btn:hover { opacity: 1; border-color: var(--accent); color: #a99cf5; }
 
   /* Ярлык «Не обновляется» на обложке плашки */
   .stale-badge {
@@ -111,7 +120,7 @@
   .grid.view-compact .card .meta,
   .grid.view-compact .card .stale-badge { display:none; }
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
-  .grid.view-compact .icon-btn { background:rgba(15,17,23,.55); }
+  .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -189,13 +198,9 @@
   }
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:12px; align-items:center; }
-  .g-top button {
-    background:none; border:none; cursor:pointer;
-    font-size:1.1rem; line-height:1; padding:2px; opacity:.85;
-    color:#9aa0ab; text-shadow:0 1px 3px rgba(0,0,0,.5);
-  }
-  .g-top button:hover { opacity:1; color:#e4e6eb; transform:scale(1.15); }
+  .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:8px; align-items:center; }
+  /* Кнопки в окне игры — тот же единый квадратный стиль */
+  .g-top .icon-btn { background: rgba(15,17,23,.82); }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
   .g-cover-link { display:block; }
   .g-cover-link img { transition:filter .15s; }
@@ -219,13 +224,14 @@
     .g-cover { max-height:240px; min-height:0; }
   }
 
-  /* Кнопка «Вниз» / «Наверх» в правом нижнем углу */
+  /* Кнопка «Наверх» в правом нижнем углу */
   .scroll-btn {
     position: fixed; right: 16px; bottom: 56px; z-index: 90;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 16px; border: 1px solid var(--border); border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px;
+    border: 1px solid var(--border); border-radius: 10px;
     background: rgba(31,35,48,.92); color: var(--text);
-    font-size: .87rem; font-weight: 600; cursor: pointer;
+    font-size: 1.15rem; cursor: pointer;
     font-family: inherit; box-shadow: 0 6px 20px rgba(0,0,0,.45);
     opacity: 0; pointer-events: none; transform: translateY(8px);
     transition: opacity .25s, transform .25s;
@@ -298,15 +304,15 @@
 <footer>© 2026 Atanvaron</footer>
 
 <div class="toasts" id="toasts"></div>
-<button id="scrollBtn" class="scroll-btn" type="button">⬇ Вниз</button>
+<button id="scrollBtn" class="scroll-btn" type="button" title="Наверх">⬆</button>
 
 <!-- Окно игры -->
 <div id="gameModal" class="overlay hidden">
   <div class="modal game">
     <div class="g-top">
-      <button id="gEdit" class="admin-only" title="Редактировать">✏️</button>
-      <button id="gDel" class="admin-only" title="Удалить">🗑️</button>
-      <button id="gClose" title="Закрыть">✕</button>
+      <button id="gEdit" class="icon-btn admin-only" title="Редактировать">✏️</button>
+      <button id="gDel" class="icon-btn admin-only" title="Удалить">🗑️</button>
+      <button id="gClose" class="icon-btn" title="Закрыть">✕</button>
     </div>
     <div class="g-grid">
       <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
@@ -768,8 +774,6 @@ async function fetchAppInfo(appid) {
 }
 
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
-// Название из слага ссылки — только черновик: Steam вырезает из слага знаки препинания.
-// Точное имя приходит из Steam API и перезаписывает черновик.
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
 // ---------- Приведение данных к плоскому списку ссылок ----------
@@ -1527,41 +1531,26 @@ function banner(text) {
   grid.before(d);
 }
 
-// ---------- Кнопка «Вниз» / «Наверх» ----------
-// Вверху страницы: «Вниз» → скроллит к списку русификаторов.
-// Ниже (или прокрутил дальше): «Наверх» → возвращает к шапке.
+// ---------- Кнопка «Наверх» ----------
+// Появляется, когда прокрутили дальше 60% высоты экрана; клик возвращает к шапке.
 (function setupScrollBtn() {
   const btn = $("scrollBtn");
   if (!btn) return;
 
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  const toList = () => {
-    const g = $("grid");
-    if (g) g.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
-  // Что показывать: если прокрутили хотя бы на 60% высоты экрана — предлагаем «Наверх»
-  const update = () => {
-    const down = window.scrollY < window.innerHeight * 0.6;
-    btn.textContent = down ? "⬇ Вниз" : "⬆ Наверх";
-    btn.title = down ? "Прокрутить к списку русификаторов" : "Вернуться наверх";
-  };
-
-  btn.addEventListener("click", () => {
-    if (btn.textContent.includes("Вниз")) toList(); else toTop();
-  });
-
-  // Обновляем подпись не чаще раза за кадр — экономно при быстром скролле
   let ticking = false;
   window.addEventListener("scroll", () => {
     if (!ticking) {
       ticking = true;
-      requestAnimationFrame(() => { update(); ticking = false; });
+      requestAnimationFrame(() => {
+        btn.classList.toggle("show", window.scrollY > window.innerHeight * 0.6);
+        ticking = false;
+      });
     }
   }, { passive: true });
 
-  update();
-  setTimeout(() => btn.classList.add("show"), 500);
+  btn.addEventListener("click", toTop);
 })();
 
 // ---------- Старт ----------
