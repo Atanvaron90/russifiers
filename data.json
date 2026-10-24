@@ -880,13 +880,18 @@
     "title": "Evergreen: The Board Game",
     "cover": {
       "appid": "2238070",
-      "name": "",
+      "name": "Evergreen: The Board Game",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2238070/capsule_616x353.jpg?t=1715265295"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/NrDsDTFgUCy3_g",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/b89ba571-8c16-49be-822d-28cf87a85430?isFromShowcase=true",
         "dl": 0
       }
     ],
