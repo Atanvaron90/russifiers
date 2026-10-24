@@ -1,5 +1,23 @@
 [
   {
+    "id": "broforce-mvm8cp2z",
+    "title": "Broforce",
+    "cover": {
+      "appid": "274190",
+      "name": "",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/274190/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/hmqHc_oCJ4_Y9A",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792836147707
+  },
+  {
     "id": "talisman-digital-classic-edition-mvlpscdl",
     "title": "Talisman: Digital Classic Edition",
     "cover": {
