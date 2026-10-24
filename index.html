@@ -51,7 +51,8 @@
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
   #search { flex:1; min-width:180px; padding:12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
-  #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  #sortBy, #viewBy, #filterBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
+  #filterBy { max-width:230px; }
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
@@ -130,7 +131,7 @@
       width:100%; height:auto;
       aspect-ratio:460/215;
       border-radius:8px;
-      align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
+      align-self:start;
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
@@ -204,8 +205,7 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
-  /* Редактор донатов: название | цвет | иконка | ✕ — крестик справа от поля иконки,
-     в той же строке; ссылка и реквизиты — во всю ширину ниже */
+  /* Редактор донатов: название | цвет | иконка | ✕ — крестик справа от поля иконки */
   .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
   .dn-row input { padding:8px 10px; font-size:.9rem; }
   .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
@@ -336,6 +336,9 @@
   <div class="toolbar">
     <input id="search" type="text" placeholder="Поиск по названию игры...">
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
+    <select id="filterBy" title="Фильтр по ярлыкам">
+      <option value="">Все записи</option>
+    </select>
     <select id="sortBy" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
@@ -499,6 +502,7 @@ const LS_TOKEN = "russifiers_gh_token";
 const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
 const LS_VIEW = "russifiers_view";
+const LS_FILTER = "russifiers_filter";
 const LS_STEAM_COMBO = "russifiers_steam_combo";
 const LS_APP_ROUTE = "russifiers_app_route";
 const LS_APPNAMES = "russifiers_appnames_v2";
@@ -1155,25 +1159,64 @@ function applyView() {
   render();
 });
 
+// ---------- Фильтр по ярлыкам ----------
+// Собирает все используемые ярлыки (текст + количество записей) в выпадающий список.
+// Выбор запоминается; если ярлык исчез со всех записей — фильтр сбрасывается на «Все».
+function currentFilter() {
+  return localStorage.getItem(LS_FILTER) || "";
+}
+function rebuildFilterOptions() {
+  const sel = $("filterBy");
+  const cur = currentFilter();
+  const counts = new Map();
+  for (const p of state.projects) {
+    if (p.badge?.text) {
+      const t = p.badge.text;
+      counts.set(t, (counts.get(t) || 0) + 1);
+    }
+  }
+  const valid = cur === "" || counts.has(cur);
+  const active = valid ? cur : "";
+  if (!valid) localStorage.setItem(LS_FILTER, "");
+  let html = '<option value="">Все записи</option>';
+  for (const [t, n] of counts)
+    html += `<option value="${esc(t)}">${esc(t)} (${n})</option>`;
+  sel.innerHTML = html;
+  sel.value = active;
+  // Рамка селекта подкрашивается цветом выбранного ярлыка
+  const badge = active ? state.projects.find(p => p.badge?.text === active)?.badge : null;
+  sel.style.borderColor = badge ? badge.color : "";
+}
+ $("filterBy").addEventListener("change", e => {
+  localStorage.setItem(LS_FILTER, e.target.value);
+  render();
+});
+
 // ---------- Отрисовка ----------
 const grid = $("grid");
 let query = "";
 
 function render() {
   const view = currentView();
+  rebuildFilterOptions();
+  const fval = currentFilter();
+
   const list = state.projects
     .filter(p => !query || p.title.toLowerCase().includes(query))
+    .filter(p => !fval || p.badge?.text === fval)
     .sort(SORTS[currentSort()].fn);
 
-  // Счётчик русификаторов: всего / найдено при поиске
+  // Счётчик: всего / найдено при активном поиске или фильтре
   const total = state.projects.length;
-  $("statCount").textContent = query
+  $("statCount").textContent = (query || fval)
     ? `Найдено: ${list.length} из ${total}`
     : `${total} ${pluralRu(total, "русификатор", "русификатора", "русификаторов")}`;
 
   grid.innerHTML = "";
   if (!list.length) {
-    grid.innerHTML = `<div class="empty">${state.token ? "Пока ничего нет — нажмите «Добавить русификатор»" : "Пока ничего не опубликовано 😕"}</div>`;
+    grid.innerHTML = `<div class="empty">${(query || fval)
+      ? "По заданным условиям ничего не найдено"
+      : (state.token ? "Пока ничего нет — нажмите «Добавить русификатор»" : "Пока ничего не опубликовано 😕")}</div>`;
     return;
   }
   for (const p of list) {
@@ -1265,6 +1308,9 @@ function openGame(id) {
   } else {
     st.style.display = "none";
   }
+
+  $("gDesc").textContent = p.description || "";
+  $("gDesc").style.display = p.description ? "" : "none";
 
   setCoverCascade($("gCover"), gameCoverURLs(p));
 
