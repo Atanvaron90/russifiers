@@ -1,5 +1,22 @@
 [
   {
+    "id": "the-captain-is-dead-mvlnipa0",
+    "title": "The Captain is Dead",
+    "cover": {
+      "appid": "1126580",
+      "name": "The Captain is Dead",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1126580/capsule_616x353.jpg?t=1656532144"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/2JNrBXxu9ARLMA",
+        "dl": 0
+      }
+    ],
+    "created": 1792801155960
+  },
+  {
     "id": "terraforming-mars-mvlnh08w",
     "title": "Terraforming Mars",
     "cover": {
