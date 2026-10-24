@@ -4,8 +4,8 @@
     "title": "Broforce",
     "cover": {
       "appid": "274190",
-      "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/274190/header.jpg"
+      "name": "Broforce",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/274190/capsule_616x353.jpg?t=1764247760"
     },
     "links": [
       {
@@ -14,8 +14,11 @@
         "dl": 0
       }
     ],
-    "stale": false,
-    "created": 1792836147707
+    "created": 1792836147707,
+    "badge": {
+      "text": "Совместный",
+      "color": "#9219f5"
+    }
   },
   {
     "id": "talisman-digital-classic-edition-mvlpscdl",
@@ -32,8 +35,11 @@
         "dl": 0
       }
     ],
-    "stale": true,
-    "created": 1792804965033
+    "created": 1792804965033,
+    "badge": {
+      "text": "Не обновляется",
+      "color": "#F5C518"
+    }
   },
   {
     "id": "monopoly-mvlp6rew",
@@ -48,7 +54,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792803958088
   },
   {
@@ -66,7 +71,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792802121742
   },
   {
@@ -84,7 +88,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792802094018
   },
   {
@@ -107,7 +110,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792802076345
   },
   {
@@ -135,7 +137,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792802044862
   },
   {
@@ -154,7 +155,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801966545
   },
   {
@@ -173,7 +173,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801945087
   },
   {
@@ -196,7 +195,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801640790
   },
   {
@@ -215,7 +213,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801611232
   },
   {
@@ -233,7 +230,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801569058
   },
   {
@@ -251,7 +247,6 @@
         "dl": 0
       }
     ],
-    "stale": false,
     "created": 1792801548178
   },
   {
@@ -304,7 +299,10 @@
       }
     ],
     "created": 1792800996622,
-    "stale": true
+    "badge": {
+      "text": "Не обновляется",
+      "color": "#F5C518"
+    }
   },
   {
     "id": "talisman-origins-classic-mvlne9km",
@@ -326,8 +324,7 @@
         "dl": 0
       }
     ],
-    "created": 1792800948982,
-    "stale": false
+    "created": 1792800948982
   },
   {
     "id": "talisman-digital-5th-edition-mvln6hmb",
@@ -364,7 +361,10 @@
       }
     ],
     "created": 1792800561273,
-    "stale": true
+    "badge": {
+      "text": "Не обновляется",
+      "color": "#F5C518"
+    }
   },
   {
     "id": "stone-age-digital-edition-mvln5k8j",
@@ -387,8 +387,7 @@
         "dl": 0
       }
     ],
-    "created": 1792800542899,
-    "stale": false
+    "created": 1792800542899
   },
   {
     "id": "set-a-watch-digital-edition-mvlmzjhv",
@@ -578,8 +577,7 @@
         "dl": 0
       }
     ],
-    "created": 1792799839014,
-    "stale": false
+    "created": 1792799839014
   },
   {
     "id": "let-them-trade-mvlmoj6f",
@@ -686,8 +684,7 @@
         "dl": 0
       }
     ],
-    "created": 1792799260922,
-    "stale": false
+    "created": 1792799260922
   },
   {
     "id": "inkborn-mvlmdf40",
@@ -804,8 +801,7 @@
         "dl": 0
       }
     ],
-    "created": 1792798733932,
-    "stale": false
+    "created": 1792798733932
   },
   {
     "id": "evergreen-the-board-game-mvlm1480",
@@ -845,8 +841,7 @@
         "dl": 0
       }
     ],
-    "created": 1792798615588,
-    "stale": false
+    "created": 1792798615588
   },
   {
     "id": "escape-tales-the-awakening-mvllwu84",
@@ -890,8 +885,7 @@
         "dl": 0
       }
     ],
-    "created": 1792798334232,
-    "stale": false
+    "created": 1792798334232
   },
   {
     "id": "decks-daggers-mvljuknx",
@@ -995,8 +989,7 @@
         "dl": 0
       }
     ],
-    "created": 1792794415023,
-    "stale": false
+    "created": 1792794415023
   },
   {
     "id": "clue-cluedo-classic-edition-mvljg6cl",
@@ -1019,8 +1012,7 @@
         "dl": 0
       }
     ],
-    "created": 1792794319653,
-    "stale": false
+    "created": 1792794319653
   },
   {
     "id": "clue-cluedo-mvlj9vni",
@@ -1038,8 +1030,7 @@
         "dl": 0
       }
     ],
-    "created": 1792794025854,
-    "stale": false
+    "created": 1792794025854
   },
   {
     "id": "clank-mvlj90ek",
@@ -1085,8 +1076,7 @@
         "dl": 0
       }
     ],
-    "created": 1792793554588,
-    "stale": false
+    "created": 1792793554588
   },
   {
     "id": "cascadia-mvlixns2",
@@ -1126,8 +1116,7 @@
         "dl": 0
       }
     ],
-    "created": 1792792517193,
-    "stale": false
+    "created": 1792792517193
   },
   {
     "id": "brass-birmingham-mvlibhcb",
@@ -1263,7 +1252,10 @@
       }
     ],
     "created": 1792788891610,
-    "stale": true
+    "badge": {
+      "text": "Не обновляется",
+      "color": "#F5C518"
+    }
   },
   {
     "id": "a-game-of-thrones-the-board-game-digital-edition-mvlg5ji9",
@@ -1291,7 +1283,6 @@
         "dl": 0
       }
     ],
-    "created": 1792788784641,
-    "stale": false
+    "created": 1792788784641
   }
 ]
