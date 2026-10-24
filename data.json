@@ -75,7 +75,7 @@
     "cover": {
       "appid": "2553410",
       "name": "Welcome To Everdell",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2553410/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2553410/capsule_616x353.jpg?t=1767903794"
     },
     "links": [
       {
@@ -145,7 +145,8 @@
     "cover": {
       "appid": "406290",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/406290/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/header.jpg?t=1647893895",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/capsule_184x69.jpg?t=1647893895"
     },
     "links": [
       {
