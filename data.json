@@ -57,6 +57,11 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/5jgHpjejNQjIHA",
         "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/cb84a790-a101-45e3-bc9a-cd9fc164879a?isFromShowcase=true",
+        "dl": 0
       }
     ],
     "badge": {
