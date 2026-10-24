@@ -1,5 +1,28 @@
 [
   {
+    "id": "unmatched-digital-edition-mvlo1r5q",
+    "title": "Unmatched: Digital Edition",
+    "cover": {
+      "appid": "1677980",
+      "name": "Unmatched: Digital Edition",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1677980/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/xMZKgBjZBp1UAA",
+        "dl": 0
+      },
+      {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1NZ1i8y9rchJeT6jiuFSHg2D27gGypO7N?usp=sharing",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792802044862
+  },
+  {
     "id": "twilight-struggle-red-sea-mvlo02q9",
     "title": "Twilight Struggle: Red Sea",
     "cover": {
