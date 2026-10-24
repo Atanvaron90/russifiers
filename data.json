@@ -314,12 +314,17 @@
     "cover": {
       "appid": "2438980",
       "name": "The Isle of Cats",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438980/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438980/f3dbe7004eb984e682fd27720a8b6d6ec77ed538/capsule_616x353.jpg?t=1767903452"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/-QBKIA5mNmcpYA",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/7e46e7e7-aff9-46d2-aae4-78a845c45823?isFromShowcase=true",
         "dl": 0
       }
     ],
