@@ -1,20 +1,20 @@
 [
   {
-    "id": "talisman-digital-classic-edition-mvlnc4ie",
-    "title": "Talisman: Digital Classic Edition",
+    "id": "talisman-origins-classic-mvlne9km",
+    "title": "Talisman: Origins (Classic)",
     "cover": {
-      "appid": "247000",
-      "name": "Talisman: Digital Classic Edition",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/247000/header.jpg"
+      "appid": "1033170",
+      "name": "Talisman: Origins (Classic)",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1033170/5d078b22462d96e67f5aac123a40bd83010d04b7/capsule_616x353_alt_assets_0.jpg?t=1777540232"
     },
     "links": [
       {
         "type": "yadisk",
-        "url": "https://disk.yandex.ru/d/BUs86J1QHJszcw",
+        "url": "https://disk.yandex.ru/d/MNNnIBGljfnecQ",
         "dl": 0
       }
     ],
-    "created": 1792800849110
+    "created": 1792800948982
   },
   {
     "id": "talisman-digital-5th-edition-mvln6hmb",
@@ -243,8 +243,7 @@
     "cover": {
       "appid": "1722860",
       "name": "",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg?t=1788454320",
-      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/capsule_184x69.jpg?t=1788454320"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg"
     },
     "links": [
       {
@@ -261,8 +260,7 @@
     "cover": {
       "appid": "1313290",
       "name": "",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/03febd9b7c531a5a685fc46c0f06a6f249a2e273/header.jpg?t=1792070270",
-      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/c2b85763fab13ed1068cffe2013de2dcc9d344bf/capsule_184x69.jpg?t=1792070270"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1313290/header.jpg"
     },
     "links": [
       {
@@ -279,7 +277,7 @@
     "cover": {
       "appid": "511820",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/511820/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/511820/capsule_616x353.jpg?t=1741270713"
     },
     "links": [
       {
@@ -296,8 +294,7 @@
     "cover": {
       "appid": "931950",
       "name": "",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg?t=1666393189",
-      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/capsule_184x69.jpg?t=1666393189"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg"
     },
     "links": [
       {
@@ -314,8 +311,7 @@
     "cover": {
       "appid": "3160500",
       "name": "",
-      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg?t=1758551676",
-      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/3f5b57f5b45e4f34c60a99a9e9a39740ebda810e/capsule_184x69.jpg?t=1758551676"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg"
     },
     "links": [
       {
@@ -332,7 +328,7 @@
     "cover": {
       "appid": "2561310",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2561310/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2561310/capsule_616x353.jpg?t=1763553739"
     },
     "links": [
       {
@@ -349,7 +345,7 @@
     "cover": {
       "appid": "943410",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/943410/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/943410/f4e8c36eff1bb074c07a6b4cc96f2d6167f7da23/capsule_616x353.jpg?t=1772553316"
     },
     "links": [
       {
@@ -366,7 +362,7 @@
     "cover": {
       "appid": "2924580",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2924580/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2924580/547cf4021992c050be48a85429821bf4c65f8a99/capsule_616x353_alt_assets_8.jpg?t=1792510079"
     },
     "links": [
       {
@@ -422,7 +418,7 @@
     "cover": {
       "appid": "893050",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/893050/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/893050/capsule_616x353.jpg?t=1752167994"
     },
     "links": [
       {
@@ -439,7 +435,7 @@
     "cover": {
       "appid": "958530",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/958530/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/958530/capsule_616x353.jpg?t=1760518039"
     },
     "links": [
       {
@@ -456,7 +452,7 @@
     "cover": {
       "appid": "2999030",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2999030/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2999030/821be9a55cbc7863392bf603e7ad0d178477d20e/capsule_616x353.jpg?t=1787313738"
     },
     "links": [
       {
@@ -478,7 +474,7 @@
     "cover": {
       "appid": "2238070",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2238070/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2238070/capsule_616x353.jpg?t=1715265295"
     },
     "links": [
       {
@@ -512,7 +508,7 @@
     "cover": {
       "appid": "2921150",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2921150/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2921150/capsule_616x353.jpg?t=1729789091"
     },
     "links": [
       {
@@ -529,7 +525,7 @@
     "cover": {
       "appid": "1689500",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1689500/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1689500/1bfdfcb98addc21208ea6b3f15a5448c55c4f38c/capsule_616x353.jpg?t=1781022179"
     },
     "links": [
       {
@@ -727,7 +723,7 @@
     "cover": {
       "appid": "2438970",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438970/header.jpg"
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438970/capsule_616x353.jpg?t=1767897466"
     },
     "links": [
       {
