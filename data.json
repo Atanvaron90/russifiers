@@ -824,13 +824,18 @@
     "title": "Hasbro's BATTLESHIP",
     "cover": {
       "appid": "893050",
-      "name": "",
+      "name": "Сэкономьте 85% при покупке Hasbro's BATTLESHIP",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/893050/capsule_616x353.jpg?t=1752167994"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/NQ3bruEY-QbD9g",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/0a8d7957-db46-4fb4-b4d4-7ae721953ec4?isFromShowcase=true",
         "dl": 0
       }
     ],
