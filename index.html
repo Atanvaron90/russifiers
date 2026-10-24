@@ -118,8 +118,7 @@
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
   /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком,
-     прижата К ВЕРХУ плашки (align-self:start), чтобы её верхний край
-     совпадал с ярлыком (оба на отступе 10px) */
+     прижата К ВЕРХУ плашки, чтобы совпадать с ярлыком (оба на отступе 10px) */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -131,7 +130,7 @@
       width:100%; height:auto;
       aspect-ratio:460/215;
       border-radius:8px;
-      align-self:start;   /* прижата к верху — не центрируется */
+      align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
@@ -142,8 +141,7 @@
     .grid:not(.view-compact) .card .meta { font-size:.74rem; }
     .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
     .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
-    /* Ярлык: верхний и левый края совпадают с кромкой обложки
-       (внутренний отступ плашки 10px; обложка прижата к верху) */
+    /* Ярлык: верхний и левый края совпадают с кромкой обложки (отступ плашки 10px) */
     .grid:not(.view-compact) .card .stale-badge {
       top:10px; left:10px;
       font-size:.68rem; font-weight:700;
@@ -275,9 +273,12 @@
   .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
   .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
   .lk-btn:hover { filter:brightness(1.15); }
+  /* Мобильное окно игры: горизонтальная обложка сверху (без обрезки), под ней — текст и ссылки */
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
-    .g-cover { max-height:240px; min-height:0; }
+    .g-cover-link { order:-1; }
+    .g-cover { height:auto; max-height:none; aspect-ratio:460/215; min-height:0; }
+    .g-body { padding:18px; }
   }
 
   /* Кнопка «Наверх» в правом нижнем углу */
@@ -437,7 +438,7 @@
     <label>Способы поддержки — у каждого название и ссылка ИЛИ реквизиты для копирования:</label>
     <div id="dList"></div>
     <button id="dAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить способ</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boosty, telegram). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boostyto, telegram). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
     <div class="modal-actions">
       <button id="dCancel" class="tool-btn" type="button">Отмена</button>
       <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -476,7 +477,7 @@ const DONATE_DEFAULT = {
   title: "☕ Поддержать автора",
   text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
   methods: [
-    { name: "Boosty", url: "https://boosty.to/atanvaron/donate", icon: "boosty", color: "#F15F2C" },
+    { name: "Boosty", url: "https://boosty.to/atanvaron/donate", icon: "boostyto", color: "#F15F2C" },
     { name: "ЮMoney", url: "https://yoomoney.ru/to/4100XXXXXXXXXXXX", color: "#8B3FFE" },
     { name: "Карта — нажмите, чтобы скопировать", value: "0000 0000 0000 0000", color: "#2E7D32" }
   ]
@@ -497,6 +498,9 @@ const LS_VIEW = "russifiers_view";
 const LS_STEAM_COMBO = "russifiers_steam_combo";
 const LS_APP_ROUTE = "russifiers_app_route";
 const LS_APPNAMES = "russifiers_appnames_v2";
+
+// На узких экранах окно игры использует горизонтальные обложки
+const isNarrowScreen = () => window.matchMedia("(max-width: 640px)").matches;
 
 const $ = id => document.getElementById(id);
 const state = { projects: [], dataSha: null, donateSha: null, donate: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
@@ -582,11 +586,12 @@ function toast(msg, type = "info", ms = 4000) {
 })();
 
 // ---------- Каталог сервисов ----------
+// boosty: Simple Icons переименовал значок в "boostyto" (старый "boosty" отдаёт 404)
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
-  boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
+  boosty:   { name:"Boosty",        slug:"boostyto",    color:"#F15F2C", hosts:["boosty.to"], altSlug:"boosty" },
   pda4:     { name:"4PDA",          slug:"",            color:"#42A5F5", hosts:["4pda.to","4pda.cc","4pda.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
   github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","gist.github.com","raw.githubusercontent.com","gist.githubusercontent.com"] },
@@ -605,12 +610,17 @@ function detectService(url) {
   } catch (e) {}
   return "other";
 }
+// makeIcon: если основной слаг не отвечает (404/сеть), onerror переключает
+// картинку на altSlug (запасной слаг того же бренда), затем на букву-заглушку
 function makeIcon(type) {
   const s = SERVICES[type] || SERVICES.other;
   if (s.iconUrl)
     return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.style.color='${s.txt || "#fff"}';this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
   if (!s.slug) return `<span class="lk-ico" style="background:${s.color};color:${s.txt || "#fff"}">${esc(s.fallback || "🔗")}</span>`;
-  return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
+  const fallbackJs = s.altSlug
+    ? `this.onerror=()=>{this.parentNode.textContent='${esc(s.name[0])}'};this.src='https://cdn.simpleicons.org/${s.altSlug}/ffffff'`
+    : `this.parentNode.textContent='${esc(s.name[0])}'`;
+  return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="${fallbackJs}"></span>`;
 }
 
 // ---------- Обложки ----------
@@ -653,14 +663,16 @@ function coverURLs(p) {
   ];
   return dedupe(urls);
 }
+// Обложки для окна игры: на мобильных — только горизонтальные (свой URL → header → capsule → заглушка),
+// на десктопе — вертикальные первыми, как раньше
 function gameCoverURLs(p) {
   const c = p.cover || {};
-  const urls = [
-    ...(c.appid ? steamTallURLs(c.appid) : []),
-    ...(c.appid ? steamHeaderURLs(c.appid) : []),
-    c.url, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
-    phSVG((p.title[0] || "?").toUpperCase())
-  ];
+  const urls = [];
+  if (!isNarrowScreen() && c.appid) urls.push(...steamTallURLs(c.appid));
+  if (c.appid) urls.push(...steamHeaderURLs(c.appid));
+  urls.push(c.url, c.capsule);
+  if (c.appid) urls.push(...steamCapsuleURLs(c.appid));
+  urls.push(phSVG((p.title[0] || "?").toUpperCase()));
   return dedupe(urls);
 }
 
@@ -669,17 +681,6 @@ function fetchTimeout(url, ms = 8000) {
   const t = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
-
-// ---------- Прокси для Steam ----------
-const STEAM_PROXIES = [
-  { name:"direct",         wrap: u => u },
-  { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
-  { name:"allorigins",     wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
-  { name:"allorigins-get", wrap: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json:"contents" },
-  { name:"cors-lol",       wrap: u => "https://api.cors.lol/?url=" + encodeURIComponent(u) },
-  { name:"cors-workers",   wrap: u => "https://test.cors.workers.dev/?" + u }
-];
-const failedCombos = new Set();
 
 // ---------- Поиск игр по названию ----------
 const SEARCH_SOURCES = [
@@ -1025,7 +1026,7 @@ function addDonateRow(m = {}) {
   box.innerHTML = `
     <input class="dn-name" placeholder="Название (Boosty, ЮMoney, Карта…)" value="${esc(m.name || "")}">
     <input class="dn-color" type="color" value="${esc(m.color || "#6c5ce7")}" title="Цвет значка">
-    <input class="dn-icon" placeholder="иконка (boosty)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
+    <input class="dn-icon" placeholder="иконка (boostyto)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
     <input class="dn-url full" placeholder="https:// ссылка (необязательно)" value="${esc(m.url || "")}">
     <input class="dn-val full" placeholder="…или реквизиты для копирования (необязательно)" value="${esc(m.value || "")}">
     <button type="button" class="ver-del" title="Убрать способ">✕</button>`;
@@ -1249,9 +1250,6 @@ function openGame(id) {
   } else {
     st.style.display = "none";
   }
-
-  $("gDesc").textContent = p.description || "";
-  $("gDesc").style.display = p.description ? "" : "none";
 
   setCoverCascade($("gCover"), gameCoverURLs(p));
 
