@@ -53,7 +53,8 @@
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
 
-  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место */
+  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место.
+     На мобильном ширина поля подгоняется под подсказку (var --ph-w считается в JS) */
   .search-wrap { position:relative; flex:1; min-width:180px; }
   #search { width:100%; padding:12px 46px 12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
@@ -95,6 +96,8 @@
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
+  /* Кнопка админа всегда у правого края панели */
+  #btnAdd { margin-left:auto; }
   body:not(.admin) .admin-only { display:none !important; }
 
   .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
@@ -104,10 +107,9 @@
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
   .card:hover h2 { color:#a99cf5; }
-  /* Обложка: естественные пропорции источника, БЕЗ обрезки (object-fit не нужен при
-     height:auto). Разные источники (header 460×215, capsule 616×353, hero-баннеры)
-     показываются целиком — плашка совпадает с окном игры */
-  .cover { display:block; width:100%; height:auto; border-radius:10px; background:var(--field); }
+  /* Обложка: единый формат 231×87 (маленькая капсула со страницы Steam) —
+     все горизонтальные обложки одного размера, ряд ровный */
+  .cover { width:100%; aspect-ratio:231/87; object-fit:cover; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
@@ -155,8 +157,8 @@
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
-  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка целиком (естественные
-     пропорции, без обрезки), прижата К ВЕРХУ плашки — совпадает с ярлыком (10px) */
+  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка того же формата 231×87,
+     прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px) */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -166,6 +168,7 @@
     .grid:not(.view-compact) .card .cover {
       grid-column:1; grid-row:1 / span 3;
       width:100%; height:auto;
+      aspect-ratio:231/87;
       border-radius:8px;
       align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
     }
@@ -184,8 +187,8 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Поиск укорочен, счётчик — в конец строки (прижат вправо) */
-    .search-wrap { flex:1 1 auto; max-width:62%; }
+    /* Поиск ровно под подсказку (ширина --ph-w считается в JS), счётчик — в конец строки */
+    .search-wrap { flex:0 0 auto; min-width:0; width:calc(var(--ph-w, 150px) + 62px); }
     .stat-chip { order:9; margin-left:auto; align-self:center; }
     .grid.view-compact { max-width:none; padding:0 8px; }
     body.admin .grid.view-compact .card h2 { padding-right:84px; }
@@ -222,7 +225,7 @@
 
   .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
   .cover-preview.hidden { display:none; }
-  .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
+  .cover-preview img { width:180px; aspect-ratio:231/87; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
   .cov-right { flex:1; min-width:0; }
   .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
   .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
@@ -317,12 +320,12 @@
   .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
   .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
   .lk-btn:hover { filter:brightness(1.15); }
-  /* Мобильное окно игры: горизонтальная обложка сверху — ЦЕЛИКОМ (естественные
-     пропорции, без обрезки), под ней — текст и ссылки */
+  /* Мобильное окно игры: горизонтальная обложка 231×87 сверху (тот же формат, что на
+     плашках), под ней — текст и ссылки */
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
     .g-cover-link { order:-1; }
-    .g-cover { height:auto; max-height:none; min-height:0; }
+    .g-cover { height:auto; min-height:0; aspect-ratio:231/87; }
     .g-body { padding:18px; }
   }
 
@@ -394,7 +397,7 @@
       <option value="grid">Сетка</option>
       <option value="compact">Список</option>
     </select>
-    <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
+    <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
   </div>
 </div>
@@ -685,7 +688,16 @@ const steamTallURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
 ];
-// Горизонтальная: у части новых игр старые пути отдают 404, поэтому новые первыми
+// Маленькая горизонтальная капсула (та, что справа на странице Steam, 231×87) —
+// единый формат для горизонтальных обложек на плашках и в мобильном окне игры
+const steamCapsuleSmallURLs = appid => [
+  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_231x87.jpg`,
+  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_231x87.jpg`,
+  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`,
+  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`,
+  `https://cdn.steamstatic.com/steam/apps/${appid}/capsule_231x87.jpg`
+];
+// Большой header (460×215) — запас, если маленькой капсулы у игры нет
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -708,11 +720,12 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
-// Горизонтальный каскад — одинаков для плашек и мобильного окна игры:
-// канонический URL → header → capsule → заглушка (плашка и окно показывают одну картинку)
+// Горизонтальный каскад: маленькая капсула → канонический URL → header → большая капсула → заглушка.
+// Одинаков для плашек и мобильного окна игры — картинки всегда совпадают
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
+    ...(c.appid ? steamCapsuleSmallURLs(c.appid) : []),
     c.url, ...(c.appid ? steamHeaderURLs(c.appid) : []),
     c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
     phSVG((p.title[0] || "?").toUpperCase())
@@ -1345,12 +1358,14 @@ let mqResizeTimer = null;
 window.addEventListener("resize", () => {
   clearTimeout(mqResizeTimer);
   mqResizeTimer = setTimeout(() => {
+    fitSearchWidth();
     if (currentView() === "compact") setupMarquees();
   }, 200);
 });
 // Пересчёт после загрузки веб-шрифтов (ширина текста меняется)
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
+    fitSearchWidth();
     if (currentView() === "compact") setupMarquees();
   });
 }
@@ -1543,6 +1558,7 @@ function updateCoverPreview() {
   } else {
     label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
     setCoverCascade(img, dedupe([
+      ...(c.appid ? steamCapsuleSmallURLs(c.appid) : []),
       c.header, ...(c.appid ? steamHeaderURLs(c.appid) : []),
       c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
       phSVG("?")
@@ -1869,12 +1885,29 @@ function banner(text) {
   btn.addEventListener("click", toTop);
 })();
 
+// ---------- Подгонка ширины поиска под подсказку (для мобильной версии) ----------
+// Измеряем фактическую ширину текста плейсхолдера и записываем в CSS-переменную
+// --ph-w. В мобильном медиазапросе ширина поля = подсказка + паддинги + кнопка фильтра.
+function fitSearchWidth() {
+  const inp = $("search");
+  if (!inp) return;
+  const probe = document.createElement("span");
+  const cs = getComputedStyle(inp);
+  probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font:${cs.font};letter-spacing:${cs.letterSpacing};`;
+  probe.textContent = inp.placeholder || "";
+  document.body.appendChild(probe);
+  const w = Math.ceil(probe.getBoundingClientRect().width);
+  probe.remove();
+  document.documentElement.style.setProperty("--ph-w", w + "px");
+}
+
 // ---------- Старт ----------
 (async function init() {
   setAdmin(!!state.token);
   await loadDonate();
   renderDonate();
   applyView();
+  fitSearchWidth();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
       .then(() => autoHealCovers())
