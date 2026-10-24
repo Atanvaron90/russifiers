@@ -1,5 +1,23 @@
 [
   {
+    "id": "raiders-of-the-north-sea-mvlmyot7",
+    "title": "Raiders of the North Sea",
+    "cover": {
+      "appid": "965600",
+      "name": "Raiders of the North Sea",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965600/header.jpg?t=1767902947",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965600/capsule_184x69.jpg?t=1767902947"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/AlnOwrnVYPqV3w",
+        "dl": 0
+      }
+    ],
+    "created": 1792800222235
+  },
+  {
     "id": "power-chord-mvlmy6o3",
     "title": "Power Chord",
     "cover": {
