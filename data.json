@@ -768,7 +768,7 @@
     "title": "Inkborn",
     "cover": {
       "appid": "2924580",
-      "name": "",
+      "name": "Inkborn",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2924580/547cf4021992c050be48a85429821bf4c65f8a99/capsule_616x353_alt_assets_8.jpg?t=1792510079"
     },
     "links": [
@@ -780,6 +780,11 @@
       {
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1_5l_M_xO0BY0UI8GJ-e_AOpR2zYP9OED?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/bf048cb9-dda3-401c-ac76-15c53be5029b?isFromShowcase=true",
         "dl": 0
       }
     ],
