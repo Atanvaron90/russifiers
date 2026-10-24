@@ -211,7 +211,7 @@
     "cover": {
       "appid": "1677980",
       "name": "Unmatched: Digital Edition",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1677980/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677980/13629a9a1a5067b28d01f99d885bb953b8c55c23/capsule_616x353.jpg?t=1785423348"
     },
     "links": [
       {
@@ -222,6 +222,11 @@
       {
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1NZ1i8y9rchJeT6jiuFSHg2D27gGypO7N?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/00853402-3a7a-446e-83ec-9fc25ab05504?isFromShowcase=true",
         "dl": 0
       },
       {
