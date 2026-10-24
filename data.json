@@ -17,7 +17,7 @@
     "created": 1792836147707,
     "badge": {
       "text": "Совместный",
-      "color": "#9219f5"
+      "color": "#8c00ff"
     }
   },
   {
@@ -79,7 +79,7 @@
     "cover": {
       "appid": "965620",
       "name": "Wings of Glory",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/965620/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965620/capsule_616x353.jpg?t=1767903931"
     },
     "links": [
       {
@@ -118,7 +118,7 @@
     "cover": {
       "appid": "1677980",
       "name": "Unmatched: Digital Edition",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1677980/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677980/13629a9a1a5067b28d01f99d885bb953b8c55c23/capsule_616x353.jpg?t=1785423348"
     },
     "links": [
       {
@@ -221,7 +221,7 @@
     "cover": {
       "appid": "2438980",
       "name": "The Isle of Cats",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438980/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438980/f3dbe7004eb984e682fd27720a8b6d6ec77ed538/capsule_616x353.jpg?t=1767903452"
     },
     "links": [
       {
