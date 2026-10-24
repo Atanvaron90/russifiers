@@ -1,5 +1,23 @@
 [
   {
+    "id": "reiner-knizia-yellow-yangtze-mvlo3eha",
+    "title": "Reiner Knizia Yellow & Yangtze",
+    "cover": {
+      "appid": "965610",
+      "name": "Reiner Knizia Yellow & Yangtze",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/965610/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/zZ10OCHmMHwlLw",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792802121742
+  },
+  {
     "id": "wings-of-glory-mvlo2t36",
     "title": "Wings of Glory",
     "cover": {
