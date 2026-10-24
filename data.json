@@ -504,6 +504,11 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/77hD94E3fGPBUg",
         "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/a1a1f740-7f77-49af-aadc-9fe28910d973?isFromShowcase=true",
+        "dl": 0
       }
     ],
     "created": 1792800243149
