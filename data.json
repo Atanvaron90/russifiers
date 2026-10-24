@@ -1,5 +1,22 @@
 [
   {
+    "id": "talisman-digital-classic-edition-mvlnc4ie",
+    "title": "Talisman: Digital Classic Edition",
+    "cover": {
+      "appid": "247000",
+      "name": "Talisman: Digital Classic Edition",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/247000/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/BUs86J1QHJszcw",
+        "dl": 0
+      }
+    ],
+    "created": 1792800849110
+  },
+  {
     "id": "talisman-digital-5th-edition-mvln6hmb",
     "title": "Talisman: Digital 5th Edition",
     "cover": {
@@ -226,7 +243,8 @@
     "cover": {
       "appid": "1722860",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg?t=1788454320",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/capsule_184x69.jpg?t=1788454320"
     },
     "links": [
       {
@@ -243,7 +261,8 @@
     "cover": {
       "appid": "1313290",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1313290/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/03febd9b7c531a5a685fc46c0f06a6f249a2e273/header.jpg?t=1792070270",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/c2b85763fab13ed1068cffe2013de2dcc9d344bf/capsule_184x69.jpg?t=1792070270"
     },
     "links": [
       {
@@ -277,7 +296,8 @@
     "cover": {
       "appid": "931950",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg?t=1666393189",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/capsule_184x69.jpg?t=1666393189"
     },
     "links": [
       {
@@ -294,7 +314,8 @@
     "cover": {
       "appid": "3160500",
       "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg?t=1758551676",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/3f5b57f5b45e4f34c60a99a9e9a39740ebda810e/capsule_184x69.jpg?t=1758551676"
     },
     "links": [
       {
