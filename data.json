@@ -1,5 +1,22 @@
 [
   {
+    "id": "terraforming-mars-mvlnh08w",
+    "title": "Terraforming Mars",
+    "cover": {
+      "appid": "800270",
+      "name": "Terraforming Mars",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/800270/b2ba0c2def4e41e550c6e494e9614e8d23512fb1/capsule_616x353.jpg?t=1769091240"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/DLl0tdrGUld5Ig",
+        "dl": 0
+      }
+    ],
+    "created": 1792801076864
+  },
+  {
     "id": "сэкономьте-10-при-покупке-tape-to-tape-mvlnfaby",
     "title": "Tape to Tape",
     "cover": {
