@@ -1155,13 +1155,18 @@
     "title": "Cascadia",
     "cover": {
       "appid": "2438970",
-      "name": "",
+      "name": "Cascadia",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438970/capsule_616x353.jpg?t=1767897466"
     },
     "links": [
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/aeD6TIGDnR3aXw",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/ef214dc1-485c-4a7e-9e77-3f45a0e417cc?isFromShowcase=true",
         "dl": 0
       }
     ],
