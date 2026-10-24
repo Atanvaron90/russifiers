@@ -55,7 +55,7 @@
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
-    color:var(--muted); font-size:.9rem; white-space:nowrap;
+    color:var(--text); font-size:.95rem; white-space:nowrap;
   }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
@@ -97,12 +97,6 @@
     text-shadow:0 1px 2px rgba(0,0,0,.6);
   }
 
-  .grid.view-list { grid-template-columns:1fr; }
-  .grid.view-list .card { display:grid; grid-template-columns:230px 1fr; gap:4px 16px; align-items:start; padding:12px; }
-  .grid.view-list .card .cover { grid-column:1; grid-row:1 / span 3; width:100%; height:100%; min-height:110px; }
-  .grid.view-list .card h2, .grid.view-list .card .desc, .grid.view-list .card .meta { grid-column:2; }
-  .grid.view-list .card .desc { flex-grow:0; }
-
   /* Компактный вид: список названий в столбик без плашек и промежутков */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
@@ -121,6 +115,38 @@
   .grid.view-compact .card .stale-badge { display:none; }
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
+
+  /* МОБИЛЬНАЯ ВЕРСИЯ (6-дюймовые экраны и меньше):
+     «Сетка» автоматически превращается в список — одна колонка,
+     обложка слева, текст справа; всё уменьшено, чтобы влезало без зума */
+  @media (max-width:640px) {
+    .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
+    .grid:not(.view-compact) .card {
+      display:grid; grid-template-columns:118px 1fr; gap:4px 12px;
+      align-items:start; padding:10px;
+    }
+    .grid:not(.view-compact) .card .cover {
+      grid-column:1; grid-row:1 / span 3;
+      width:100%; height:100%; min-height:76px;
+      aspect-ratio:auto; border-radius:8px;
+    }
+    .grid:not(.view-compact) .card h2,
+    .grid:not(.view-compact) .card .desc,
+    .grid:not(.view-compact) .card .meta { grid-column:2; }
+    .grid:not(.view-compact) .card h2 {
+      font-size:1rem; padding-right:8px; margin-top:0;
+    }
+    body.admin .grid:not(.view-compact) .card h2 { padding-right:84px; }
+    .grid:not(.view-compact) .card .desc { font-size:.84rem; flex-grow:0; }
+    .grid:not(.view-compact) .card .meta { font-size:.74rem; }
+    .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
+    .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
+    .grid:not(.view-compact) .card .stale-badge {
+      top:6px; left:6px; font-size:.64rem; padding:3px 7px;
+    }
+    .grid.view-compact { max-width:none; padding:0 8px; }
+    .toolbar { padding:0 12px; }
+  }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
   .overlay.hidden { display:none; }
@@ -273,7 +299,7 @@
       <span id="logoFallback" class="logo-fallback">🌐</span>
       <div class="title-text">
         <h1>Русификаторы от Atanvaron</h1>
-        <p>Перевод и адаптация цифровых настолок, и не только.</p>
+        <p>Мои переводы и проекты — бесплатно</p>
       </div>
     </div>
   </header>
@@ -284,15 +310,14 @@
     <select id="sortBy" title="Сортировка">
       <option value="az">А → Я</option>
       <option value="za">Я → А</option>
-      <option value="dl">По переходам</option>
+      <option value="dl">Сначала популярные</option>
       <option value="new">Сначала новые</option>
     </select>
     <select id="viewBy" title="Вид списка">
-      <option value="grid">Сетка 3х3</option>
-      <option value="list">Список</option>
-      <option value="compact">Компактный список</option>
+      <option value="grid">Сетка</option>
+      <option value="compact">Компактно</option>
     </select>
-    <button id="btnAdd" class="tool-btn primary admin-only">Добавить русификатор</button>
+    <button id="btnAdd" class="tool-btn primary admin-only">➕ Добавить русификатор</button>
   </div>
 </div>
 
@@ -326,7 +351,7 @@
       </a>
       <div class="g-body">
         <h2 id="gTitle"></h2>
-        <div id="gStale" class="stale-badge" style="position:static; margin-top:6px; display:none;">Не обновляется</div>
+        <div id="gStale" class="stale-badge" style="position:static; margin-top:6px; display:none;">🏷 Не обновляется</div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
         <h3>Ссылки</h3>
         <div id="gLinks"></div>
@@ -339,12 +364,12 @@
      Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="formModal" class="overlay hidden">
   <div class="modal">
-    <h2 id="formModalTitle">Добавление русификатора</h2>
+    <h2 id="formModalTitle">Добавить русификатор</h2>
     <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
-    <input id="fAppId" type="text" placeholder="AppId игры или ссылка на страницу игры в Steam">
+    <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
     <div id="fNote" class="f-note"></div>
     <label>Название игры *</label>
-    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически, или введите вручную">
+    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
     <div id="coverPreview" class="cover-preview hidden">
       <img id="covImg" alt="Обложка">
       <div class="cov-right">
@@ -352,12 +377,12 @@
         <div id="covAlts"></div>
       </div>
     </div>
-    <label>Ссылка на картинку (для игр не из Steam)</label>
+    <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
 
     <label class="flag-row">
       <input id="fStale" type="checkbox">
-      <span class="flag-text">Ярлык «Не обновляется»
+      <span class="flag-text">🏷 Пометить «Не обновляется»
         <small>Например, если вышел официальный перевод игры и версии больше не выходят. На плашке появится ярлык.</small>
       </span>
     </label>
@@ -502,7 +527,6 @@ function toast(msg, type = "info", ms = 4000) {
 })();
 
 // ---------- Каталог сервисов ----------
-// pda4: голубой фон в тон иконке (был оранжевый)
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
@@ -1038,9 +1062,12 @@ function currentSort() {
 }
 
 // ---------- Вид списка ----------
+// "list" удалён: старое сохранённое значение превращается в "grid";
+// на мобильных экранах сетка автоматически рисуется списком (CSS-медиазапрос)
 function currentView() {
-  const v = localStorage.getItem(LS_VIEW);
-  return ["grid", "list", "compact"].includes(v) ? v : "grid";
+  let v = localStorage.getItem(LS_VIEW);
+  if (v === "list") v = "grid";
+  return ["grid", "compact"].includes(v) ? v : "grid";
 }
 function applyView() {
   grid.classList.remove("view-grid", "view-list", "view-compact");
