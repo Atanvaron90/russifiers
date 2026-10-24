@@ -1,5 +1,23 @@
 [
   {
+    "id": "the-isle-of-cats-mvlnrk0y",
+    "title": "The Isle of Cats",
+    "cover": {
+      "appid": "2438980",
+      "name": "The Isle of Cats",
+      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438980/header.jpg"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/-QBKIA5mNmcpYA",
+        "dl": 0
+      }
+    ],
+    "stale": false,
+    "created": 1792801569058
+  },
+  {
     "id": "the-fox-in-the-forest-mvlnr3wy",
     "title": "The Fox in the Forest",
     "cover": {
