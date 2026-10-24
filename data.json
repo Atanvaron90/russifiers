@@ -70,7 +70,8 @@
     "cover": {
       "appid": "247000",
       "name": "Talisman: Digital Classic Edition",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/247000/header.jpg"
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/247000/header_russian.jpg?t=1756199630",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/247000/capsule_184x69_russian.jpg?t=1756199630"
     },
     "links": [
       {
@@ -82,7 +83,7 @@
     "created": 1792804965033,
     "badge": {
       "text": "Не обновляется",
-      "color": "#F5C518"
+      "color": "#f5c518"
     }
   },
   {
