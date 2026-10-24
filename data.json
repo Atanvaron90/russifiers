@@ -1667,6 +1667,11 @@
         "dl": 0
       },
       {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1FfkDpQr97e57-C_JN3Ufb4koy6F1s9F2?usp=sharing",
+        "dl": 0
+      },
+      {
         "type": "boosty",
         "url": "https://boosty.to/atanvaron_/bundle/6d5953e2-525c-4f3e-a727-00ae433a5bcc?isFromShowcasePreview=true",
         "dl": 0
