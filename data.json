@@ -255,7 +255,7 @@
     "title": "Twilight Struggle",
     "cover": {
       "appid": "406290",
-      "name": "",
+      "name": "Twilight Struggle",
       "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/header.jpg?t=1647893895",
       "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/capsule_184x69.jpg?t=1647893895"
     },
@@ -263,6 +263,11 @@
       {
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/sb_IZhG4Xr3dpg",
+        "dl": 0
+      },
+      {
+        "type": "boosty",
+        "url": "https://boosty.to/atanvaron_/bundle/ccff07d1-0185-49aa-af8a-a28e72770cbd?isFromShowcase=true",
         "dl": 0
       }
     ],
