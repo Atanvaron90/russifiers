@@ -1,5 +1,27 @@
 [
   {
+    "id": "talisman-the-horus-heresy-classic-mvm9buvh",
+    "title": "Talisman: The Horus Heresy (Classic)",
+    "cover": {
+      "appid": "358460",
+      "name": "Talisman: The Horus Heresy (Classic)",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/358460/0a03fe70485dd8391024356818380a13059f1375/header_alt_assets_1.jpg?t=1777539901",
+      "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/358460/5d26ae03e2fc6e92295481947dca8531e12790bb/capsule_184x69_alt_assets_1.jpg?t=1777539901"
+    },
+    "links": [
+      {
+        "type": "yadisk",
+        "url": "https://disk.yandex.ru/d/AEJYBdv67Uw4LA",
+        "dl": 0
+      }
+    ],
+    "badge": {
+      "text": "Совместный",
+      "color": "#9d19f5"
+    },
+    "created": 1792837788173
+  },
+  {
     "id": "fighting-fantasy-legends-mvm99hnx",
     "title": "Fighting Fantasy Legends",
     "cover": {
