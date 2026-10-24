@@ -199,12 +199,18 @@
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
   .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:8px; align-items:center; }
-  /* Кнопки в окне игры — тот же единый квадратный стиль */
-  .g-top .icon-btn { background: rgba(15,17,23,.82); }
+  /* Кнопки в окне игры: без фона, серые значки (квадратная форма сохранена) */
+  .g-top .icon-btn {
+    background: none; border-color: transparent; box-shadow: none;
+    color: #9aa0ab;
+  }
+  .g-top .icon-btn:hover {
+    background: none; border-color: transparent;
+    color: #e4e6eb; transform: scale(1.15);
+  }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
   .g-cover-link { display:block; }
   .g-cover-link img { transition:filter .15s; }
-  .g-cover-link:not(.no-link):hover img { filter:brightness(1.15); }
   .g-cover-link.no-link { pointer-events:none; }
   .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
   .g-body { padding:24px; max-height:82vh; overflow:auto; }
@@ -496,12 +502,13 @@ function toast(msg, type = "info", ms = 4000) {
 })();
 
 // ---------- Каталог сервисов ----------
+// pda4: голубой фон в тон иконке (был оранжевый)
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
   boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
-  pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
+  pda4:     { name:"4PDA",          slug:"",            color:"#42A5F5", hosts:["4pda.to","4pda.cc","4pda.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
   github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","gist.github.com","raw.githubusercontent.com","gist.githubusercontent.com"] },
   telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph","telesco.pe"] },
@@ -1139,16 +1146,11 @@ function openGame(id) {
   } else {
     titleEl.textContent = p.title;
   }
+  // Обложка — без ссылки: на Steam ведёт только название
   const coverLink = $("gCoverLink");
-  if (store) {
-    coverLink.href = store;
-    coverLink.classList.remove("no-link");
-    coverLink.title = "Открыть страницу игры в Steam";
-  } else {
-    coverLink.removeAttribute("href");
-    coverLink.classList.add("no-link");
-    coverLink.title = "";
-  }
+  coverLink.removeAttribute("href");
+  coverLink.classList.add("no-link");
+  coverLink.removeAttribute("title");
 
   // Ярлык «Не обновляется» под названием
   $("gStale").style.display = p.stale ? "inline-flex" : "none";
