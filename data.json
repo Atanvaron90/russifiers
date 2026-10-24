@@ -149,11 +149,11 @@
   },
   {
     "id": "ticket-to-ride-mvlnt3di",
-    "title": "Ticket to Ride",
+    "title": "Сэкономьте 70% при покупке Ticket to Ride®",
     "cover": {
       "appid": "2477010",
-      "name": "",
-      "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2477010/header.jpg"
+      "name": "Сэкономьте 70% при покупке Ticket to Ride®",
+      "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2477010/4751c635779e064bbb3ccaaf257618e295881114/capsule_616x353_alt_assets_10.jpg?t=1792584181"
     },
     "links": [
       {
@@ -164,6 +164,11 @@
       {
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
+        "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1081524",
         "dl": 0
       }
     ],
