@@ -451,8 +451,8 @@ function toast(msg, type = "info", ms = 4000) {
 // ---------- Каталог сервисов ----------
 // yadisk: у Simple Icons нет значка "yandexdisk" (404) — используем favicon-сервис
 const SERVICES = {
-  yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#EE3D45", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
-              iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я" },
+  yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
+              iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
   gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
   boosty:   { name:"Boosty",        slug:"boosty",      color:"#F15F2C", hosts:["boosty.to"] },
   pda4:     { name:"4PDA",          slug:"",            color:"#F26F21", hosts:["4pda.to","4pda.cc","4pda.ru"],
@@ -476,8 +476,8 @@ function detectService(url) {
 function makeIcon(type) {
   const s = SERVICES[type] || SERVICES.other;
   if (s.iconUrl)
-    return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
-  if (!s.slug) return `<span class="lk-ico" style="background:${s.color}">${esc(s.fallback || "🔗")}</span>`;
+    return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.style.color='${s.txt || "#fff"}';this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
+  if (!s.slug) return `<span class="lk-ico" style="background:${s.color};color:${s.txt || "#fff"}">${esc(s.fallback || "🔗")}</span>`;
   return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="this.parentNode.textContent='${esc(s.name[0])}'"></span>`;
 }
 
