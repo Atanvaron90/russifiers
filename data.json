@@ -769,7 +769,7 @@
     "title": "Dune: Imperium",
     "cover": {
       "appid": "1689500",
-      "name": "",
+      "name": "Dune: Imperium",
       "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1689500/1bfdfcb98addc21208ea6b3f15a5448c55c4f38c/capsule_616x353.jpg?t=1781022179"
     },
     "links": [
@@ -782,9 +782,15 @@
         "type": "gdrive",
         "url": "https://drive.google.com/drive/folders/1LC8MUNVRLlaQ55DdYELIgYUlQcMUo0Zj?usp=sharing",
         "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1086185&view=findpost&p=129041629",
+        "dl": 0
       }
     ],
-    "created": 1792798334232
+    "created": 1792798334232,
+    "stale": false
   },
   {
     "id": "decks-daggers-mvljuknx",
