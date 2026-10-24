@@ -11,8 +11,8 @@
     --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  /* overflow-x:clip не создаёт скролл-контейнер — липкая шапка работает,
-     а страница больше не растягивается длинными однострочными названиями */
+  /* Не даём странице растягиваться длинными однострочными названиями.
+     clip (а не hidden) — не создаёт скролл-контейнер, липкая шапка работает */
   html, body { overflow-x: clip; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
 
@@ -143,17 +143,7 @@
     font-size:1rem; font-weight:500; padding-right:40px;
     white-space:nowrap; overflow:hidden;
   }
-  .grid.view-compact .card h2 > span { display:inline-block; }
-  .grid.view-compact .card h2.mq > span {
-    animation: mqmove var(--mq-dur,8s) ease-in-out infinite alternate;
-  }
-  @keyframes mqmove {
-    0%, 12%  { transform: translateX(0); }
-    88%, 100% { transform: translateX(var(--mq-x, -40px)); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .grid.view-compact .card h2.mq > span { animation: none; }
-  }
+  .grid.view-compact .card h2 > span { display:inline-block; will-change:transform; }
   .grid.view-compact .card:hover h2 { color:#a99cf5; }
   .grid.view-compact .card .cover,
   .grid.view-compact .card .desc,
@@ -1213,16 +1203,12 @@ function applyView() {
 function currentFilter() {
   return localStorage.getItem(LS_FILTER) || "";
 }
-function filterCounts() {
+function renderFilterPanel() {
+  const cur = currentFilter();
   const counts = new Map();
   for (const p of state.projects) {
     if (p.badge?.text) counts.set(p.badge.text, (counts.get(p.badge.text) || 0) + 1);
   }
-  return counts;
-}
-function renderFilterPanel() {
-  const cur = currentFilter();
-  const counts = filterCounts();
   let html = '<div class="f-title">Фильтр по ярлыкам</div>';
   html += `<button type="button" class="f-chip ${cur === "" ? "sel" : ""}" data-f="">Все записи</button>`;
   for (const [t, n] of counts) {
@@ -1313,21 +1299,55 @@ function render() {
       setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
   }
 
-  // Список: длинные названия → бегущая строка (без масштабирования страницы)
-  if (view === "compact") {
-    grid.querySelectorAll(".card h2").forEach(h => {
-      const span = h.querySelector("span");
-      if (!span) return;
-      const cs = getComputedStyle(h);
-      const avail = h.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      if (span.scrollWidth > avail + 1) {
-        const d = span.scrollWidth - avail + 12; // небольшой запас, чтобы хвост уходил полностью
-        h.style.setProperty("--mq-x", -d + "px");
-        h.style.setProperty("--mq-dur", Math.max(5, Math.round(d / 26)) + "s");
-        h.classList.add("mq");
-      }
-    });
+  // Список: длинные названия → бегущая строка
+  if (view === "compact") requestAnimationFrame(setupMarquees);
+}
+
+// ---------- Бегущая строка для длинных названий ----------
+// Переполнение определяется штатно: scrollWidth заголовка против его видимой ширины.
+// Для каждого бегущего заголовка создаётся СОБСТВЕННЫЙ @keyframes с конкретными
+// числами (без CSS-переменных — некоторые мобильные движки не применяют var()
+// внутри keyframes). Скорость зависит от длины переполнения.
+function setupMarquees() {
+  const old = document.getElementById("mqStyles");
+  if (old) old.remove();
+  // Уважаем системную настройку «уменьшить движение»
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  let rules = "", n = 0;
+  grid.querySelectorAll(".card h2").forEach(h => {
+    const span = h.querySelector("span");
+    if (!span) return;
+    span.style.animation = "";   // сброс прошлой анимации
+    span.style.transform = "";
+    // Влезает целиком — ничего не делаем
+    if (h.scrollWidth <= h.clientWidth + 1) return;
+    const dist = h.scrollWidth - h.clientWidth + 14; // +запас, чтобы хвост уходил полностью
+    const name = "mqrun" + (++n);
+    const dur = Math.max(6, Math.round(dist / 28));  // ~28 px/сек
+    rules += `@keyframes ${name}{0%,12%{transform:translateX(0)}88%,100%{transform:translateX(-${dist}px)}}`;
+    span.style.animation = `${name} ${dur}s ease-in-out infinite alternate`;
+  });
+  if (rules) {
+    const st = document.createElement("style");
+    st.id = "mqStyles";
+    st.textContent = rules;
+    document.head.appendChild(st);
   }
+}
+// Пересчёт при повороте экрана / изменении размеров окна
+let mqResizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(mqResizeTimer);
+  mqResizeTimer = setTimeout(() => {
+    if (currentView() === "compact") setupMarquees();
+  }, 200);
+});
+// Пересчёт после загрузки веб-шрифтов (ширина текста меняется)
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    if (currentView() === "compact") setupMarquees();
+  });
 }
 
  $("sortBy").value = currentSort();
