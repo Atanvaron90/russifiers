@@ -82,6 +82,11 @@
         "type": "yadisk",
         "url": "https://disk.yandex.ru/d/F5FsQKYijS_e7w",
         "dl": 0
+      },
+      {
+        "type": "pda4",
+        "url": "https://4pda.to/forum/index.php?showtopic=1092448",
+        "dl": 0
       }
     ],
     "stale": false,
