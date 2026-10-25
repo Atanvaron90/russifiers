@@ -1,0 +1,12 @@
+{
+  "title": "💬 Связаться со мной",
+  "text": "Вопросы, предложения и сообщения о багах.",
+  "contacts": [
+    {
+      "name": "Telegram-канал",
+      "color": "#26a5e4",
+      "icon": "telegram",
+      "url": "https://t.me/@mr_smith90"
+    }
+  ]
+}
