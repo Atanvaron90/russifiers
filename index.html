@@ -11,8 +11,6 @@
     --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  /* Не даём странице растягиваться длинными однострочными названиями.
-     clip (а не hidden) — не создаёт скролл-контейнер, липкая шапка работает */
   html, body { overflow-x: clip; }
   body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
 
@@ -24,9 +22,16 @@
   }
   header { position:relative; text-align:center; padding:0 20px 8px; }
   .title-row { display:flex; align-items:stretch; justify-content:center; gap:16px; }
-  .title-text { display:flex; flex-direction:column; justify-content:space-between; text-align:left; }
+  .title-text { display:flex; flex-direction:column; justify-content:space-between; text-align:left; position:relative; }
   .title-text h1 { font-size:2rem; margin-bottom:4px; }
   .title-text p { color:var(--muted); font-size:.92rem; }
+  /* Редактор названия: незаметная иконка рядом с текстом (только админ) */
+  .title-edit {
+    position:absolute; top:-2px; right:-30px;
+    background:none; border:none; cursor:pointer;
+    font-size:.95rem; opacity:.25; padding:4px; line-height:1;
+  }
+  .title-edit:hover { opacity:.9; }
   .site-logo {
     display:none;
     align-self:stretch;
@@ -42,6 +47,7 @@
   @media (max-width:640px) {
     .title-text h1 { font-size:1.45rem; }
     .site-logo { max-height:48px; }
+    .title-edit { top:-4px; right:-28px; font-size:.85rem; }
   }
 
   .auth-btn {
@@ -53,7 +59,6 @@
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
 
-  /* Поиск с кнопкой фильтра внутри: фильтр по ярлыкам не занимает отдельное место */
   .search-wrap { position:relative; flex:1; min-width:180px; }
   #search { width:100%; padding:12px 46px 12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
   #search:focus { outline:none; border-color:var(--accent); }
@@ -88,7 +93,6 @@
   .f-chip .n { opacity:.65; font-weight:400; }
   .s-row label { display:block; font-size:.72rem; color:var(--muted); }
   .s-row select { margin-top:4px; padding:8px 10px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; cursor:pointer; width:100%; }
-  /* Шестерёнка настроек: скрыта на десктопе, показывается в мобильном медиазапросе */
   .gear-btn {
     padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px;
     color:var(--muted); cursor:pointer; font-size:1rem;
@@ -99,8 +103,6 @@
   .gear-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
 
   #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
-  /* Счётчик: перед кнопкой админа; для посетителя — крайний правый элемент.
-     auto-отступ прижимает счётчик (и кнопку после него) вправо */
   .stat-chip {
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
@@ -111,7 +113,7 @@
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
   .tool-btn:disabled { opacity:.5; cursor:default; }
-  /* Две подписи кнопки админа: полная на десктопе, короткая на мобильном */
+  #btnAdd { margin-left:auto; }
   #btnAdd .m-short { display:none; }
   body:not(.admin) .admin-only { display:none !important; }
 
@@ -122,14 +124,12 @@
   .card:hover { transform:translateY(-4px); border-color:var(--accent); }
   .card h2 { font-size:1.15rem; padding-right:56px; }
   .card:hover h2 { color:#a99cf5; }
-  /* Обложка: header 460×215 — единый горизонтальный формат, чуть обрезается при вписывании */
   .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
   .meta { font-size:.85rem; color:var(--muted); }
   .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
   .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
 
   .card-actions { position:absolute; top:16px; right:16px; display:flex; gap:6px; z-index:2; }
-  /* Единый стиль квадратных кнопок-иконок: 38×38, скруглённые углы */
   .icon-btn {
     background: rgba(31,35,48,.92); border: 1px solid var(--border);
     cursor: pointer; font-size: 1.05rem; opacity: .85;
@@ -140,8 +140,6 @@
   }
   .icon-btn:hover { opacity: 1; border-color: var(--accent); color: #a99cf5; }
 
-  /* Ярлык: квадрат со скруглением, выровнен с обложкой (отступ 16px — как поля плашки).
-     Цвет фона/текста задаётся инлайн из данных ярлыка */
   .stale-badge {
     position:absolute; top:16px; left:16px; z-index:2;
     display:inline-flex; align-items:center; gap:5px;
@@ -151,7 +149,6 @@
     white-space:nowrap;
   }
 
-  /* Список (компактный): названия в столбик; длинные — бегущей строкой */
   .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
   .grid.view-compact .card {
     background:none; border:none; border-radius:0;
@@ -171,10 +168,6 @@
   .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
   .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
 
-  /* МОБИЛЬНАЯ ВЕРСИЯ: «Сетка» рисуется списком — обложка header 460×215,
-     прижата К ВЕРХУ плашки — совпадает с ярлыком (оба на отступе 10px).
-     Шапка — CSS Grid с фиксированными областями (элементы не могут «уехать»):
-     строка 1: поиск + шестерёнка; строка 2: счётчик + «Добавить» */
   @media (max-width:640px) {
     .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
     .grid:not(.view-compact) .card {
@@ -186,7 +179,7 @@
       width:100%; height:auto;
       aspect-ratio:460/215;
       border-radius:8px;
-      align-self:start;   /* прижата к верху — верхний край совпадает с ярлыком */
+      align-self:start;
     }
     .grid:not(.view-compact) .card h2,
     .grid:not(.view-compact) .card .desc,
@@ -197,25 +190,17 @@
     .grid:not(.view-compact) .card .meta { font-size:.74rem; }
     .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
     .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
-    /* Ярлык: верхний и левый края совпадают с кромкой обложки (отступ плашки 10px) */
     .grid:not(.view-compact) .card .stale-badge {
       top:10px; left:10px;
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    /* Шапка в 2 строки через grid-области: элементы закреплены, порядок не зависит от DOM */
-    .toolbar {
-      display:grid; grid-template-columns:1fr auto;
-      grid-template-areas:
-        "search gear"
-        "stat   add";
-      align-items:center; row-gap:10px; column-gap:10px; padding:0 12px;
-    }
+    .toolbar { padding:0 12px; row-gap:10px; }
     .toolbar .m-hide { display:none !important; }
-    .search-wrap { grid-area:search; }
-    .gear-btn { grid-area:gear; display:inline-flex; }
-    .stat-chip { grid-area:stat; margin-left:0; justify-self:start; }
-    #btnAdd { grid-area:add; justify-self:start; padding:12px; font-size:.9rem; }
+    .search-wrap { order:1; flex:1 1 0; min-width:0; }
+    .gear-btn { display:inline-flex; order:2; }
+    .stat-chip { order:3; margin-left:0; }
+    #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
     #btnAdd .m-full { display:none; }
     #btnAdd .m-short { display:inline; }
     .grid.view-compact { max-width:none; padding:0 8px; }
@@ -238,7 +223,6 @@
   .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; margin-top:2px; cursor:pointer; accent-color:var(--accent); }
   .flag-row .flag-text { font-size:.9rem; color:var(--text); }
 
-  /* Редактор ярлыка: текст + цвет + готовые варианты */
   .badge-edit { display:grid; grid-template-columns:1fr 48px; gap:8px; margin-top:8px; align-items:center; }
   .badge-edit input[type="color"] { padding:2px; height:42px; cursor:pointer; }
   .badge-presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center; }
@@ -275,25 +259,41 @@
     .l-url  { grid-column:2; grid-row:2; }
   }
 
-  /* Редактор донатов: название | цвет | иконка | ✕ — крестик справа от поля иконки */
-  .dn-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
-  .dn-row input { padding:8px 10px; font-size:.9rem; }
-  .dn-row .dn-color { padding:2px; height:38px; cursor:pointer; }
-  .dn-row .full { grid-column:1 / -1; }
-  .dn-row .ver-del { grid-column:4; grid-row:1; justify-self:center; padding:8px; }
-  .dn-row .ver-del:hover { color:#ff6b6b; }
+  .dn-row, .ct-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
+  .dn-row input, .ct-row input { padding:8px 10px; font-size:.9rem; }
+  .dn-row .dn-color, .ct-row .ct-color { padding:2px; height:38px; cursor:pointer; }
+  .dn-row .full, .ct-row .full { grid-column:1 / -1; }
+  .dn-row .ver-del, .ct-row .ver-del { grid-column:4; grid-row:1; justify-self:center; padding:8px; }
+  .dn-row .ver-del:hover, .ct-row .ver-del:hover { color:#ff6b6b; }
 
-  .donate { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
-  .donate-box { position:relative; background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04)); border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px; }
-  .don-edit { position:absolute; top:10px; right:10px; }
-  .donate-box h3 { font-size:1.05rem; margin-bottom:6px; }
-  .donate-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
-  .donate-list { display:flex; flex-wrap:wrap; gap:10px; }
-  .don-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 14px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit; }
-  .don-btn:hover { border-color:var(--accent); }
-  .don-ico { width:20px; height:20px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff; flex:none; }
-  .don-ico img { width:13px; height:13px; }
-  body:not(.admin) #donate.no-methods { display:none; }
+  /* Плашки донатов и контактов: донаты слева, контакты справа (десктоп);
+     обе в потоке под сеткой на мобильных */
+  .donate, .contacts { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
+  .donate-box, .contacts-box {
+    position:relative;
+    background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04));
+    border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px;
+  }
+  .contacts-box { background:linear-gradient(225deg, rgba(62,207,142,.12), rgba(62,207,142,.03)); border-color:rgba(62,207,142,.45); }
+  .don-edit, .ct-edit { position:absolute; top:10px; right:10px; }
+  .donate-box h3, .contacts-box h3 { font-size:1.05rem; margin-bottom:6px; }
+  .donate-box p, .contacts-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
+  .donate-list, .contacts-list { display:flex; flex-wrap:wrap; gap:10px; }
+  .don-btn, .ct-btn {
+    display:inline-flex; align-items:center; gap:8px; padding:9px 14px;
+    background:var(--card); border:1px solid var(--border); border-radius:10px;
+    color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit;
+  }
+  .don-btn:hover, .ct-btn:hover { border-color:var(--accent); }
+  .ct-btn:hover { border-color:#3ecf8e; }
+  .don-ico, .ct-ico {
+    width:20px; height:20px; border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:700; color:#fff; flex:none;
+  }
+  .don-ico img, .ct-ico img { width:13px; height:13px; }
+  body:not(.admin) #donate.no-methods,
+  body:not(.admin) #contacts.no-methods { display:none; }
 
   @media (min-width: 1650px) {
     .donate {
@@ -306,14 +306,24 @@
       padding: 0;
       z-index: 5;
     }
-    .donate-box { padding: 14px 16px; }
-    .donate-box h3 { font-size: 1rem; }
-    .donate-box p { font-size: .82rem; margin-bottom: 10px; }
+    .contacts {
+      position: fixed;
+      top: 152px;
+      right: calc(50vw - 824px);   /* зеркально донатам — правый край */
+      left: auto;
+      width: 300px;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      z-index: 5;
+    }
+    .donate-box, .contacts-box { padding: 14px 16px; }
+    .donate-box h3, .contacts-box h3 { font-size: 1rem; }
+    .donate-box p, .contacts-box p { font-size: .82rem; margin-bottom: 10px; }
   }
 
   .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
   .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:8px; align-items:center; }
-  /* Кнопки в окне игры: без фона, серые значки (квадратная форма сохранена) */
   .g-top .icon-btn {
     background: none; border-color: transparent; box-shadow: none;
     color: #9aa0ab;
@@ -331,7 +341,6 @@
   .g-body h2 { margin-bottom:6px; }
   .g-title-link { color:inherit; text-decoration:none; }
   .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
-  /* Ярлык в окне игры: та же квадратная форма; цвет — инлайн из данных */
   #gStale {
     margin-top:8px; display:none;
     align-self:flex-start;
@@ -347,8 +356,6 @@
   .lk-info .cnt { display:block; font-size:.78rem; color:var(--muted); }
   .lk-btn { padding:8px 16px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.88rem; font-weight:600; white-space:nowrap; }
   .lk-btn:hover { filter:brightness(1.15); }
-  /* Мобильное окно игры: горизонтальная обложка header 460×215 сверху (тот же формат,
-     что на плашках), под ней — текст и ссылки */
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
     .g-cover-link { order:-1; }
@@ -356,7 +363,6 @@
     .g-body { padding:18px; }
   }
 
-  /* Кнопка «Наверх» в правом нижнем углу */
   .scroll-btn {
     position: fixed; right: 16px; bottom: 56px; z-index: 90;
     display: inline-flex; align-items: center; justify-content: center;
@@ -398,8 +404,9 @@
       <img id="siteLogo" class="site-logo" alt="">
       <span id="logoFallback" class="logo-fallback">🌐</span>
       <div class="title-text">
-        <h1>Русификаторы от Atanvaron</h1>
-        <p>Мои переводы и проекты — бесплатно</p>
+        <h1 id="siteTitle">Русификаторы от Atanvaron</h1>
+        <p id="siteSlogan">Мои переводы и проекты — бесплатно</p>
+        <button id="titleEdit" class="title-edit admin-only" title="Редактировать название и слоган">✏️</button>
       </div>
     </div>
   </header>
@@ -425,10 +432,10 @@
       <option value="compact">Список</option>
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
+    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <button id="btnAdd" class="tool-btn primary admin-only">
       <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
     </button>
-    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <div id="settingsPanel" class="settings-panel hidden">
       <div class="f-title">Настройки поиска</div>
       <div class="s-row">
@@ -461,6 +468,15 @@
     <h3 id="donTitle"></h3>
     <p id="donText"></p>
     <div class="donate-list" id="donateList"></div>
+  </div>
+</section>
+
+<section id="contacts" class="contacts">
+  <div class="contacts-box">
+    <button id="ctEdit" class="icon-btn admin-only ct-edit" title="Редактировать блок контактов">✏️</button>
+    <h3 id="ctTitle"></h3>
+    <p id="ctText"></p>
+    <div class="contacts-list" id="contactsList"></div>
   </div>
 </section>
 
@@ -533,6 +549,22 @@
   </div>
 </div>
 
+<!-- Редактор названия и слогана (только для админа) -->
+<div id="titleModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Название и слоган сайта</h2>
+    <label>Название</label>
+    <input id="tName" type="text" placeholder="Русификаторы от Atanvaron">
+    <label>Слоган</label>
+    <input id="tSlogan" type="text" placeholder="Мои переводы и проекты — бесплатно">
+    <p class="hint">Сохранение публикует изменения для всех посетителей и создаёт файл site.json в репозитории.</p>
+    <div class="modal-actions">
+      <button id="tCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="tSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
 <!-- Редактор блока донатов (только для админа).
      Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="donateModal" class="overlay hidden">
@@ -549,6 +581,26 @@
     <div class="modal-actions">
       <button id="dCancel" class="tool-btn" type="button">Отмена</button>
       <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Редактор блока контактов (только для админа).
+     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
+<div id="contactsModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Блок контактов</h2>
+    <label>Заголовок</label>
+    <input id="cTitle" type="text" placeholder="💬 Связь со мной">
+    <label>Подпись</label>
+    <textarea id="cText" style="min-height:60px; resize:vertical;"></textarea>
+    <label>Контакты — у каждого название и ссылка:</label>
+    <div id="cList"></div>
+    <button id="cAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить контакт</button>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <div class="modal-actions">
+      <button id="cCancel" class="tool-btn" type="button">Отмена</button>
+      <button id="cSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
     </div>
   </div>
 </div>
@@ -575,6 +627,8 @@ const CONFIG = {
   branch: "main",
   dataFile: "data.json",
   donateFile: "donate.json",
+  contactsFile: "contacts.json",
+  siteFile: "site.json",
   counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
@@ -588,6 +642,21 @@ const DONATE_DEFAULT = {
     { name: "ЮMoney", url: "https://yoomoney.ru/to/4100XXXXXXXXXXXX", color: "#8B3FFE" },
     { name: "Карта — нажмите, чтобы скопировать", value: "0000 0000 0000 0000", color: "#2E7D32" }
   ]
+};
+
+// ==== БЛОК КОНТАКТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
+const CONTACTS_DEFAULT = {
+  title: "💬 Связь со мной",
+  text: "Вопросы, предложения и сообщения о багах — в Telegram-канале.",
+  contacts: [
+    { name: "Telegram-канал", url: "https://t.me/atanvaron", icon: "telegram", color: "#26A5E4" }
+  ]
+};
+
+// ==== НАЗВАНИЕ И СЛОГАН ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
+const SITE_DEFAULT = {
+  name: "Русификаторы от Atanvaron",
+  slogan: "Мои переводы и проекты — бесплатно"
 };
 // ============================================================
 
@@ -607,11 +676,16 @@ const LS_STEAM_COMBO = "russifiers_steam_combo";
 const LS_APP_ROUTE = "russifiers_app_route";
 const LS_APPNAMES = "russifiers_appnames_v2";
 
-// На узких экранах окно игры использует горизонтальные обложки
 const isNarrowScreen = () => window.matchMedia("(max-width: 640px)").matches;
 
 const $ = id => document.getElementById(id);
-const state = { projects: [], dataSha: null, donateSha: null, donate: null, token: localStorage.getItem(LS_TOKEN) || "", user: "" };
+const state = {
+  projects: [], dataSha: null,
+  donateSha: null, donate: null,
+  contactsSha: null, contacts: null,
+  siteSha: null, site: null,
+  token: localStorage.getItem(LS_TOKEN) || "", user: ""
+};
 let dlCache = {}; try { dlCache = JSON.parse(localStorage.getItem(LS_DL)) || {}; } catch (e) {}
 const saveDl = () => localStorage.setItem(LS_DL, JSON.stringify(dlCache));
 
@@ -627,10 +701,8 @@ const pluralRu = (n, one, few, many) => {
 };
 
 // ---------- Ярлыки на плашках ----------
-// Формат в data.json: badge: { text, color }. Старый флаг stale:true
-// автоматически превращается в ярлык по умолчанию (миграция в migrate()).
 const BADGE_DEFAULT = { text: "Не обновляется", color: "#F5C518" };
-const BADGE_ALPHA = 0.88; // «чуть прозрачный» фон
+const BADGE_ALPHA = 0.88;
 const hexToRgb = h => {
   const m = String(h || "").replace("#", "").trim();
   const v = m.length === 3 ? m.split("").map(c => c + c).join("") : m;
@@ -638,7 +710,6 @@ const hexToRgb = h => {
   const n = parseInt(v, 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
-// Цвет текста ярлыка: тёмный на светлом фоне, белый на тёмном
 const badgeTextColor = c => {
   const rgb = hexToRgb(c);
   if (!rgb) return "#1c1c1c";
@@ -663,8 +734,6 @@ function toast(msg, type = "info", ms = 4000) {
 }
 
 // ---------- Логотип сайта ----------
-// Ищет файл логотипа среди нескольких имён — расширение файла больше не важно.
-// Первый найденный становится лого в шапке и иконкой вкладки.
 (function setupLogo() {
   const img = $("siteLogo");
   const fav = document.createElement("link");
@@ -672,7 +741,7 @@ function toast(msg, type = "info", ms = 4000) {
   const candidates = ["logo.png", "logo.jpg", "logo.jpeg", "logo.webp", "logo.gif"];
   let i = 0;
   function tryNext() {
-    if (i >= candidates.length) {           // ни одного файла нет — заглушка
+    if (i >= candidates.length) {
       img.style.display = "none";
       $("logoFallback").style.display = "inline";
       return;
@@ -687,14 +756,13 @@ function toast(msg, type = "info", ms = 4000) {
       fav.href = name;
       document.head.appendChild(fav);
     };
-    probe.onerror = tryNext;                // файла нет — пробуем следующее имя
+    probe.onerror = tryNext;
     probe.src = name;
   }
   tryNext();
 })();
 
 // ---------- Каталог сервисов ----------
-// boosty: Simple Icons переименовал значок в "boostyto" (старый "boosty" отдаёт 404)
 const SERVICES = {
   yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
               iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
@@ -718,8 +786,6 @@ function detectService(url) {
   } catch (e) {}
   return "other";
 }
-// makeIcon: если основной слаг не отвечает (404/сеть), onerror переключает
-// картинку на altSlug (запасной слаг того же бренда), затем на букву-заглушку
 function makeIcon(type) {
   const s = SERVICES[type] || SERVICES.other;
   if (s.iconUrl)
@@ -732,14 +798,12 @@ function makeIcon(type) {
 }
 
 // ---------- Обложки ----------
-// Вертикальная (library_600x900): старые зеркала первыми, новые пути — запасом.
 const steamTallURLs = appid => [
   `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
   `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
 ];
-// Горизонтальный формат 460×215 (header со страницы Steam):
 const steamHeaderURLs = appid => [
   `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
@@ -762,8 +826,6 @@ function setCoverCascade(img, urls) {
   img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
   img.src = urls[0];
 }
-// Горизонтальный каскад: header 460×215 → канонический URL → большая капсула → заглушка.
-// Одинаков для плашек и мобильного окна игры — картинки всегда совпадают
 function coverURLs(p) {
   const c = p.cover || {};
   const urls = [
@@ -773,8 +835,6 @@ function coverURLs(p) {
   ];
   return dedupe(urls);
 }
-// Обложки для окна игры: на десктопе — вертикальные первыми, затем тот же
-// горизонтальный каскад, что у плашек; на мобильных — только горизонтальный
 function gameCoverURLs(p) {
   const c = p.cover || {};
   const urls = [];
@@ -789,7 +849,6 @@ function fetchTimeout(url, ms = 8000) {
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
 }
 
-// ---------- Прокси для Steam ----------
 const STEAM_PROXIES = [
   { name:"direct",         wrap: u => u },
   { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
@@ -800,7 +859,6 @@ const STEAM_PROXIES = [
 ];
 const failedCombos = new Set();
 
-// ---------- Поиск игр по названию ----------
 const SEARCH_SOURCES = [
   { name:"community", url: t => "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(t),
     parse: j => Array.isArray(j) ? j.map(x => ({ id:String(x.appid ?? ""), name:x.name || "", tiny:x.icon || x.logo || "" })) : [] },
@@ -862,9 +920,6 @@ async function steamSearch(term) {
   return anyAnswered ? [] : null;
 }
 
-// ---------- Информация об игре по AppID: название + канонические обложки ----------
-// Стратегия: быстрая попытка через запомненный удачный маршрут →
-// ГОНКА всех маршрутов одновременно (Promise.any), таймаут каждому 20 с.
 const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
 function cacheInfo(id, info) {
   appInfoCache[id] = info;
@@ -915,7 +970,7 @@ async function tryRoute(route, proxy, appid, ms) {
   const r = await fetchTimeout(proxy.wrap(route.url(appid)), ms);
   if (!r.ok) throw new Error("HTTP " + r.status);
   let text = await r.text();
-  if (proxy.json) { // обёртка allorigins/get: {"contents": "..."}
+  if (proxy.json) {
     try { text = JSON.parse(text)[proxy.json] || ""; } catch (e) { throw new Error("нет обёртки"); }
   }
   let info;
@@ -933,7 +988,6 @@ async function fetchAppInfo(appid) {
   const cached = cachedInfo(appid);
   if (cached && cached.header) return cached;
 
-  // Быстрая попытка через запомненный удачный маршрут
   const saved = localStorage.getItem(LS_APP_ROUTE);
   if (saved) {
     const [ri, pi] = saved.split(":").map(Number);
@@ -950,7 +1004,6 @@ async function fetchAppInfo(appid) {
     }
   }
 
-  // ГОНКА: все маршруты одновременно; побеждает первый успешный ответ
   const tasks = [];
   for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
     for (let ri = 0; ri < APP_ROUTES.length; ri++) {
@@ -981,7 +1034,6 @@ async function fetchAppInfo(appid) {
 const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
 const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
 
-// ---------- Приведение данных к плоскому списку ссылок + миграция ярлыков ----------
 function migrate(p) {
   if (!Array.isArray(p.links)) {
     const flat = [];
@@ -994,14 +1046,12 @@ function migrate(p) {
   p.links = (p.links || []).filter(l => l && l.url).map(l => ({
     type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0
   }));
-  // Миграция: старый флаг stale:true → ярлык по умолчанию
   if (p.stale && !p.badge) p.badge = { ...BADGE_DEFAULT };
   delete p.stale;
   if (p.badge && !p.badge.text) delete p.badge;
   return p;
 }
 
-// ---------- GitHub API ----------
 function gh(path, opts = {}) {
   const headers = { Accept: "application/vnd.github+json", ...(opts.headers || {}) };
   if (state.token) headers.Authorization = "Bearer " + state.token;
@@ -1025,17 +1075,26 @@ async function getSha(file) {
 }
 async function putJson(file, obj, message, retried = false) {
   const body = { message, content: utf8B64(JSON.stringify(obj, null, 2)), branch: CONFIG.branch };
-  const cached = file === CONFIG.dataFile ? state.dataSha : state.donateSha;
+  const cached =
+    file === CONFIG.dataFile ? state.dataSha :
+    file === CONFIG.donateFile ? state.donateSha :
+    file === CONFIG.contactsFile ? state.contactsSha :
+    state.siteSha;
   const sha = cached || await getSha(file);
   if (sha) body.sha = sha;
   try {
     const res = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}`,
       { method: "PUT", body: JSON.stringify(body) });
     if (file === CONFIG.dataFile) state.dataSha = res.content.sha;
-    else state.donateSha = res.content.sha;
+    else if (file === CONFIG.donateFile) state.donateSha = res.content.sha;
+    else if (file === CONFIG.contactsFile) state.contactsSha = res.content.sha;
+    else state.siteSha = res.content.sha;
   } catch (e) {
     if (!retried && /42[02]|409/.test(e.message)) {
-      if (file === CONFIG.dataFile) state.dataSha = null; else state.donateSha = null;
+      if (file === CONFIG.dataFile) state.dataSha = null;
+      else if (file === CONFIG.donateFile) state.donateSha = null;
+      else if (file === CONFIG.contactsFile) state.contactsSha = null;
+      else state.siteSha = null;
       return putJson(file, obj, message, true);
     }
     throw e;
@@ -1051,6 +1110,49 @@ async function loadData() {
   state.projects = data.filter(p => p && p.title).map(migrate);
   state.dataSha = null;
 }
+
+// ---------- Название и слоган сайта ----------
+async function loadSite() {
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.siteFile}?t=${Date.now()}`);
+    if (r.ok) {
+      const j = await r.json();
+      if (j && typeof j === "object") { state.site = j; return; }
+    }
+  } catch (e) {}
+  state.site = { ...SITE_DEFAULT };
+}
+function renderSite() {
+  const s = state.site;
+  $("siteTitle").textContent = s?.name || SITE_DEFAULT.name;
+  $("siteSlogan").textContent = s?.slogan || SITE_DEFAULT.slogan;
+}
+ $("titleEdit").addEventListener("click", () => {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const s = state.site || {};
+  $("tName").value = s?.name || SITE_DEFAULT.name;
+  $("tSlogan").value = s?.slogan || SITE_DEFAULT.slogan;
+  $("titleModal").classList.remove("hidden");
+});
+ $("tCancel").addEventListener("click", () => $("titleModal").classList.add("hidden"));
+ $("tSaveBtn").addEventListener("click", async () => {
+  const btn = $("tSaveBtn");
+  if (btn.disabled) return;
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const name = $("tName").value.trim() || SITE_DEFAULT.name;
+  const slogan = $("tSlogan").value.trim() || SITE_DEFAULT.slogan;
+  btn.disabled = true;
+  try {
+    await putJson(CONFIG.siteFile, { name, slogan }, "Обновлены название и слоган сайта");
+    state.site = { name, slogan };
+    renderSite();
+    $("titleModal").classList.add("hidden");
+    toast("Название и слоган обновлены", "ok", 4000);
+  } catch (e) {
+    toast("Не удалось сохранить site.json: " + e.message, "err", 6000);
+  }
+  btn.disabled = false;
+});
 
 // ---------- Авторемонт обложек ----------
 const autoHealTried = new Set();
@@ -1190,10 +1292,101 @@ const closeDonate = () => $("donateModal").classList.add("hidden");
     await putJson(CONFIG.donateFile, data, "Обновлён блок донатов");
     state.donate = data;
     renderDonate();
-    closeDonate();
+    $("donateModal").classList.add("hidden");
     toast("Блок донатов обновлён", "ok", 4000);
   } catch (e) {
     toast("Не удалось сохранить donate.json: " + e.message, "err", 6000);
+  }
+  btn.disabled = false;
+});
+
+// ---------- Контакты ----------
+async function loadContacts() {
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.contactsFile}?t=${Date.now()}`);
+    if (r.ok) {
+      const j = await r.json();
+      if (j && typeof j === "object" && Array.isArray(j.contacts)) { state.contacts = j; return; }
+    }
+  } catch (e) {}
+  state.contacts = CONTACTS_DEFAULT;
+}
+function renderContacts() {
+  const sec = $("contacts");
+  const c = state.contacts;
+  const items = (c && Array.isArray(c.contacts))
+    ? c.contacts.filter(m => m && m.name && m.url) : [];
+  if (!items.length) {
+    sec.classList.add("no-methods");
+    $("ctTitle").textContent = "Блок контактов выключен";
+    $("ctText").textContent = "Нажми ✏️, чтобы добавить контакты.";
+    $("contactsList").innerHTML = "";
+    return;
+  }
+  sec.classList.remove("no-methods");
+  $("ctTitle").textContent = c.title || "💬 Связь со мной";
+  $("ctText").textContent = c.text || "";
+  const box = $("contactsList");
+  box.innerHTML = "";
+  for (const m of items) {
+    const ico = m.icon
+      ? `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
+      : `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
+    box.insertAdjacentHTML("beforeend", `<a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
+  }
+}
+function addContactsRow(m = {}) {
+  const box = document.createElement("div");
+  box.className = "ct-row";
+  box.innerHTML = `
+    <input class="ct-name" placeholder="Название (Telegram-канал, Discord…)" value="${esc(m.name || "")}">
+    <input class="ct-color" type="color" value="${esc(m.color || "#26A5E4")}" title="Цвет значка">
+    <input class="ct-icon" placeholder="иконка (telegram)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
+    <input class="ct-url full" placeholder="https:// ссылка" value="${esc(m.url || "")}">
+    <button type="button" class="ver-del" title="Убрать контакт">✕</button>`;
+  $("cList").appendChild(box);
+}
+ $("ctEdit").addEventListener("click", () => {
+  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const c = state.contacts || {};
+  $("cTitle").value = c.title || "";
+  $("cText").value = c.text || "";
+  $("cList").innerHTML = "";
+  (c.contacts?.length ? c.contacts : [{}]).forEach(addContactsRow);
+  $("contactsModal").classList.remove("hidden");
+});
+ $("cAdd").addEventListener("click", () => addContactsRow());
+ $("cList").addEventListener("click", e => {
+  if (e.target.closest(".ver-del")) e.target.closest(".ct-row").remove();
+});
+const closeContacts = () => $("contactsModal").classList.add("hidden");
+ $("cCancel").addEventListener("click", closeContacts);
+ $("cSaveBtn").addEventListener("click", async () => {
+  const btn = $("cSaveBtn");
+  if (btn.disabled) return;
+  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
+  const data = { title: $("cTitle").value.trim(), text: $("cText").value.trim(), contacts: [] };
+  for (const b of document.querySelectorAll("#cList .ct-row")) {
+    const name = b.querySelector(".ct-name").value.trim();
+    if (!name) continue;
+    const m = { name, color: b.querySelector(".ct-color").value };
+    const icon = b.querySelector(".ct-icon").value.trim();
+    if (icon) m.icon = icon;
+    const url = b.querySelector(".ct-url").value.trim();
+    if (!url) { alert(`У контакта «${name}» нет ссылки`); return; }
+    if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
+    m.url = url;
+    data.contacts.push(m);
+  }
+  btn.disabled = true;
+  try {
+    await putJson(CONFIG.contactsFile, data, "Обновлён блок контактов");
+    state.contacts = data;
+    renderContacts();
+    $("contactsModal").classList.add("hidden");
+    toast("Блок контактов обновлён", "ok", 4000);
+  } catch (e) {
+    toast("Не удалось сохранить contacts.json: " + e.message, "err", 6000);
   }
   btn.disabled = false;
 });
@@ -1240,8 +1433,6 @@ function currentSort() {
 }
 
 // ---------- Вид списка ----------
-// "list" удалён: старое сохранённое значение превращается в "grid";
-// на мобильных экранах сетка автоматически рисуется списком (CSS-медиазапрос)
 function currentView() {
   let v = localStorage.getItem(LS_VIEW);
   if (v === "list") v = "grid";
@@ -1250,7 +1441,6 @@ function currentView() {
 function applyView() {
   grid.classList.remove("view-grid", "view-list", "view-compact");
   grid.classList.add("view-" + currentView());
-  // Синхронизация обоих селектов (десктопного и мобильного из настроек)
   $("viewBy").value = currentView();
   $("viewByM").value = currentView();
 }
@@ -1265,7 +1455,7 @@ function applyView() {
   render();
 });
 
-// ---------- Фильтр по ярлыкам (панель внутри строки поиска) ----------
+// ---------- Фильтр по ярлыкам ----------
 function currentFilter() {
   return localStorage.getItem(LS_FILTER) || "";
 }
@@ -1306,7 +1496,6 @@ function toggleFilterPanel(force) {
   toggleFilterPanel(false);
   render();
 });
-// Закрытие панелей кликом мимо (кроме клика по самим кнопкам — у них stopPropagation)
 document.addEventListener("click", e => {
   const fp = $("filterPanel");
   if (!fp.classList.contains("hidden") &&
@@ -1333,10 +1522,8 @@ function render() {
     .filter(p => !fval || p.badge?.text === fval)
     .sort(SORTS[currentSort()].fn);
 
-  // Кнопка фильтра: подсветка при активном фильтре
   updateFilterBtn();
 
-  // Счётчик русификаторов: всего / найдено при активном поиске или фильтре
   const total = state.projects.length;
   $("statCount").textContent = (query || fval)
     ? `Найдено: ${list.length} из ${total}`
@@ -1350,7 +1537,6 @@ function render() {
     return;
   }
   for (const p of list) {
-    // перечень сервисов из ссылок: «Яндекс.Диск • Google Drive • Boosty»
     const services = dedupe((p.links || [])
       .map(l => (SERVICES[l.type] || SERVICES.other).name));
     grid.insertAdjacentHTML("beforeend", `
@@ -1365,37 +1551,28 @@ function render() {
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         ${services.length ? `<div class="meta">${esc(services.join(" • "))}</div>` : ""}
       </div>`);
-    // в компактном виде картинки скрыты — не грузим их зря
     if (view !== "compact")
       setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
   }
 
-  // Список: длинные названия → бегущая строка
   if (view === "compact") requestAnimationFrame(setupMarquees);
 }
 
-// ---------- Бегущая строка для длинных названий ----------
-// Переполнение определяется штатно: scrollWidth заголовка против его видимой ширины.
-// Для каждого бегущего заголовка создаётся СОБСТВЕННЫЙ @keyframes с конкретными
-// числами (без CSS-переменных — некоторые мобильные движки не применяют var()
-// внутри keyframes). Скорость зависит от длины переполнения.
 function setupMarquees() {
   const old = document.getElementById("mqStyles");
   if (old) old.remove();
-  // Уважаем системную настройку «уменьшить движение»
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   let rules = "", n = 0;
   grid.querySelectorAll(".card h2").forEach(h => {
     const span = h.querySelector("span");
     if (!span) return;
-    span.style.animation = "";   // сброс прошлой анимации
+    span.style.animation = "";
     span.style.transform = "";
-    // Влезает целиком — ничего не делаем
     if (h.scrollWidth <= h.clientWidth + 1) return;
-    const dist = h.scrollWidth - h.clientWidth + 14; // +запас, чтобы хвост уходил полностью
+    const dist = h.scrollWidth - h.clientWidth + 14;
     const name = "mqrun" + (++n);
-    const dur = Math.max(6, Math.round(dist / 28));  // ~28 px/сек
+    const dur = Math.max(6, Math.round(dist / 28));
     rules += `@keyframes ${name}{0%,12%{transform:translateX(0)}88%,100%{transform:translateX(-${dist}px)}}`;
     span.style.animation = `${name} ${dur}s ease-in-out infinite alternate`;
   });
@@ -1406,7 +1583,6 @@ function setupMarquees() {
     document.head.appendChild(st);
   }
 }
-// Пересчёт при повороте экрана / изменении размеров окна
 let mqResizeTimer = null;
 window.addEventListener("resize", () => {
   clearTimeout(mqResizeTimer);
@@ -1414,7 +1590,6 @@ window.addEventListener("resize", () => {
     if (currentView() === "compact") setupMarquees();
   }, 200);
 });
-// Пересчёт после загрузки веб-шрифтов (ширина текста меняется)
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     if (currentView() === "compact") setupMarquees();
@@ -1478,13 +1653,11 @@ function openGame(id) {
   } else {
     titleEl.textContent = p.title;
   }
-  // Обложка — без ссылки: на Steam ведёт только название
   const coverLink = $("gCoverLink");
   coverLink.removeAttribute("href");
   coverLink.classList.add("no-link");
   coverLink.removeAttribute("title");
 
-  // Ярлык под названием: текст и цвет из данных
   const st = $("gStale");
   const b = p.badge;
   if (b?.text) {
@@ -1727,7 +1900,6 @@ function queueAppIdLookup(immediate = false) {
   updateCoverPreview();
 });
 
-// Готовые ярлыки: собираем из уже используемых на сайте записях
 function renderBadgePresets() {
   const seen = new Map();
   for (const p of state.projects) {
@@ -1765,7 +1937,6 @@ function openForm(id = null) {
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
   $("fTitle").value = p ? p.title : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
-  // Ярлык: галочка, текст, цвет + готовые варианты из используемых
   const b = p?.badge;
   $("fBadgeOn").checked = !!b;
   $("fBadgeText").value = b?.text || BADGE_DEFAULT.text;
@@ -1865,7 +2036,6 @@ function refreshOrder() {
     }
   }
 
-  // Ярлык: галочка + текст (пустой текст → значение по умолчанию) + цвет
   let badge = null;
   if ($("fBadgeOn").checked) {
     badge = {
@@ -1903,8 +2073,6 @@ function refreshOrder() {
   toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
 });
 
-// Закрытие модалок.
-// Формы (русификатор и донаты) защищены от случайного закрытия: клик мимо и Esc игнорируются.
 for (const m of [$("loginModal"), $("gameModal")]) {
   m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
 }
@@ -1925,8 +2093,6 @@ function banner(text) {
   grid.before(d);
 }
 
-// ---------- Кнопка «Наверх» ----------
-// Появляется, когда прокрутили дальше 60% высоты экрана; клик возвращает к шапке.
 (function setupScrollBtn() {
   const btn = $("scrollBtn");
   if (!btn) return;
@@ -1947,7 +2113,6 @@ function banner(text) {
   btn.addEventListener("click", toTop);
 })();
 
-// ---------- Панель настроек (мобильная шестерёнка) ----------
 (function setupGear() {
   const gear = $("gearBtn"), panel = $("settingsPanel");
   gear.addEventListener("click", e => {
@@ -1958,11 +2123,14 @@ function banner(text) {
   panel.addEventListener("click", e => e.stopPropagation());
 })();
 
-// ---------- Старт ----------
 (async function init() {
   setAdmin(!!state.token);
+  await loadSite();
+  renderSite();
   await loadDonate();
   renderDonate();
+  await loadContacts();
+  renderContacts();
   applyView();
   if (state.token) {
     gh("/user").then(u => { state.user = u.login; setAdmin(true); })
@@ -1976,7 +2144,7 @@ function banner(text) {
   }
   if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
     grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
-    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и <b>DONATE_DEFAULT</b> — см. настройки в начале скрипта.");
+    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и дефолтные блоки — см. настройки в начале скрипта.");
     return;
   }
   try { await loadData(); }
