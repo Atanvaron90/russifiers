@@ -1165,6 +1165,11 @@
           "type": "gdrive",
           "url": "https://drive.google.com/drive/folders/1RNSQbOGhnSuUtTT_dc77CUBzHwHS8gTb?usp=sharing",
           "dl": 0
+        },
+        {
+          "type": "telegram",
+          "url": "https://t.me/c/1173962586/449535/511976",
+          "dl": 0
         }
       ],
       "created": 1792798655904
