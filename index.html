@@ -286,6 +286,8 @@
   }
   .don-btn:hover, .ct-btn:hover { border-color:var(--accent); }
   .ct-btn:hover { border-color:#3ecf8e; }
+  .ct-item { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; max-width:100%; }
+  .ct-note { font-size:.78rem; color:var(--muted); line-height:1.35; }
   .don-ico, .ct-ico {
     width:20px; height:20px; border-radius:5px;
     display:inline-flex; align-items:center; justify-content:center;
@@ -594,10 +596,10 @@
     <input id="cTitle" type="text" placeholder="💬 Связь со мной">
     <label>Подпись</label>
     <textarea id="cText" style="min-height:60px; resize:vertical;"></textarea>
-    <label>Контакты — у каждого название и ссылка:</label>
+    <label>Контакты — у каждого название, надпись и ссылка:</label>
     <div id="cList"></div>
     <button id="cAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить контакт</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Надпись — необязательный текст, который появится рядом с кнопкой контакта. Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
     <div class="modal-actions">
       <button id="cCancel" class="tool-btn" type="button">Отмена</button>
       <button id="cSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -649,7 +651,7 @@ const CONTACTS_DEFAULT = {
   title: "💬 Связь со мной",
   text: "Вопросы, предложения и сообщения о багах — в Telegram-канале.",
   contacts: [
-    { name: "Telegram-канал", url: "https://t.me/atanvaron", icon: "telegram", color: "#26A5E4" }
+    { name: "Telegram-канал", url: "https://t.me/atanvaron", icon: "telegram", color: "#26A5E4", note: "Новости и обновления" }
   ]
 };
 
@@ -1332,7 +1334,7 @@ function renderContacts() {
     const ico = m.icon
       ? `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
       : `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
-    box.insertAdjacentHTML("beforeend", `<a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
+    box.insertAdjacentHTML("beforeend", `<span class="ct-item"><a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>${m.note ? `<span class="ct-note">${esc(m.note)}</span>` : ""}</span>`);
   }
 }
 function addContactsRow(m = {}) {
@@ -1343,6 +1345,7 @@ function addContactsRow(m = {}) {
     <input class="ct-color" type="color" value="${esc(m.color || "#26A5E4")}" title="Цвет значка">
     <input class="ct-icon" placeholder="иконка (telegram)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
     <input class="ct-url full" placeholder="https:// ссылка" value="${esc(m.url || "")}">
+    <input class="ct-note-in full" placeholder="Надпись рядом с кнопкой — необязательно (напр. Новости и обновления)" value="${esc(m.note || "")}">
     <button type="button" class="ver-del" title="Убрать контакт">✕</button>`;
   $("cList").appendChild(box);
 }
@@ -1372,6 +1375,8 @@ const closeContacts = () => $("contactsModal").classList.add("hidden");
     const m = { name, color: b.querySelector(".ct-color").value };
     const icon = b.querySelector(".ct-icon").value.trim();
     if (icon) m.icon = icon;
+    const note = b.querySelector(".ct-note-in").value.trim();
+    if (note) m.note = note;
     const url = b.querySelector(".ct-url").value.trim();
     if (!url) { alert(`У контакта «${name}» нет ссылки`); return; }
     if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
