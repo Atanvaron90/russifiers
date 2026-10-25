@@ -13,6 +13,12 @@
       "color": "#26a5e4",
       "icon": "telegram",
       "url": "https://t.me/atn_digitalboardru"
+    },
+    {
+      "name": "Канал на Boosty",
+      "color": "#e47b25",
+      "icon": "boosty",
+      "url": "https://boosty.to/atanvaron_"
     }
   ]
 }
