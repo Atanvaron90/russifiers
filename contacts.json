@@ -3,10 +3,16 @@
   "text": "Вопросы, предложения и сообщения о багах.",
   "contacts": [
     {
+      "name": "Telegram-чат",
+      "color": "#26a5e4",
+      "icon": "telegram",
+      "url": "https://t.me/mr_smith90"
+    },
+    {
       "name": "Telegram-канал",
       "color": "#26a5e4",
       "icon": "telegram",
-      "url": "https://t.me/@mr_smith90"
+      "url": "https://t.me/atn_digitalboardru"
     }
   ]
 }
