@@ -6,13 +6,14 @@
       "name": "Telegram-чат",
       "color": "#26a5e4",
       "icon": "telegram",
-      "note": "Отслеживайте выход новых версий",
+      "note": "По поводу вопросов и найденных багов",
       "url": "https://t.me/mr_smith90"
     },
     {
       "name": "Telegram-канал",
       "color": "#26a5e4",
       "icon": "telegram",
+      "note": "Отслеживайте выход новых версий",
       "url": "https://t.me/atn_digitalboardru"
     },
     {
