@@ -1430,6 +1430,11 @@
         "dl": 0
       },
       {
+        "type": "gdrive",
+        "url": "https://drive.google.com/drive/folders/1VHKyz82Tz9mTdgGp2nCvNifRdzjUlNEg?usp=sharing",
+        "dl": 0
+      },
+      {
         "type": "pda4",
         "url": "https://4pda.to/forum/index.php?showtopic=1073341",
         "dl": 0
