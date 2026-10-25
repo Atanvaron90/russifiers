@@ -286,7 +286,8 @@
   }
   .don-btn:hover, .ct-btn:hover { border-color:var(--accent); }
   .ct-btn:hover { border-color:#3ecf8e; }
-  .ct-item { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; max-width:100%; }
+  .ct-item { display:flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%; }
+  .ct-item.has-note { width:100%; }
   .ct-note { font-size:.78rem; color:var(--muted); line-height:1.35; }
   .don-ico, .ct-ico {
     width:20px; height:20px; border-radius:5px;
@@ -559,7 +560,7 @@
     <input id="tName" type="text" placeholder="Русификаторы от Atanvaron">
     <label>Слоган</label>
     <input id="tSlogan" type="text" placeholder="Мои переводы и проекты — бесплатно">
-    <p class="hint">Сохранение публикует изменения для всех посетителей и создаёт файл site.json в репозитории.</p>
+    <p class="hint">Сохранение публикует изменения для всех посетителей и записывает их в общий файл data.json (название, слоган, донаты, контакты, каталог).</p>
     <div class="modal-actions">
       <button id="tCancel" class="tool-btn" type="button">Отмена</button>
       <button id="tSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -627,7 +628,9 @@ const CONFIG = {
   owner: "ВАШ_НИК_GITHUB",
   repo: "russifiers",
   branch: "main",
-  dataFile: "data.json",
+  dataFile: "data.json",        // ЕДИНЫЙ файл данных: каталог + название/слоган + донаты + контакты
+  // Файлы ниже нужны только для чтения старой структуры при переходе;
+  // после первого сохранения через ✏️ всё пишется в data.json, и их можно удалить из репозитория.
   donateFile: "donate.json",
   contactsFile: "contacts.json",
   siteFile: "site.json",
@@ -1102,14 +1105,43 @@ async function putJson(file, obj, message, retried = false) {
     throw e;
   }
 }
-const writeData = (projects, message) => putJson(CONFIG.dataFile, projects, message);
+// ---------- Единый файл данных: data.json = { name, slogan, donate, contacts, projects } ----------
+const mergedData = () => ({
+  name: state.site?.name || SITE_DEFAULT.name,
+  slogan: state.site?.slogan || SITE_DEFAULT.slogan,
+  donate: state.donate || DONATE_DEFAULT,
+  contacts: state.contacts || CONTACTS_DEFAULT,
+  projects: state.projects
+});
+const writeData = message => putJson(CONFIG.dataFile, mergedData(), message);
 async function loadData() {
+  // Дефолты — пока файлы не загружены (или их нет)
+  state.site = { ...SITE_DEFAULT };
+  state.donate = DONATE_DEFAULT;
+  state.contacts = CONTACTS_DEFAULT;
   const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
-  if (r.status === 404) { state.projects = []; state.dataSha = null; return; }
+  if (r.status === 404) {
+    // data.json ещё не создан — читаем старые отдельные файлы (переходный период)
+    state.projects = []; state.dataSha = null;
+    await loadSite(); await loadDonate(); await loadContacts();
+    return;
+  }
   if (!r.ok) throw new Error("GitHub вернул " + r.status);
   const data = await r.json();
-  if (!Array.isArray(data)) throw new Error("data.json имеет неверный формат");
-  state.projects = data.filter(p => p && p.title).map(migrate);
+  if (Array.isArray(data)) {
+    // Старый формат: в data.json только каталог, остальное — в отдельных файлах
+    state.projects = data.filter(p => p && p.title).map(migrate);
+    state.dataSha = null;
+    await loadSite(); await loadDonate(); await loadContacts();
+    return;
+  }
+  if (!data || typeof data !== "object") throw new Error("data.json имеет неверный формат");
+  // Новый объединённый формат — все данные в одном файле
+  if (typeof data.name === "string" || typeof data.slogan === "string")
+    state.site = { name: data.name ?? SITE_DEFAULT.name, slogan: data.slogan ?? SITE_DEFAULT.slogan };
+  if (data.donate && typeof data.donate === "object" && Array.isArray(data.donate.methods)) state.donate = data.donate;
+  if (data.contacts && typeof data.contacts === "object" && Array.isArray(data.contacts.contacts)) state.contacts = data.contacts;
+  state.projects = (Array.isArray(data.projects) ? data.projects : []).filter(p => p && p.title).map(migrate);
   state.dataSha = null;
 }
 
@@ -1145,13 +1177,13 @@ function renderSite() {
   const slogan = $("tSlogan").value.trim() || SITE_DEFAULT.slogan;
   btn.disabled = true;
   try {
-    await putJson(CONFIG.siteFile, { name, slogan }, "Обновлены название и слоган сайта");
     state.site = { name, slogan };
+    await putJson(CONFIG.dataFile, mergedData(), "Обновлены название и слоган сайта");
     renderSite();
     $("titleModal").classList.add("hidden");
     toast("Название и слоган обновлены", "ok", 4000);
   } catch (e) {
-    toast("Не удалось сохранить site.json: " + e.message, "err", 6000);
+    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
   }
   btn.disabled = false;
 });
@@ -1184,7 +1216,7 @@ async function autoHealCovers() {
   }
   if (fixed) {
     try {
-      await writeData(state.projects, "Обложки: канонические URL из Steam");
+      await writeData("Обложки: канонические URL из Steam");
       render();
       toast(`Обложки обновлены автоматически: ${fixed} шт.`, "ok", 5000);
     } catch (e) {
@@ -1291,13 +1323,13 @@ const closeDonate = () => $("donateModal").classList.add("hidden");
   }
   btn.disabled = true;
   try {
-    await putJson(CONFIG.donateFile, data, "Обновлён блок донатов");
     state.donate = data;
+    await putJson(CONFIG.dataFile, mergedData(), "Обновлён блок донатов");
     renderDonate();
     $("donateModal").classList.add("hidden");
     toast("Блок донатов обновлён", "ok", 4000);
   } catch (e) {
-    toast("Не удалось сохранить donate.json: " + e.message, "err", 6000);
+    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
   }
   btn.disabled = false;
 });
@@ -1334,7 +1366,7 @@ function renderContacts() {
     const ico = m.icon
       ? `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
       : `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
-    box.insertAdjacentHTML("beforeend", `<span class="ct-item"><a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>${m.note ? `<span class="ct-note">${esc(m.note)}</span>` : ""}</span>`);
+    box.insertAdjacentHTML("beforeend", `<span class="ct-item${m.note ? " has-note" : ""}">${m.note ? `<span class="ct-note">${esc(m.note)}</span>` : ""}<a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a></span>`);
   }
 }
 function addContactsRow(m = {}) {
@@ -1385,13 +1417,13 @@ const closeContacts = () => $("contactsModal").classList.add("hidden");
   }
   btn.disabled = true;
   try {
-    await putJson(CONFIG.contactsFile, data, "Обновлён блок контактов");
     state.contacts = data;
+    await putJson(CONFIG.dataFile, mergedData(), "Обновлён блок контактов");
     renderContacts();
     $("contactsModal").classList.add("hidden");
     toast("Блок контактов обновлён", "ok", 4000);
   } catch (e) {
-    toast("Не удалось сохранить contacts.json: " + e.message, "err", 6000);
+    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
   }
   btn.disabled = false;
 });
@@ -1624,7 +1656,7 @@ async function deleteProject(id) {
   state.projects = state.projects.filter(x => x.id !== id);
   render();
   try {
-    await writeData(state.projects, "Удалён: " + p.title);
+    await writeData("Удалён: " + p.title);
     toast("Удалено: " + p.title, "ok", 3000);
   } catch (e) {
     toast("Запись убрана со страницы, но data.json не обновлён: " + e.message, "err", 6000);
@@ -2066,7 +2098,7 @@ function refreshOrder() {
 
   btn.disabled = true; btn.textContent = "Публикую…";
   try {
-    await writeData(state.projects, (editId ? "Обновлён: " : "Добавлен: ") + title);
+    await writeData((editId ? "Обновлён: " : "Добавлен: ") + title);
   } catch (e) {
     toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
     btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
@@ -2130,11 +2162,16 @@ function banner(text) {
 
 (async function init() {
   setAdmin(!!state.token);
-  await loadSite();
+  if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
+    renderSite(); renderDonate(); renderContacts(); applyView();
+    grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
+    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и дефолтные блоки — см. настройки в начале скрипта.");
+    return;
+  }
+  try { await loadData(); }
+  catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
   renderSite();
-  await loadDonate();
   renderDonate();
-  await loadContacts();
   renderContacts();
   applyView();
   if (state.token) {
@@ -2147,13 +2184,6 @@ function banner(text) {
         }
       });
   }
-  if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
-    grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
-    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и дефолтные блоки — см. настройки в начале скрипта.");
-    return;
-  }
-  try { await loadData(); }
-  catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
   render();
 })();
 </script>
