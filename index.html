@@ -196,7 +196,7 @@
     }
     .toolbar { padding:0 12px; row-gap:10px; }
     .toolbar .m-hide { display:none !important; }
-    .search-wrap { order:1; flex:1 1 auto; min-width:0; }
+    .search-wrap { order:1; flex:1 1 0; min-width:0; }
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
     #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
@@ -281,7 +281,7 @@
     background:var(--card); border:1px solid var(--border); border-radius:10px;
     color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit;
   }
-  .don-btn:hover { border-color:var(--accent); }
+  .don-btn:hover, .ct-btn:hover { border-color:var(--accent); }
   .ct-btn:hover { border-color:#3ecf8e; }
   .ct-btn:hover .ct-name { color:#a99cf5; }
   .ct-txt { display:flex; flex-direction:column; line-height:1.25; text-align:left; }
@@ -595,10 +595,10 @@
     <input id="cTitle" type="text" placeholder="💬 Связь со мной">
     <label>Подпись</label>
     <textarea id="cText" style="min-height:60px; resize:vertical;"></textarea>
-    <label>Контакты — у каждого название, подпись (необязательно) и ссылка:</label>
+    <label>Контакты — название, подпись, ссылка:</label>
     <div id="cList"></div>
     <button id="cAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить контакт</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
+    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Подпись выводится под названием контакта (необязательно). Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
     <div class="modal-actions">
       <button id="cCancel" class="tool-btn" type="button">Отмена</button>
       <button id="cSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -1177,22 +1177,3 @@ async function autoHealCovers() {
         p.cover.url = info.header;
         if (info.capsule) p.cover.capsule = info.capsule;
         fixed++;
-      }
-    } catch (e) {}
-    await new Promise(r => setTimeout(r, 350));
-  }
-  if (fixed) {
-    try {
-      await writeData(state.projects, "Обложки: канонические URL из Steam");
-      render();
-      toast(`Обложки обновлены автоматически: ${fixed} шт.`, "ok", 5000);
-    } catch (e) {
-      console.warn("Авторемонт обложек: не удалось сохранить —", e.message);
-    }
-  }
-}
-
-// ---------- Донаты ----------
-async function loadDonate() {
-  try {
-    const r = await fetch(`https://raw.githubusercontent.com
