@@ -72,6 +72,16 @@
   }
   .filter-btn:hover { border-color:var(--accent); color:var(--text); }
   .filter-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .search-toggle {
+    display:none; align-items:center; justify-content:center;
+    width:46px; padding:12px 0;
+    background:var(--card); border:1px solid var(--border); border-radius:10px;
+    color:var(--muted); cursor:pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .search-toggle:hover { border-color:var(--accent); color:var(--text); }
+  .search-toggle.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  @keyframes searchSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
   .filter-panel, .settings-panel {
     position:absolute; top:calc(100% + 8px); z-index:30;
     background:var(--card); border:1px solid var(--border); border-radius:12px;
@@ -195,9 +205,16 @@
       font-size:.68rem; font-weight:700;
       padding:3px 8px; border-radius:8px;
     }
-    .toolbar { padding:0 12px; row-gap:10px; }
+    .toolbar { position:relative; padding:0 12px; row-gap:10px; }
     .toolbar .m-hide { display:none !important; }
+    .search-toggle { display:inline-flex; }
+    .toolbar.search-open .search-toggle { display:none; }
     .search-wrap { order:1; flex:1 1 0; min-width:0; }
+    .toolbar.search-open .search-wrap {
+      position:absolute; left:12px; right:12px; top:0; z-index:35;
+      background:var(--bg);
+      animation:searchSlide .18s ease;
+    }
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
     #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
@@ -437,6 +454,11 @@
   </header>
 
   <div class="toolbar">
+    <button id="searchToggle" class="search-toggle" type="button" title="Поиск" aria-label="Поиск">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path>
+      </svg>
+    </button>
     <div class="search-wrap">
       <input id="search" type="text" placeholder="Поиск по названию">
       <button id="filterBtn" class="filter-btn" type="button" title="Фильтр по ярлыкам">
@@ -553,7 +575,7 @@
     <label>Ссылка на картинку</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
 
-    <label>Ярлык на плашке — например «Не обновляется», если вышел официальный перевод игры:</label>
+    <label>Ярлыки:</label>
     <label class="flag-row">
       <input id="fBadgeOn" type="checkbox">
       <span class="flag-text">Показывать ярлык</span>
@@ -1714,6 +1736,20 @@ if (document.fonts && document.fonts.ready) {
   render();
 });
  $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
+
+ // Мобильная версия: лупа вместо поля — по тапу поле выдвигается поверх элементов строки
+ const toolbarEl = document.querySelector(".toolbar");
+ $("searchToggle").addEventListener("click", () => {
+   toolbarEl.classList.add("search-open");
+   $("search").focus();
+ });
+ $("search").addEventListener("input", () => $("searchToggle").classList.toggle("on", $("search").value.trim() !== ""));
+ document.addEventListener("click", e => {
+   if (!toolbarEl.classList.contains("search-open")) return;
+   if (e.target.closest(".search-wrap") || e.target.closest("#searchToggle")) return;
+   toolbarEl.classList.remove("search-open");
+ });
+ document.addEventListener("keydown", e => { if (e.key === "Escape") toolbarEl.classList.remove("search-open"); });
 
 // ---------- Удаление ----------
 async function deleteProject(id) {
