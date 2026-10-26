@@ -243,7 +243,12 @@
 
   /* Загрузка файлов на диски (в форме добавления) */
   .up-block { border:1px dashed var(--border); border-radius:10px; padding:12px; margin-top:12px; }
-  .up-head { display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--muted); }
+  .up-block > summary { cursor:pointer; user-select:none; }
+  .up-head { display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--muted); list-style:none; }
+  .up-head::-webkit-details-marker { display:none; }
+  .up-head::after { content:"▸"; transition:transform .2s; }
+  .up-block[open] .up-head::after { transform:rotate(90deg); }
+  .up-inner { margin-top:10px; }
   .up-row { display:flex; align-items:center; gap:10px; margin-top:8px; }
   .up-name { width:60px; flex:none; font-size:.85rem; }
   .up-bar { flex:1; height:8px; background:var(--field); border-radius:4px; overflow:hidden; }
@@ -532,7 +537,7 @@
      Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
 <div id="formModal" class="overlay hidden">
   <div class="modal">
-    <h2 id="formModalTitle">Добавить русификатор</h2>
+    <h2 id="formModalTitle">Добавление русификатора</h2>
     <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
     <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
     <div id="fNote" class="f-note"></div>
@@ -563,28 +568,30 @@
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
 
-    <div class="up-block">
-      <div class="up-head">
+    <details class="up-block" id="upBlock">
+      <summary class="up-head">
         <span>Загрузка архива на диски</span>
-        <button id="drivesSetup" class="retry-search" type="button">Подключить диски</button>
+      </summary>
+      <div class="up-inner">
+        <button id="drivesSetup" class="retry-search" type="button" style="margin-top:10px;">Подключить диски</button>
+        <div class="up-row y">
+          <span class="up-name">Яндекс</span>
+          <div class="up-bar"><div id="yaBar"></div></div>
+          <span id="yaState" class="up-state">—</span>
+        </div>
+        <div class="up-row g">
+          <span class="up-name">Google</span>
+          <div class="up-bar"><div id="gdBar"></div></div>
+          <span id="gdState" class="up-state">—</span>
+        </div>
+        <input id="upFile" type="file" hidden>
+        <button id="upBtn" class="tool-btn" type="button" style="margin-top:10px;">📁 Загрузить файл на оба диска</button>
+        <p class="hint">Файл уходит из браузера напрямую на диски и не попадает в репозиторий. Не закрывайте страницу до конца загрузки — ссылки добавятся в список выше автоматически.</p>
       </div>
-      <div class="up-row y">
-        <span class="up-name">Яндекс</span>
-        <div class="up-bar"><div id="yaBar"></div></div>
-        <span id="yaState" class="up-state">—</span>
-      </div>
-      <div class="up-row g">
-        <span class="up-name">Google</span>
-        <div class="up-bar"><div id="gdBar"></div></div>
-        <span id="gdState" class="up-state">—</span>
-      </div>
-      <input id="upFile" type="file" hidden>
-      <button id="upBtn" class="tool-btn" type="button" style="margin-top:10px;">📁 Загрузить файл на оба диска</button>
-      <p class="hint">Файл уходит из браузера напрямую на диски и не попадает в репозиторий. Не закрывайте страницу до конца загрузки — ссылки добавятся в список выше автоматически.</p>
-    </div>
+    </details>
     <div class="modal-actions">
       <button id="fCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="fSave" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+      <button id="fSave" class="tool-btn primary" type="button">Опубликовать</button>
     </div>
   </div>
 </div>
@@ -2047,7 +2054,8 @@ function openForm(id = null) {
   clearTimeout(searchTimer); clearTimeout(appIdTimer);
   titlePick = null; lastFound = []; titleAuto = false;
   const p = id ? state.projects.find(x => x.id === id) : null;
-  $("formModalTitle").textContent = p ? "Редактировать русификатор" : "Добавить русификатор";
+  $("formModalTitle").textContent = p ? "Редактирование русификатора" : "Добавление русификатора";
+  $("fSave").textContent = p ? "Сохранить" : "Опубликовать";
   $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
   $("fTitle").value = p ? p.title : "";
   $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
@@ -2064,6 +2072,7 @@ function openForm(id = null) {
   updateCoverPreview();
   if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
   updateDriveStates();
+  $("upBlock").open = false;
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
@@ -2416,15 +2425,16 @@ $("drivesClose").addEventListener("click", () => $("drivesModal").classList.add(
     });
   }
 
-  btn.disabled = true; btn.textContent = "Публикую…";
+  const lbl = btn.textContent;
+  btn.disabled = true; btn.textContent = editId ? "Сохраняю…" : "Публикую…";
   try {
     await writeData((editId ? "Обновлён: " : "Добавлен: ") + title);
   } catch (e) {
     toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
-    btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
+    btn.disabled = false; btn.textContent = lbl;
     return;
   }
-  btn.disabled = false; btn.textContent = "Сохранить и опубликовать";
+  btn.disabled = false; btn.textContent = lbl;
   render();
   closeForm();
   toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
