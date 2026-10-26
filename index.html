@@ -219,7 +219,7 @@
   .f-note a { color:#a99cf5; text-decoration:underline; }
   .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
 
-  .flag-row { display:flex; align-items:center; gap:10px; margin-top:12px; cursor:pointer; }
+  .modal .flag-row { display:flex; align-items:center; gap:10px; margin-top:12px; cursor:pointer; }
   .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; cursor:pointer; accent-color:var(--accent); }
   .flag-row .flag-text { font-size:.9rem; color:var(--text); }
 
@@ -539,7 +539,7 @@
   <div class="modal">
     <h2 id="formModalTitle">Добавление русификатора</h2>
     <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
-    <input id="fAppId" type="text" placeholder="store.steampowered.com/app/292030/…, steamdb.info/app/292030/… или просто 292030">
+    <input id="fAppId" type="text">
     <div id="fNote" class="f-note"></div>
     <label>Название игры *</label>
     <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
@@ -550,7 +550,7 @@
         <div id="covAlts"></div>
       </div>
     </div>
-    <label>…или прямая ссылка на картинку (для игр не из Steam)</label>
+    <label>Ссылка на картинку</label>
     <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
 
     <label>Ярлык на плашке — например «Не обновляется», если вышел официальный перевод игры:</label>
@@ -564,7 +564,7 @@
     </div>
     <div id="badgePresets" class="badge-presets"></div>
 
-    <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
+    <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
 
@@ -2030,7 +2030,7 @@ function renderBadgePresets() {
   const box = $("badgePresets");
   const items = [...seen.values()];
   box.innerHTML = items.length
-    ? '<span class="hint">Готовые ярлыки из используемых — клик, чтобы подставить:</span>'
+    ? '<span class="hint">Готовые ярлыки:</span>'
     : "";
   for (const b of items.slice(0, 12)) {
     const chip = document.createElement("button");
