@@ -241,6 +241,23 @@
   .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
   .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
 
+  /* Загрузка файлов на диски (в форме добавления) */
+  .up-block { border:1px dashed var(--border); border-radius:10px; padding:12px; margin-top:12px; }
+  .up-head { display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--muted); }
+  .up-row { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .up-name { width:60px; flex:none; font-size:.85rem; }
+  .up-bar { flex:1; height:8px; background:var(--field); border-radius:4px; overflow:hidden; }
+  .up-bar > div { height:100%; width:0%; background:var(--accent); border-radius:4px; transition:width .25s; }
+  .up-row.y .up-bar > div { background:#FC3F1D; }
+  .up-row.g .up-bar > div { background:#34A853; }
+  .up-state { width:150px; flex:none; font-size:.75rem; color:var(--muted); text-align:right; overflow-wrap:anywhere; }
+  .up-state.err { color:#ff6b6b; }
+  .up-state.ok  { color:#3ecf8e; }
+  @media (max-width:600px) {
+    .up-name { width:50px; font-size:.78rem; }
+    .up-state { width:110px; font-size:.7rem; }
+  }
+
   .steam-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--field); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px; margin-top:6px; cursor:pointer; font-size:.9rem; }
   .steam-item:hover { border-color:var(--accent); }
   .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
@@ -336,11 +353,11 @@
     color: #e4e6eb; transform: scale(1.15);
   }
   .g-grid { display:grid; grid-template-columns:250px 1fr; }
-  .g-cover-link { display:block; }
+  .g-cover-link { display:flex; align-items:center; justify-content:center; background:var(--field); overflow:hidden; }
   .g-cover-link img { transition:filter .15s; }
   .g-cover-link.no-link { pointer-events:none; }
-  .g-cover { width:100%; height:100%; min-height:340px; object-fit:cover; background:var(--field); }
-  .g-body { padding:24px; max-height:82vh; overflow:auto; }
+  .g-cover { width:100%; height:auto; max-height:82vh; object-fit:contain; background:var(--field); }
+  .g-body { padding:24px; min-height:340px; max-height:82vh; overflow:auto; }
   .g-body h2 { margin-bottom:6px; }
   .g-title-link { color:inherit; text-decoration:none; }
   .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
@@ -362,7 +379,7 @@
   @media (max-width:640px) {
     .g-grid { grid-template-columns:1fr; }
     .g-cover-link { order:-1; }
-    .g-cover { height:auto; min-height:0; aspect-ratio:460/215; }
+    .g-cover { height:auto; min-height:0; max-height:none; aspect-ratio:460/215; object-fit:contain; }
     .g-body { padding:18px; }
   }
 
@@ -500,7 +517,7 @@
       <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
         <img id="gCover" class="g-cover" alt="Обложка">
       </a>
-      <div class="g-body">
+      <div class="g-body" id="gBody">
         <h2 id="gTitle"></h2>
         <div id="gStale" style="display:none;"></div>
         <p id="gDesc" class="desc" style="margin-top:10px;"></p>
@@ -545,9 +562,49 @@
     <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок — он сохранится на сайте):</label>
     <div id="lkList"></div>
     <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
+
+    <div class="up-block">
+      <div class="up-head">
+        <span>Загрузка архива на диски</span>
+        <button id="drivesSetup" class="retry-search" type="button">Подключить диски</button>
+      </div>
+      <div class="up-row y">
+        <span class="up-name">Яндекс</span>
+        <div class="up-bar"><div id="yaBar"></div></div>
+        <span id="yaState" class="up-state">—</span>
+      </div>
+      <div class="up-row g">
+        <span class="up-name">Google</span>
+        <div class="up-bar"><div id="gdBar"></div></div>
+        <span id="gdState" class="up-state">—</span>
+      </div>
+      <input id="upFile" type="file" hidden>
+      <button id="upBtn" class="tool-btn" type="button" style="margin-top:10px;">📁 Загрузить файл на оба диска</button>
+      <p class="hint">Файл уходит из браузера напрямую на диски и не попадает в репозиторий. Не закрывайте страницу до конца загрузки — ссылки добавятся в список выше автоматически.</p>
+    </div>
     <div class="modal-actions">
       <button id="fCancel" class="tool-btn" type="button">Отмена</button>
       <button id="fSave" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Подключение дисков для загрузки файлов (только для админа) -->
+<div id="drivesModal" class="overlay hidden">
+  <div class="modal">
+    <h2>Подключение дисков</h2>
+    <label>Яндекс.Диск — OAuth-токен с правом записи на Диск</label>
+    <div style="display:flex; gap:8px;">
+      <input id="yaTokenInput" type="password" placeholder="y0_AgAAAA...">
+      <button id="yaTokenSave" class="tool-btn primary" type="button" style="flex:none;">Сохранить</button>
+    </div>
+    <div id="yaStatus" class="f-note"></div>
+    <label>Google Drive</label>
+    <button id="gdConnect" class="tool-btn" type="button">🔌 Подключить Google Drive</button>
+    <div id="gdStatus" class="f-note"></div>
+    <p class="hint">Яндекс: oauth.yandex.ru → «Создать приложение» → в правах отметьте «Запись в любом месте на Диске» (Яндекс Диск REST API) → кнопка «Выпустить отладочный токен» → вставьте его сюда. Google: в CONFIG в начале скрипта вставьте gdriveClientId (Google Cloud Console → Credentials → OAuth Client ID, тип «Веб-приложение», Authorized JavaScript origin — адрес сайта). Токены хранятся только в вашем браузере и не публикуются в репозитории.</p>
+    <div class="modal-actions">
+      <button id="drivesClose" class="tool-btn" type="button">Закрыть</button>
     </div>
   </div>
 </div>
@@ -634,7 +691,10 @@ const CONFIG = {
   donateFile: "donate.json",
   contactsFile: "contacts.json",
   siteFile: "site.json",
-  counterNS: "my-russifiers-site" // УНИКАЛЬНОЕ имя для счётчиков!
+  counterNS: "my-russifiers-site", // УНИКАЛЬНОЕ имя для счётчиков!
+  // —— Загрузка файлов на диски через форму (необязательно) ——
+  gdriveClientId: "",            // OAuth Client ID из Google Cloud Console (...apps.googleusercontent.com)
+  yandexFolder: "Русификаторы"   // имя папки на обоих дисках — создаётся автоматически
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
@@ -673,6 +733,7 @@ if (location.hostname.endsWith(".github.io")) {
 
 const GH_API = "https://api.github.com";
 const LS_TOKEN = "russifiers_gh_token";
+const LS_YA_TOKEN = "russifiers_ya_token";
 const LS_DL = "russifiers_dl_cache_v1";
 const LS_SORT = "russifiers_sort";
 const LS_VIEW = "russifiers_view";
@@ -1678,6 +1739,21 @@ grid.addEventListener("click", e => {
 let openedId = null;
 const steamStoreURL = p => p.cover?.appid ? `https://store.steampowered.com/app/${p.cover.appid}/` : null;
 
+// Высота окна игры подгоняется под высоту обложки слева; обложка не обрезается,
+// а если ссылок много — они листаются внутри правой части.
+function syncGameBody() {
+  const body = $("gBody"), img = $("gCover");
+  if ($("gameModal").classList.contains("hidden") || isNarrowScreen()) {
+    body.style.maxHeight = "";
+    return;
+  }
+  // 375 — высота высокой обложки 600×900 при ширине колонки 250px; 340 — прежний минимум окна
+  const h = Math.round(img.getBoundingClientRect().height) || 375;
+  body.style.maxHeight = Math.min(Math.round(window.innerHeight * 0.82), Math.max(h, 340)) + "px";
+}
+$("gCover").addEventListener("load", syncGameBody);
+window.addEventListener("resize", syncGameBody);
+
 function openGame(id) {
   const p = state.projects.find(x => x.id === id);
   if (!p) return;
@@ -1710,6 +1786,7 @@ function openGame(id) {
   $("gDesc").style.display = p.description ? "" : "none";
 
   setCoverCascade($("gCover"), gameCoverURLs(p));
+  syncGameBody();
 
   const box = $("gLinks");
   box.innerHTML = "";
@@ -1986,6 +2063,7 @@ function openForm(id = null) {
   refreshOrder();
   updateCoverPreview();
   if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
+  updateDriveStates();
   $("formModal").classList.remove("hidden");
 }
 const closeForm = () => $("formModal").classList.add("hidden");
@@ -2036,6 +2114,248 @@ function refreshOrder() {
   const det = detectService(e.target.value.trim());
   if (det !== "other") sel.value = det;
 });
+
+// ---------- Загрузка файлов на Яндекс.Диск и Google Drive ----------
+const GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+let gdToken = null, gdTokenExp = 0;
+
+const yaToken = () => localStorage.getItem(LS_YA_TOKEN) || "";
+const upBar = (id, pct) => { $(id).style.width = Math.max(0, Math.min(100, pct)) + "%"; };
+const upState = (id, text, cls = "") => { const el = $(id); el.textContent = text; el.className = "up-state " + cls; };
+
+function updateDriveStates() {
+  const has = yaToken();
+  upState("yaState", has ? "подключён" : "не подключён", has ? "ok" : "");
+  upState("gdState", CONFIG.gdriveClientId ? "настроен" : "нет Client ID в CONFIG");
+  upBar("yaBar", 0); upBar("gdBar", 0);
+}
+
+function xhrSend(url, { method = "PUT", headers = {}, body, onProgress } = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
+    if (onProgress) xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded / e.total * 100); };
+    xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve(xhr) : reject(new Error("HTTP " + xhr.status));
+    xhr.onerror = () => reject(new Error("сеть недоступна"));
+    xhr.send(body);
+  });
+}
+
+// —— Яндекс.Диск: один PUT (без докачки) + публикация ——
+function yaApi(path, opts = {}) {
+  return fetch("https://cloud-api.yandex.net" + path,
+    { ...opts, headers: { Authorization: "OAuth " + yaToken(), ...(opts.headers || {}) } });
+}
+async function yaUpload(file, barId, stateId) {
+  if (!yaToken()) throw new Error("токен не подключён");
+  const folder = CONFIG.yandexFolder || "Русификаторы";
+  upState(stateId, "папка…");
+  const mkdir = await yaApi(`/v1/disk/resources?path=${encodeURIComponent("/" + folder)}`, { method: "PUT" });
+  if (!mkdir.ok && mkdir.status !== 409) throw new Error("не создать папку (HTTP " + mkdir.status + ")");
+  upState(stateId, "запрос…");
+  let href = null;
+  for (let i = 0; i < 5; i++) {
+    const name = i ? file.name.replace(/(\.[^.]*)$/, ` (${i})$1`) : file.name;
+    const p = "/" + folder + "/" + name;
+    const r = await yaApi(`/v1/disk/resources/upload?path=${encodeURIComponent(p)}&overwrite=false`);
+    if (r.status === 409) continue; // имя занято — пробуем «имя (2)»
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    href = { url: (await r.json()).href, path: p };
+    break;
+  }
+  if (!href) throw new Error("не нашлось свободное имя файла");
+  upState(stateId, "загрузка…");
+  await xhrSend(href.url, { body: file, onProgress: pct => { upBar(barId, pct); upState(stateId, Math.round(pct) + "%"); } });
+  upState(stateId, "публикация…");
+  const pub = await yaApi(`/v1/disk/resources/publish?path=${encodeURIComponent(href.path)}`, { method: "PUT" });
+  if (!pub.ok) throw new Error("публикация HTTP " + pub.status);
+  const link = (await pub.json()).href;
+  upBar(barId, 100);
+  upState(stateId, "готово", "ok");
+  return link;
+}
+
+// —— Google Drive: resumable частями по 8 МБ (можно докачать) ——
+function loadGsi() {
+  if (window.google?.accounts?.oauth2) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("не удалось загрузить Google-клиент"));
+    document.head.appendChild(s);
+  });
+}
+function gdEnsureToken() {
+  if (gdToken && Date.now() < gdTokenExp) return Promise.resolve(gdToken);
+  if (!CONFIG.gdriveClientId) return Promise.reject(new Error("в CONFIG не заполнен gdriveClientId"));
+  return loadGsi().then(() => new Promise((resolve, reject) => {
+    try {
+      google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.gdriveClientId,
+        scope: GDRIVE_SCOPE,
+        callback: resp => {
+          if (resp.error) return reject(new Error("Google: " + resp.error));
+          gdToken = resp.access_token;
+          gdTokenExp = Date.now() + Math.max((resp.expires_in || 3600) - 120, 60) * 1000;
+          resolve(gdToken);
+        },
+        error_callback: err => reject(new Error("Google: " + (err?.message || err?.type || "окно закрыто")))
+      }).requestAccessToken({});
+    } catch (e) { reject(e); }
+  }));
+}
+async function gdFolder(token) {
+  const name = (CONFIG.yandexFolder || "Русификаторы").replace(/'/g, "\\'");
+  const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const found = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`,
+    { headers: { Authorization: "Bearer " + token } });
+  if (found.ok) {
+    const j = await found.json();
+    if (j.files?.length) return j.files[0].id;
+  }
+  const made = await fetch("https://www.googleapis.com/drive/v3/files", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ name: CONFIG.yandexFolder || "Русификаторы", mimeType: "application/vnd.google-apps.folder" })
+  });
+  if (!made.ok) throw new Error("не создать папку (HTTP " + made.status + ")");
+  return (await made.json()).id;
+}
+async function gdFinish(token, id, stateId) {
+  upState(stateId, "публикация…");
+  const perm = await fetch(`https://www.googleapis.com/drive/v3/files/${id}/permissions`, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+    body: JSON.stringify({ role: "reader", type: "anyone" })
+  });
+  if (!perm.ok) throw new Error("открыть доступ HTTP " + perm.status);
+  upState(stateId, "готово", "ok");
+  return `https://drive.google.com/file/d/${id}/view`;
+}
+async function gdUpload(file, barId, stateId) {
+  if (!file.size) throw new Error("пустой файл");
+  const token = await gdEnsureToken();
+  upState(stateId, "папка…");
+  const folderId = await gdFolder(token);
+  upState(stateId, "запрос…");
+  const init = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json; charset=UTF-8",
+      "X-Upload-Content-Type": file.type || "application/octet-stream",
+      "X-Upload-Content-Length": String(file.size)
+    },
+    body: JSON.stringify({ name: file.name, parents: [folderId] })
+  });
+  if (!init.ok) throw new Error("сессия HTTP " + init.status);
+  const loc = init.headers.get("Location") || init.headers.get("location");
+  if (!loc) {
+    // Резерв: адрес сессии не отдали — multipart одним запросом
+    upState(stateId, "загрузка…");
+    const fd = new FormData();
+    fd.append("metadata", new Blob([JSON.stringify({ name: file.name, parents: [folderId] })], { type: "application/json" }));
+    fd.append("file", file);
+    const xhr = await xhrSend("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
+      method: "POST", headers: { Authorization: "Bearer " + token }, body: fd,
+      onProgress: pct => { upBar(barId, pct); upState(stateId, Math.round(pct) + "%"); }
+    });
+    return await gdFinish(token, JSON.parse(xhr.responseText).id, stateId);
+  }
+  const chunk = 8 * 1024 * 1024;
+  let offset = 0;
+  while (true) {
+    const end = Math.min(offset + chunk, file.size);
+    upState(stateId, Math.round(end / file.size * 100) + "%");
+    const r = await fetch(loc, {
+      method: "PUT",
+      headers: { "Content-Range": `bytes ${offset}-${end - 1}/${file.size}` },
+      body: file.slice(offset, end)
+    });
+    if (r.status === 308) { offset = end; upBar(barId, end / file.size * 100); continue; }
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const id = (await r.json()).id;
+    upBar(barId, 100);
+    return await gdFinish(token, id, stateId);
+  }
+}
+
+// —— Общий процесс: параллельно на оба диска ——
+let uploading = false;
+$("upBtn").addEventListener("click", () => {
+  if (uploading) return;
+  if (!yaToken() && !CONFIG.gdriveClientId) {
+    toast("Сначала подключите хотя бы один диск", "err", 5000);
+    openDrives();
+    return;
+  }
+  $("upFile").click();
+});
+$("upFile").addEventListener("change", async () => {
+  const file = $("upFile").files[0];
+  $("upFile").value = "";
+  if (!file || uploading) return;
+  uploading = true;
+  $("upBtn").disabled = true;
+  let added = 0;
+  const finishOne = link => {
+    if (!link) return;
+    addLinkRow({ type: detectService(link), url: link });
+    refreshOrder();
+    added++;
+  };
+  const tasks = [];
+  if (yaToken()) tasks.push(
+    yaUpload(file, "yaBar", "yaState").then(finishOne)
+      .catch(e => { upState("yaState", "ошибка", "err"); toast("Яндекс.Диск: " + e.message, "err", 6000); }));
+  if (CONFIG.gdriveClientId) tasks.push(
+    gdUpload(file, "gdBar", "gdState").then(finishOne)
+      .catch(e => { upState("gdState", "ошибка", "err"); toast("Google Drive: " + e.message, "err", 6000); }));
+  await Promise.allSettled(tasks);
+  if (added) toast(added === 1 ? "Готово: ссылка добавлена — не забудьте сохранить" : `Готово: добавлено ссылок — ${added}. Не забудьте сохранить`, "ok", 6000);
+  uploading = false;
+  $("upBtn").disabled = false;
+});
+
+// —— Окно «Подключить диски» ——
+function openDrives() {
+  $("yaTokenInput").value = yaToken();
+  updateDriveStates();
+  $("drivesModal").classList.remove("hidden");
+  yaCheck();
+}
+async function yaCheck() {
+  const el = $("yaStatus");
+  if (!yaToken()) { el.textContent = "Токен не задан."; return; }
+  el.textContent = "Проверяем токен…";
+  try {
+    const r = await yaApi("/v1/disk/");
+    el.textContent = r.ok ? "Токен работает, Диск доступен." : "Токен не принят (HTTP " + r.status + ") — выпустите новый.";
+  } catch (e) { el.textContent = "Не удалось связаться с Яндексом: " + e.message; }
+}
+$("drivesSetup").addEventListener("click", openDrives);
+$("yaTokenSave").addEventListener("click", () => {
+  const v = $("yaTokenInput").value.trim();
+  if (v) localStorage.setItem(LS_YA_TOKEN, v); else localStorage.removeItem(LS_YA_TOKEN);
+  updateDriveStates();
+  yaCheck();
+  toast(v ? "Токен Яндекс.Диска сохранён" : "Токен Яндекс.Диска удалён", "ok", 4000);
+});
+$("gdConnect").addEventListener("click", async () => {
+  const el = $("gdStatus");
+  el.textContent = "Открываем окно Google…";
+  try {
+    await gdEnsureToken();
+    el.textContent = "Google Drive подключён. Токен действует ~1 час — после перерыва нажмите кнопку ещё раз.";
+    upState("gdState", "подключён", "ok");
+  } catch (e) {
+    el.textContent = e.message;
+  }
+});
+$("drivesClose").addEventListener("click", () => $("drivesModal").classList.add("hidden"));
 
 // ---------- Сохранение ----------
  $("fSave").addEventListener("click", async () => {
