@@ -854,6 +854,11 @@
           "type": "pda4",
           "url": "https://4pda.to/forum/index.php?showtopic=1073175&view=findpost&p=124022739",
           "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1ZPTKfY8a1x5OhWJBRKHoT8ZP12efUX5h?usp=sharing",
+          "dl": 0
         }
       ],
       "created": 1792799839014
