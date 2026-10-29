@@ -548,6 +548,11 @@
           "dl": 0
         },
         {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/15LAmXftEh-pSE_E56Ka78kk7BdGlJ3PX?usp=sharing",
+          "dl": 0
+        },
+        {
           "type": "pda4",
           "url": "https://4pda.to/forum/index.php?showtopic=952832&view=findpost&p=85394470",
           "dl": 0
