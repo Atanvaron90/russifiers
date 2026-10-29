@@ -621,6 +621,11 @@
           "dl": 0
         },
         {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/118Xz_pXUn2bn9hGaFSFMC2Jtgs9Cmy6r?usp=sharing",
+          "dl": 0
+        },
+        {
           "type": "pda4",
           "url": "https://4pda.to/forum/index.php?showtopic=1088317",
           "dl": 0
