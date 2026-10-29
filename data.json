@@ -454,6 +454,11 @@
           "type": "boosty",
           "url": "https://boosty.to/atanvaron_/bundle/de0fd8d7-dac9-47f5-94e2-d1c1ce16fda1?isFromShowcase=true",
           "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1eToMv0etkRK2CYBe1IiC9pTEHLMB2dPB?usp=sharing",
+          "dl": 0
         }
       ],
       "created": 1792801548178
