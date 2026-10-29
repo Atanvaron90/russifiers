@@ -752,6 +752,11 @@
           "type": "yadisk",
           "url": "https://disk.yandex.ru/d/BqihYiXB3sLGjg",
           "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1ghgdDvFMc7LtZ4UgwFiEJ-DNTnoPrz2j?usp=sharing",
+          "dl": 0
         }
       ],
       "created": 1792800156259
