@@ -119,6 +119,7 @@
     color:var(--text); font-size:.95rem; white-space:nowrap;
     margin-left:auto;
   }
+  #statVisitors { margin-left:8px; }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
@@ -480,6 +481,7 @@
       <option value="compact">Список</option>
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
+    <span id="statVisitors" class="stat-chip admin-only" title="Уникальные посетители: всего и за сегодня (каждый браузер считается один раз)"></span>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <button id="btnAdd" class="tool-btn primary admin-only">
       <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
@@ -1566,6 +1568,34 @@ async function syncCounters() {
   render();
 }
 
+// ---------- Уникальные посещения (плашка видна только админу) ----------
+const LS_UV_EVER = "russifiers_uv_ever";
+const LS_UV_DAY = "russifiers_uv_day";
+const uvDayKey = () => {
+  const d = new Date();
+  return "uvDay_" + d.getFullYear() + "_" + String(d.getMonth() + 1).padStart(2, "0") + "_" + String(d.getDate()).padStart(2, "0");
+};
+function countVisit() {
+  try {
+    if (state.token) return; // собственные визиты администратора не считаем
+    if (!localStorage.getItem(LS_UV_EVER)) {
+      remoteHit("uvTotal");
+      localStorage.setItem(LS_UV_EVER, "1");
+    }
+    if (localStorage.getItem(LS_UV_DAY) !== uvDayKey()) {
+      remoteHit(uvDayKey());
+      localStorage.setItem(LS_UV_DAY, uvDayKey());
+    }
+  } catch (e) {}
+}
+async function showVisitors() {
+  const el = $("statVisitors");
+  if (!el) return;
+  const [total, today] = await Promise.all([remoteGet("uvTotal"), remoteGet(uvDayKey())]);
+  const fmt = v => (v == null ? "—" : v);
+  el.textContent = "Посетителей: " + fmt(total) + " · сегодня " + fmt(today);
+}
+
 // ---------- Сортировка ----------
 const SORTS = {
   az:  { fn: (a, b) => a.title.localeCompare(b.title, "ru", { sensitivity: "base" }) },
@@ -1924,6 +1954,7 @@ function setAdmin(on) {
     $("loginModal").classList.add("hidden");
     $("tokenInput").value = "";
     autoHealCovers();
+    showVisitors();
   } catch (e) {
     state.token = old;
     alert("GitHub не принял токен: " + e.message);
@@ -2555,12 +2586,13 @@ function banner(text) {
   }
   try { await loadData(); }
   catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
+  countVisit();
   renderSite();
   renderDonate();
   renderContacts();
   applyView();
   if (state.token) {
-    gh("/user").then(u => { state.user = u.login; setAdmin(true); })
+    gh("/user").then(u => { state.user = u.login; setAdmin(true); showVisitors(); })
       .then(() => autoHealCovers())
       .catch(e => {
         if (/401/.test(e.message)) {
