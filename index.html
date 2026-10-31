@@ -120,7 +120,7 @@
     color:var(--text); font-size:.95rem; white-space:nowrap;
   }
   .uv-wrap { position:relative; align-self:center; display:inline-flex; }
-  #statVisitors { cursor:pointer; font-family:inherit; }
+  #statVisitors { cursor:default; font-family:inherit; }
   #statVisitors:hover { border-color:var(--accent); }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
@@ -222,7 +222,7 @@
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
     .uv-wrap { order:3; position:static; }
-    .v-panel { left:12px; right:12px; min-width:0; }
+    .v-panel { left:50%; right:auto; transform:translateX(-50%); width:max-content; max-width:calc(100vw - 24px); min-width:0; }
     #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
     #btnAdd .m-full { display:none; }
     #btnAdd .m-short { display:inline; }
@@ -485,7 +485,7 @@
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <div class="uv-wrap admin-only">
-      <button id="statVisitors" class="stat-chip" type="button" title="Уникальные посетители: всего / за сегодня">
+      <button id="statVisitors" class="stat-chip" type="button">
         <span id="uvShort">—</span>
       </button>
       <div id="visitorsPanel" class="v-panel hidden" role="status">
@@ -1643,15 +1643,28 @@ async function showVisitors() {
   if (tEl) tEl.textContent = fmt(total);
   if (dEl) dEl.textContent = fmt(today);
 }
-$("statVisitors").addEventListener("click", () => {
-  const p = $("visitorsPanel");
-  p.classList.toggle("hidden");
-  if (!p.classList.contains("hidden")) showVisitors();
-});
+// Панель открывается при наведении на плашку (на телефонах — по касанию, там наведения нет)
+const uvWrap = document.querySelector(".uv-wrap");
+const uvPanel = $("visitorsPanel");
+let uvHideTimer = null;
+const uvCanHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+const uvOpen = () => { clearTimeout(uvHideTimer); uvPanel.classList.remove("hidden"); showVisitors(); };
+const uvClose = () => { clearTimeout(uvHideTimer); uvHideTimer = setTimeout(() => uvPanel.classList.add("hidden"), 250); };
+if (uvCanHover) {
+  uvWrap.addEventListener("mouseenter", uvOpen);
+  uvWrap.addEventListener("mouseleave", uvClose);
+  $("statVisitors").addEventListener("focus", uvOpen);
+  $("statVisitors").addEventListener("blur", uvClose);
+} else {
+  $("statVisitors").addEventListener("click", () => {
+    if (uvPanel.classList.toggle("hidden")) clearTimeout(uvHideTimer);
+    else showVisitors();
+  });
+}
 document.addEventListener("click", e => {
-  if (!e.target.closest(".uv-wrap")) $("visitorsPanel").classList.add("hidden");
+  if (!e.target.closest(".uv-wrap")) { clearTimeout(uvHideTimer); uvPanel.classList.add("hidden"); }
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") $("visitorsPanel").classList.add("hidden"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { clearTimeout(uvHideTimer); uvPanel.classList.add("hidden"); } });
 
 // ---------- Сортировка ----------
 const SORTS = {
