@@ -53,6 +53,9 @@
   /* Вход/выход администратора — клик по аватару сайта */
   .site-logo, .logo-fallback { cursor:pointer; }
   .site-logo:hover, .logo-fallback:hover { filter:brightness(1.25); }
+  /* Аватар вошедшего администратора — золотая подсветка (у посетителей — фиолетовая) */
+  body.admin .site-logo { border-color:#f5c542; box-shadow:0 3px 18px rgba(245,197,66,.55); }
+  body.admin .logo-fallback { text-shadow:0 0 12px rgba(245,197,66,.9), 0 0 22px rgba(245,197,66,.5); }
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
 
@@ -122,6 +125,18 @@
   .uv-wrap { position:relative; align-self:center; display:inline-flex; }
   #statVisitors { cursor:default; font-family:inherit; }
   #statVisitors:hover { border-color:var(--accent); }
+  /* Полный текст счётчика — на десктопе, краткий (N/M) — на мобильных */
+  #uvShort { display:none; }
+  #uvFull { display:inline; }
+  @media (max-width:640px) {
+    #uvShort { display:inline; }
+    #uvFull { display:none; }
+  }
+  /* Широкий десктоп: счётчик — в правый верхний угол сайта (прилипает к шапке);
+     порог 1140px — ниже него плашка задевала бы заголовок и карандаш редактирования */
+  @media (min-width:1140px) {
+    .uv-wrap { position:absolute; top:20px; right:20px; }
+  }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
@@ -487,6 +502,7 @@
     <div class="uv-wrap admin-only">
       <button id="statVisitors" class="stat-chip" type="button">
         <span id="uvShort">—</span>
+        <span id="uvFull">—</span>
       </button>
       <div id="visitorsPanel" class="v-panel hidden" role="status">
         <div class="f-title">Уникальные посетители:</div>
@@ -1638,6 +1654,8 @@ async function showVisitors() {
   const fmt = v => (v == null ? "—" : v);
   const short = $("uvShort");
   if (short) short.textContent = fmt(total) + "/" + fmt(today);
+  const full = $("uvFull");
+  if (full) full.textContent = "Посетители: " + fmt(total) + " · сегодня: " + fmt(today);
   const tEl = $("uvTotal");
   const dEl = $("uvToday");
   if (tEl) tEl.textContent = fmt(total);
