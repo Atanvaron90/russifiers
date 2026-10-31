@@ -722,11 +722,29 @@ const CONFIG = {
   contactsFile: "contacts.json",
   siteFile: "site.json",
   counterNS: "my-russifiers-site", // УНИКАЛЬНОЕ имя для счётчиков!
+  metricaId: "113956215",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
   // —— Загрузка файлов на диски через форму (необязательно) ——
   gdriveClientId: "",            // OAuth Client ID из Google Cloud Console (...apps.googleusercontent.com)
   yandexFolder: "Русификаторы"   // имя папки на обоих дисках — создаётся автоматически
 };
 const COUNTER_API = "https://abacus.jasoncameron.dev";
+
+// ==== СЧЁТЧИК ПОСЕЩЕНИЙ (Яндекс.Метрика) ====
+// Впишите в CONFIG.metricaId номер счётчика из https://metrica.yandex.ru — и статистика
+// начнёт собираться автоматически: уникальные посетители (новые/вернувшиеся), визиты,
+// переходы по внешним ссылкам (все ссылки на диски считаются сами), источники, карта кликов.
+// Счётчик невидим для посетителей, панель статистики — только у вас (вход по Яндекс-аккаунту).
+(function () {
+  const id = parseInt(String(CONFIG.metricaId || "").trim(), 10);
+  if (!id) return;
+  window.ym = window.ym || function () { (window.ym.a = window.ym.a || []).push(arguments); };
+  window.ym.l = 1 * new Date();
+  window.ym(id, "init", { clickmap: true, linktrack: true, accurateTrackBounce: true, webvisor: false });
+  const m = document.createElement("script");
+  m.async = true;
+  m.src = "https://mc.yandex.ru/metrika/tag.js";
+  document.head.appendChild(m);
+})();
 
 // ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
 const DONATE_DEFAULT = {
