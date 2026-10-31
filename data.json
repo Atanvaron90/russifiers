@@ -1,2637 +1,1989 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Русификаторы от Atanvaron</title>
-<meta name="description" content="Бесплатные русификаторы для игр от Atanvaron">
-<style>
-  :root {
-    --bg:#0f1117; --card:#1a1d27; --accent:#6c5ce7;
-    --text:#e4e6eb; --muted:#9aa0ab; --border:#2a2e3d; --field:#232735;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { overflow-x: clip; }
-  body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); padding-bottom:56px; }
-
-  .sticky-top {
-    position: sticky; top: 0; z-index: 20;
-    background: rgba(15,17,23,.88);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 0;
-  }
-  header { position:relative; text-align:center; padding:0 20px 8px; }
-  .title-row { display:flex; align-items:stretch; justify-content:center; gap:16px; }
-  .title-text { display:flex; flex-direction:column; justify-content:space-between; text-align:left; position:relative; }
-  .title-text h1 { font-size:2rem; margin-bottom:4px; }
-  .title-text p { color:var(--muted); font-size:.92rem; }
-  /* Редактор названия: незаметная иконка рядом с текстом (только админ) */
-  .title-edit {
-    position:absolute; top:-2px; right:-30px;
-    background:none; border:none; cursor:pointer;
-    font-size:.95rem; opacity:.25; padding:4px; line-height:1;
-  }
-  .title-edit:hover { opacity:.9; }
-  .site-logo {
-    display:none;
-    align-self:stretch;
-    max-height:64px;
-    width:auto;
-    aspect-ratio:1/1;
-    object-fit:cover;
-    border:2px solid var(--accent);
-    border-radius:50%;
-    box-shadow:0 3px 16px rgba(108,92,231,.45);
-  }
-  .logo-fallback { display:none; align-self:center; font-size:2.4rem; }
-  @media (max-width:640px) {
-    .title-text h1 { font-size:1.45rem; }
-    .site-logo { max-height:48px; }
-    .title-edit { top:-4px; right:-28px; font-size:.85rem; }
-  }
-
-  .auth-btn {
-    position:absolute; top:8px; right:22px;
-    background:none; border:none; cursor:pointer;
-    font-size:1.1rem; opacity:.4; padding:6px; line-height:1;
-  }
-  .auth-btn:hover { opacity:.9; }
-
-  .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
-
-  .search-wrap { position:relative; flex:1; min-width:180px; align-self:flex-start; }
-  #search { display:block; width:100%; padding:12px 52px 12px 16px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; }
-  #search:focus { outline:none; border-color:var(--accent); }
-  #search:focus ~ .filter-btn { border-color:var(--accent); }
-  .filter-btn {
-    position:absolute; right:0; top:0; height:100%; width:40px;
-    display:inline-flex; align-items:center; justify-content:center;
-    background:var(--field); border:1px solid var(--border); border-radius:0 10px 10px 0;
-    color:var(--muted); cursor:pointer;
-    transition: color .15s, border-color .15s, background .15s;
-  }
-  .filter-btn:hover { border-color:var(--accent); color:var(--text); }
-  .filter-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .search-toggle {
-    display:none; align-items:center; justify-content:center;
-    width:46px; padding:12px 0;
-    background:var(--card); border:1px solid var(--border); border-radius:10px;
-    color:var(--muted); cursor:pointer;
-    transition: color .15s, border-color .15s;
-  }
-  .search-toggle:hover { border-color:var(--accent); color:var(--text); }
-  .search-toggle.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-  @keyframes searchSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
-  .filter-panel, .settings-panel, .v-panel {
-    position:absolute; top:calc(100% + 8px); z-index:30;
-    background:var(--card); border:1px solid var(--border); border-radius:12px;
-    padding:12px; box-shadow:0 12px 30px rgba(0,0,0,.5);
-    display:flex; flex-direction:column; gap:8px; align-items:stretch;
-  }
-  .filter-panel { left:0; right:0; }
-  .settings-panel, .v-panel { right:0; }
-  .settings-panel { width:200px; }
-  .v-panel { min-width:190px; }
-  .filter-panel.hidden, .settings-panel.hidden, .v-panel.hidden { display:none; }
-  .v-row { display:flex; justify-content:space-between; align-items:baseline; gap:16px; font-size:.9rem; }
-  .v-row span { color:var(--muted); }
-  .v-row b { color:var(--text); font-size:1rem; }
-  .filter-panel .f-title, .settings-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
-  .f-chip {
-    display:inline-flex; align-items:center; gap:6px;
-    border:1px solid var(--border); border-radius:10px;
-    padding:6px 12px; font-size:.82rem; font-weight:600;
-    cursor:pointer; font-family:inherit; background:var(--field); color:var(--text);
-  }
-  .f-chip:hover { border-color:var(--accent); }
-  .f-chip.sel { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
-  .f-chip .n { opacity:.65; font-weight:400; }
-  .s-row label { display:block; font-size:.72rem; color:var(--muted); }
-  .s-row select { margin-top:4px; padding:8px 10px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; cursor:pointer; width:100%; }
-  .gear-btn {
-    padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px;
-    color:var(--muted); cursor:pointer; font-size:1rem;
-    display:none; align-items:center; justify-content:center;
-    transition: color .15s, border-color .15s;
-  }
-  .gear-btn:hover { border-color:var(--accent); color:var(--text); }
-  .gear-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-
-  #sortBy, #viewBy { padding:12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; cursor:pointer; }
-  .stat-chip {
-    align-self:center; padding:12px 14px; background:var(--card);
-    border:1px solid var(--border); border-radius:10px;
-    color:var(--text); font-size:.95rem; white-space:nowrap;
-    margin-left:auto;
-  }
-  .uv-wrap { position:relative; align-self:center; display:inline-flex; margin-left:8px; }
-  #statVisitors { cursor:pointer; font-family:inherit; }
-  #statVisitors:hover { border-color:var(--accent); }
-  .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
-  .tool-btn:hover { border-color:var(--accent); }
-  .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
-  .tool-btn:disabled { opacity:.5; cursor:default; }
-  #btnAdd { margin-left:auto; }
-  #btnAdd .m-short { display:none; }
-  body:not(.admin) .admin-only { display:none !important; }
-
-  .banner { max-width:1000px; margin:14px auto 0; padding:14px 18px; background:#241f33; border:1px solid var(--accent); border-radius:12px; color:#d9d3f5; font-size:.92rem; line-height:1.5; }
-
-  .grid { max-width:1000px; margin:20px auto 30px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; }
-  .card { position:relative; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:transform .15s,border-color .15s; }
-  .card:hover { transform:translateY(-4px); border-color:var(--accent); }
-  .card h2 { font-size:1.15rem; padding-right:56px; }
-  .card:hover h2 { color:#a99cf5; }
-  .cover { width:100%; aspect-ratio:460/215; object-fit:cover; border-radius:10px; background:var(--field); }
-  .meta { font-size:.85rem; color:var(--muted); }
-  .desc { font-size:.92rem; color:#c5c9d3; flex-grow:1; }
-  .empty { grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; }
-
-  .card-actions { position:absolute; top:16px; right:16px; display:flex; gap:6px; z-index:2; }
-  .icon-btn {
-    background: rgba(31,35,48,.92); border: 1px solid var(--border);
-    cursor: pointer; font-size: 1.05rem; opacity: .85;
-    width: 38px; height: 38px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.35);
-    transition: opacity .15s, border-color .15s, color .15s;
-  }
-  .icon-btn:hover { opacity: 1; border-color: var(--accent); color: #a99cf5; }
-
-  .stale-badge {
-    position:absolute; top:16px; left:16px; z-index:2;
-    display:inline-flex; align-items:center; gap:5px;
-    border:1px solid rgba(0,0,0,.2);
-    font-size:.72rem; font-weight:700;
-    padding:4px 9px; border-radius:10px;
-    white-space:nowrap;
-  }
-
-  .grid.view-compact { grid-template-columns:1fr; gap:0; max-width:640px; margin-bottom:30px; }
-  .grid.view-compact .card {
-    background:none; border:none; border-radius:0;
-    padding:7px 14px; gap:0; transform:none;
-  }
-  .grid.view-compact .card:hover { transform:none; border-color:transparent; background:rgba(108,92,231,.09); }
-  .grid.view-compact .card h2 {
-    font-size:1rem; font-weight:500; padding-right:40px;
-    white-space:nowrap; overflow:hidden;
-  }
-  .grid.view-compact .card h2 > span { display:inline-block; will-change:transform; }
-  .grid.view-compact .card:hover h2 { color:#a99cf5; }
-  .grid.view-compact .card .cover,
-  .grid.view-compact .card .desc,
-  .grid.view-compact .card .meta,
-  .grid.view-compact .card .stale-badge { display:none; }
-  .grid.view-compact .card-actions { top:50%; right:8px; transform:translateY(-50%); }
-  .grid.view-compact .icon-btn { width:34px; height:34px; font-size:.95rem; }
-
-  @media (max-width:640px) {
-    .grid:not(.view-compact) { grid-template-columns:1fr; gap:12px; padding:0 12px; margin:16px auto 24px; }
-    .grid:not(.view-compact) .card {
-      display:grid; grid-template-columns:minmax(96px, 36%) 1fr; gap:4px 12px;
-      align-items:start; padding:10px;
-    }
-    .grid:not(.view-compact) .card .cover {
-      grid-column:1; grid-row:1 / span 3;
-      width:100%; height:auto;
-      aspect-ratio:460/215;
-      border-radius:8px;
-      align-self:start;
-    }
-    .grid:not(.view-compact) .card h2,
-    .grid:not(.view-compact) .card .desc,
-    .grid:not(.view-compact) .card .meta { grid-column:2; }
-    .grid:not(.view-compact) .card h2 { font-size:1rem; padding-right:8px; margin-top:0; }
-    body.admin .grid:not(.view-compact) .card h2 { padding-right:84px; }
-    .grid:not(.view-compact) .card .desc { font-size:.84rem; flex-grow:0; }
-    .grid:not(.view-compact) .card .meta { font-size:.74rem; }
-    .grid:not(.view-compact) .card-actions { top:6px; right:6px; gap:4px; }
-    .grid:not(.view-compact) .card .icon-btn { width:32px; height:32px; font-size:.9rem; }
-    .grid:not(.view-compact) .card .stale-badge {
-      top:10px; left:10px;
-      font-size:.68rem; font-weight:700;
-      padding:3px 8px; border-radius:8px;
-    }
-    .toolbar { position:relative; padding:0 12px; row-gap:10px; }
-    .toolbar .m-hide { display:none !important; }
-    .search-toggle { display:inline-flex; }
-    .toolbar.search-open .search-toggle { display:none; }
-    .search-wrap { display:none; order:1; flex:1 1 0; min-width:0; }
-    .toolbar.search-open .search-wrap {
-      display:block;
-      position:absolute; left:12px; right:12px; top:0; z-index:35;
-      background:var(--bg);
-      animation:searchSlide .18s ease;
-    }
-    .gear-btn { display:inline-flex; order:2; }
-    .stat-chip { order:3; margin-left:0; }
-    .uv-wrap { order:3; }
-    #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
-    #btnAdd .m-full { display:none; }
-    #btnAdd .m-short { display:inline; }
-    .grid.view-compact { max-width:none; padding:0 8px; }
-    body.admin .grid.view-compact .card h2 { padding-right:84px; }
-  }
-
-  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
-  .overlay.hidden { display:none; }
-  .modal { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; width:100%; max-width:560px; max-height:92vh; overflow:auto; }
-  .modal h2 { font-size:1.2rem; margin-bottom:12px; }
-  .modal label { display:block; font-size:.82rem; color:var(--muted); margin:12px 0 4px; }
-  .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:var(--field); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; }
-  .modal input:focus, .modal textarea:focus { outline:none; border-color:var(--accent); }
-  .hint { font-size:.8rem; color:var(--muted); margin-top:10px; line-height:1.5; }
-  .f-note { font-size:.8rem; color:#a99cf5; margin-top:4px; line-height:1.5; }
-  .f-note a { color:#a99cf5; text-decoration:underline; }
-  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
-
-  .modal .flag-row { display:flex; align-items:center; gap:10px; margin-top:12px; cursor:pointer; }
-  .flag-row input[type="checkbox"] { width:18px; height:18px; flex:none; cursor:pointer; accent-color:var(--accent); }
-  .flag-row .flag-text { font-size:.9rem; color:var(--text); }
-
-  .badge-edit { display:grid; grid-template-columns:1fr 48px; gap:8px; margin-top:8px; align-items:center; }
-  .badge-edit input[type="color"] { padding:2px; height:42px; cursor:pointer; }
-  .badge-presets { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center; }
-  .badge-chip {
-    display:inline-flex; align-items:center;
-    border:1px solid rgba(0,0,0,.2); border-radius:10px;
-    font-size:.75rem; font-weight:700; padding:4px 10px;
-    cursor:pointer; font-family:inherit;
-  }
-  .badge-chip:hover { filter:brightness(1.08); }
-
-  .cover-preview { display:flex; gap:12px; margin-top:10px; align-items:flex-start; }
-  .cover-preview.hidden { display:none; }
-  .cover-preview img { width:180px; aspect-ratio:460/215; object-fit:cover; border-radius:8px; background:var(--field); flex:none; }
-  .cov-right { flex:1; min-width:0; }
-  .retry-search { background:none; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:2px 10px; cursor:pointer; font-size:.8rem; margin-left:6px; }
-  .retry-search:hover { border-color:var(--accent); color:#a99cf5; }
-
-  /* Загрузка файлов на диски (в форме добавления) */
-  .up-block { border:1px dashed var(--border); border-radius:10px; padding:12px; margin-top:12px; }
-  .up-block > summary { cursor:pointer; user-select:none; }
-  .up-head { display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--muted); list-style:none; }
-  .up-head::-webkit-details-marker { display:none; }
-  .up-head::after { content:"▸"; transition:transform .2s; }
-  .up-block[open] .up-head::after { transform:rotate(90deg); }
-  .up-inner { margin-top:10px; }
-  .up-row { display:flex; align-items:center; gap:10px; margin-top:8px; }
-  .up-name { width:60px; flex:none; font-size:.85rem; }
-  .up-bar { flex:1; height:8px; background:var(--field); border-radius:4px; overflow:hidden; }
-  .up-bar > div { height:100%; width:0%; background:var(--accent); border-radius:4px; transition:width .25s; }
-  .up-row.y .up-bar > div { background:#FC3F1D; }
-  .up-row.g .up-bar > div { background:#34A853; }
-  .up-state { width:150px; flex:none; font-size:.75rem; color:var(--muted); text-align:right; overflow-wrap:anywhere; }
-  .up-state.err { color:#ff6b6b; }
-  .up-state.ok  { color:#3ecf8e; }
-  @media (max-width:600px) {
-    .up-name { width:50px; font-size:.78rem; }
-    .up-state { width:110px; font-size:.7rem; }
-  }
-
-  .steam-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--field); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px; margin-top:6px; cursor:pointer; font-size:.9rem; }
-  .steam-item:hover { border-color:var(--accent); }
-  .steam-item img { width:58px; height:27px; object-fit:cover; border-radius:4px; flex:none; }
-
-  .lk-row { display:grid; grid-template-columns:auto 150px 1fr auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
-  .lk-row input, .lk-row select { padding:8px 10px; font-size:.9rem; }
-  .lk-order { display:flex; flex-direction:column; gap:2px; }
-  .ord { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.85rem; line-height:1; padding:2px 5px; }
-  .ord:hover:not(:disabled) { color:var(--accent); }
-  .ord:disabled { opacity:.25; cursor:default; }
-  .ver-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:4px; }
-  .ver-del:hover { color:#ff6b6b; }
-  @media (max-width:600px) {
-    .lk-row { grid-template-columns:auto 1fr auto; }
-    .l-type { grid-column:2; }
-    .l-url  { grid-column:2; grid-row:2; }
-  }
-
-  .dn-row, .ct-row { display:grid; grid-template-columns:1fr 56px 130px auto; gap:8px; align-items:center; border:1px dashed var(--border); border-radius:10px; padding:10px; margin-top:10px; }
-  .dn-row input, .ct-row input { padding:8px 10px; font-size:.9rem; }
-  .dn-row .dn-color, .ct-row .ct-color { padding:2px; height:38px; cursor:pointer; }
-  .dn-row .full, .ct-row .full { grid-column:1 / -1; }
-  .dn-row .ver-del, .ct-row .ver-del { grid-column:4; grid-row:1; justify-self:center; padding:8px; }
-  .dn-row .ver-del:hover, .ct-row .ver-del:hover { color:#ff6b6b; }
-
-  /* Плашки донатов и контактов: донаты слева, контакты справа (десктоп);
-     обе в потоке под сеткой на мобильных */
-  .donate, .contacts { max-width:1000px; margin:0 auto 34px; padding:0 20px; }
-  .donate-box, .contacts-box {
-    position:relative;
-    background:linear-gradient(135deg, rgba(108,92,231,.14), rgba(108,92,231,.04));
-    border:1px solid rgba(108,92,231,.45); border-radius:14px; padding:18px 20px;
-  }
-  .contacts-box { background:linear-gradient(225deg, rgba(62,207,142,.12), rgba(62,207,142,.03)); border-color:rgba(62,207,142,.45); }
-  .don-edit, .ct-edit { position:absolute; top:10px; right:10px; }
-  .donate-box h3, .contacts-box h3 { font-size:1.05rem; margin-bottom:6px; }
-  .donate-box p, .contacts-box p { font-size:.88rem; color:var(--muted); margin-bottom:12px; }
-  .donate-list, .contacts-list { display:flex; flex-wrap:wrap; gap:10px; }
-  .don-btn, .ct-btn {
-    display:inline-flex; align-items:center; gap:8px; padding:9px 14px;
-    background:var(--card); border:1px solid var(--border); border-radius:10px;
-    color:var(--text); text-decoration:none; font-size:.9rem; cursor:pointer; font-family:inherit;
-  }
-  .don-btn:hover, .ct-btn:hover { border-color:var(--accent); }
-  .ct-btn:hover { border-color:#3ecf8e; }
-  .ct-item { display:flex; flex-direction:column; align-items:flex-start; gap:4px; max-width:100%; }
-  .ct-item.has-note { width:100%; }
-  .ct-note { font-size:.78rem; color:var(--muted); line-height:1.35; }
-  .don-ico, .ct-ico {
-    width:20px; height:20px; border-radius:5px;
-    display:inline-flex; align-items:center; justify-content:center;
-    font-size:.72rem; font-weight:700; color:#fff; flex:none;
-  }
-  .don-ico img, .ct-ico img { width:13px; height:13px; }
-  body:not(.admin) #donate.no-methods,
-  body:not(.admin) #contacts.no-methods { display:none; }
-
-  @media (min-width: 1650px) {
-    .donate {
-      position: fixed;
-      top: 152px;
-      left: calc(50vw - 824px);
-      width: 300px;
-      max-width: none;
-      margin: 0;
-      padding: 0;
-      z-index: 5;
-    }
-    .contacts {
-      position: fixed;
-      top: 152px;
-      right: calc(50vw - 824px);   /* зеркально донатам — правый край */
-      left: auto;
-      width: 300px;
-      max-width: none;
-      margin: 0;
-      padding: 0;
-      z-index: 5;
-    }
-    .donate-box, .contacts-box { padding: 14px 16px; }
-    .donate-box h3, .contacts-box h3 { font-size: 1rem; }
-    .donate-box p, .contacts-box p { font-size: .82rem; margin-bottom: 10px; }
-  }
-
-  .modal.game { max-width:800px; padding:0; overflow:hidden; position:relative; }
-  .g-top { position:absolute; top:10px; right:14px; z-index:2; display:flex; gap:8px; align-items:center; }
-  .g-top .icon-btn {
-    background: none; border-color: transparent; box-shadow: none;
-    color: #9aa0ab;
-  }
-  .g-top .icon-btn:hover {
-    background: none; border-color: transparent;
-    color: #e4e6eb; transform: scale(1.15);
-  }
-  .g-grid { display:grid; grid-template-columns:250px 1fr; }
-  .g-cover-link { display:flex; align-items:center; justify-content:center; background:var(--field); overflow:hidden; }
-  .g-cover-link img { transition:filter .15s; }
-  .g-cover-link.no-link { pointer-events:none; }
-  .g-cover { width:100%; height:auto; max-height:82vh; object-fit:contain; background:var(--field); }
-  .g-body { padding:20px 24px; min-height:340px; max-height:82vh; overflow:auto; }
-  .g-body h2 { margin-bottom:6px; }
-  .g-title-link { color:inherit; text-decoration:none; }
-  .g-title-link:hover { color:#a99cf5; text-decoration:underline; }
-  #gStale {
-    margin-top:8px; display:none;
-    align-self:flex-start;
-    border:1px solid rgba(0,0,0,.2);
-    font-size:.72rem; font-weight:700;
-    padding:4px 9px; border-radius:10px; white-space:nowrap;
-  }
-  .g-body h3 { font-size:.92rem; margin:13px 0 2px; color:var(--muted); }
-  .lk { display:flex; align-items:center; gap:10px; padding:7px 10px; border:1px solid var(--border); border-radius:10px; margin-top:8px; background:var(--field); }
-  .lk-ico { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex:none; font-size:.88rem; }
-  .lk-ico img { width:16px; height:16px; }
-  .lk-info { flex:1; font-size:.88rem; line-height:1.25; }
-  .lk-info .cnt { display:block; font-size:.74rem; color:var(--muted); }
-  .lk-btn { padding:6px 14px; background:var(--accent); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:600; white-space:nowrap; }
-  .lk-btn:hover { filter:brightness(1.15); }
-  @media (max-width:640px) {
-    .g-grid { grid-template-columns:1fr; }
-    .g-cover-link { order:-1; }
-    .g-cover { height:auto; min-height:0; max-height:none; aspect-ratio:460/215; object-fit:contain; }
-    .g-body { padding:18px; }
-  }
-
-  .scroll-btn {
-    position: fixed; right: 16px; bottom: 56px; z-index: 90;
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px;
-    border: 1px solid var(--border); border-radius: 10px;
-    background: rgba(31,35,48,.92); color: var(--text);
-    font-size: 1.15rem; cursor: pointer;
-    font-family: inherit; box-shadow: 0 6px 20px rgba(0,0,0,.45);
-    opacity: 0; pointer-events: none; transform: translateY(8px);
-    transition: opacity .25s, transform .25s;
-  }
-  .scroll-btn.show { opacity: 1; pointer-events: auto; transform: none; }
-  .scroll-btn:hover { border-color: var(--accent); color: #a99cf5; }
-
-  footer {
-    position:fixed; bottom:0; left:0; right:0; z-index:10;
-    text-align:center; color:var(--muted); padding:12px; font-size:.8rem;
-    background:rgba(15,17,23,.88); border-top:1px solid var(--border);
-  }
-
-  .toasts { position:fixed; right:16px; bottom:56px; z-index:100; display:flex; flex-direction:column; gap:8px; max-width:min(340px, calc(100vw - 32px)); }
-  .toast {
-    background:#1f2330; border:1px solid var(--border); border-left:3px solid var(--accent);
-    border-radius:10px; padding:10px 14px; font-size:.87rem; color:var(--text);
-    box-shadow:0 6px 20px rgba(0,0,0,.45); animation:tin .25s ease; overflow-wrap:anywhere;
-  }
-  .toast.ok  { border-left-color:#3ecf8e; }
-  .toast.err { border-left-color:#ff6b6b; }
-  .toast.out { opacity:0; transition:opacity .35s; }
-  @keyframes tin { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-</style>
-</head>
-<body>
-
-<div class="sticky-top">
-  <header>
-    <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
-    <div class="title-row">
-      <img id="siteLogo" class="site-logo" alt="">
-      <span id="logoFallback" class="logo-fallback">🌐</span>
-      <div class="title-text">
-        <h1 id="siteTitle">Русификаторы от Atanvaron</h1>
-        <p id="siteSlogan">Мои переводы и проекты — бесплатно</p>
-        <button id="titleEdit" class="title-edit admin-only" title="Редактировать название и слоган">✏️</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="toolbar">
-    <button id="searchToggle" class="search-toggle" type="button" title="Поиск" aria-label="Поиск">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path>
-      </svg>
-    </button>
-    <div class="search-wrap">
-      <input id="search" type="text" placeholder="Поиск по названию">
-      <button id="filterBtn" class="filter-btn" type="button" title="Фильтр по ярлыкам">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M1.5 2h13l-5.2 6.1v4.4l-2.6 1.4V8.1L1.5 2z" fill="currentColor"/>
-        </svg>
-      </button>
-      <div id="filterPanel" class="filter-panel hidden"></div>
-    </div>
-    <select id="sortBy" class="m-hide" title="Сортировка">
-      <option value="az">А → Я</option>
-      <option value="za">Я → А</option>
-      <option value="dl">Сначала популярные</option>
-      <option value="new">Сначала новые</option>
-    </select>
-    <select id="viewBy" class="m-hide" title="Вид списка">
-      <option value="grid">Сетка</option>
-      <option value="compact">Список</option>
-    </select>
-    <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
-    <div class="uv-wrap admin-only">
-      <button id="statVisitors" class="stat-chip" type="button" title="Уникальные посетители: всего / за сегодня">
-        <span id="uvShort">—</span>
-      </button>
-      <div id="visitorsPanel" class="v-panel hidden" role="status">
-        <div class="v-row"><span>Посетителей:</span><b id="uvTotal">—</b></div>
-        <div class="v-row"><span>Сегодня:</span><b id="uvToday">—</b></div>
-      </div>
-    </div>
-    <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
-    <button id="btnAdd" class="tool-btn primary admin-only">
-      <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
-    </button>
-    <div id="settingsPanel" class="settings-panel hidden">
-      <div class="f-title">Настройки поиска</div>
-      <div class="s-row">
-        <label>Сортировка
-          <select id="sortByM">
-            <option value="az">А → Я</option>
-            <option value="za">Я → А</option>
-            <option value="dl">Сначала популярные</option>
-            <option value="new">Сначала новые</option>
-          </select>
-        </label>
-      </div>
-      <div class="s-row">
-        <label>Вид списка
-          <select id="viewByM">
-            <option value="grid">Сетка</option>
-            <option value="compact">Список</option>
-          </select>
-        </label>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="grid view-grid" id="grid"></div>
-
-<section id="donate" class="donate">
-  <div class="donate-box">
-    <button id="donEdit" class="icon-btn admin-only don-edit" title="Редактировать блок донатов">✏️</button>
-    <h3 id="donTitle"></h3>
-    <p id="donText"></p>
-    <div class="donate-list" id="donateList"></div>
-  </div>
-</section>
-
-<section id="contacts" class="contacts">
-  <div class="contacts-box">
-    <button id="ctEdit" class="icon-btn admin-only ct-edit" title="Редактировать блок контактов">✏️</button>
-    <h3 id="ctTitle"></h3>
-    <p id="ctText"></p>
-    <div class="contacts-list" id="contactsList"></div>
-  </div>
-</section>
-
-<footer>© 2026 Atanvaron</footer>
-
-<div class="toasts" id="toasts"></div>
-<button id="scrollBtn" class="scroll-btn" type="button" title="Наверх">⬆</button>
-
-<!-- Окно игры -->
-<div id="gameModal" class="overlay hidden">
-  <div class="modal game">
-    <div class="g-top">
-      <button id="gEdit" class="icon-btn admin-only" title="Редактировать">✏️</button>
-      <button id="gDel" class="icon-btn admin-only" title="Удалить">🗑️</button>
-      <button id="gClose" class="icon-btn" title="Закрыть">✕</button>
-    </div>
-    <div class="g-grid">
-      <a id="gCoverLink" class="g-cover-link no-link" target="_blank" rel="noopener">
-        <img id="gCover" class="g-cover" alt="Обложка">
-      </a>
-      <div class="g-body" id="gBody">
-        <h2 id="gTitle"></h2>
-        <div id="gStale" style="display:none;"></div>
-        <p id="gDesc" class="desc" style="margin-top:10px;"></p>
-        <h3>Ссылки</h3>
-        <div id="gLinks"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Форма добавления / редактирования.
-     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
-<div id="formModal" class="overlay hidden">
-  <div class="modal">
-    <h2 id="formModalTitle">Добавление русификатора</h2>
-    <label>Ссылка на игру или AppID — по ней подтянутся название и обложка</label>
-    <input id="fAppId" type="text">
-    <div id="fNote" class="f-note"></div>
-    <label>Название игры *</label>
-    <input id="fTitle" type="text" placeholder="Подтянется из Steam автоматически — или введите вручную">
-    <div id="coverPreview" class="cover-preview hidden">
-      <img id="covImg" alt="Обложка">
-      <div class="cov-right">
-        <div id="covLabel" class="meta"></div>
-        <div id="covAlts"></div>
-      </div>
-    </div>
-    <label>Ссылка на картинку</label>
-    <input id="fCoverUrl" type="text" placeholder="https://...jpg/png">
-
-    <label>Ярлыки:</label>
-    <label class="flag-row">
-      <input id="fBadgeOn" type="checkbox">
-      <span class="flag-text">Показывать ярлык</span>
-    </label>
-    <div class="badge-edit">
-      <input id="fBadgeText" type="text" placeholder="Текст ярлыка (напр. Не обновляется)">
-      <input id="fBadgeColor" type="color" value="#F5C518" title="Цвет фона ярлыка">
-    </div>
-    <div id="badgePresets" class="badge-presets"></div>
-
-    <label>Ссылки на скачивание (кнопками ↑ ↓ можно менять порядок):</label>
-    <div id="lkList"></div>
-    <button id="fAddLink" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить ещё ссылку</button>
-
-    <details class="up-block" id="upBlock">
-      <summary class="up-head">
-        <span>Загрузка архива на диски</span>
-      </summary>
-      <div class="up-inner">
-        <button id="drivesSetup" class="retry-search" type="button" style="margin-top:10px;">Подключить диски</button>
-        <div class="up-row y">
-          <span class="up-name">Яндекс</span>
-          <div class="up-bar"><div id="yaBar"></div></div>
-          <span id="yaState" class="up-state">—</span>
-        </div>
-        <div class="up-row g">
-          <span class="up-name">Google</span>
-          <div class="up-bar"><div id="gdBar"></div></div>
-          <span id="gdState" class="up-state">—</span>
-        </div>
-        <input id="upFile" type="file" hidden>
-        <button id="upBtn" class="tool-btn" type="button" style="margin-top:10px;">📁 Загрузить файл на оба диска</button>
-        <p class="hint">Файл уходит из браузера напрямую на диски и не попадает в репозиторий. Не закрывайте страницу до конца загрузки — ссылки добавятся в список выше автоматически.</p>
-      </div>
-    </details>
-    <div class="modal-actions">
-      <button id="fCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="fSave" class="tool-btn primary" type="button">Опубликовать</button>
-    </div>
-  </div>
-</div>
-
-<!-- Подключение дисков для загрузки файлов (только для админа) -->
-<div id="drivesModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Подключение дисков</h2>
-    <label>Яндекс.Диск — OAuth-токен с правом записи на Диск</label>
-    <div style="display:flex; gap:8px;">
-      <input id="yaTokenInput" type="password" placeholder="y0_AgAAAA...">
-      <button id="yaTokenSave" class="tool-btn primary" type="button" style="flex:none;">Сохранить</button>
-    </div>
-    <div id="yaStatus" class="f-note"></div>
-    <label>Google Drive</label>
-    <button id="gdConnect" class="tool-btn" type="button">🔌 Подключить Google Drive</button>
-    <div id="gdStatus" class="f-note"></div>
-    <p class="hint">Яндекс: oauth.yandex.ru → «Создать приложение» → в правах отметьте «Запись в любом месте на Диске» (Яндекс Диск REST API) → кнопка «Выпустить отладочный токен» → вставьте его сюда. Google: в CONFIG в начале скрипта вставьте gdriveClientId (Google Cloud Console → Credentials → OAuth Client ID, тип «Веб-приложение», Authorized JavaScript origin — адрес сайта). Токены хранятся только в вашем браузере и не публикуются в репозитории.</p>
-    <div class="modal-actions">
-      <button id="drivesClose" class="tool-btn" type="button">Закрыть</button>
-    </div>
-  </div>
-</div>
-
-<!-- Редактор названия и слогана (только для админа) -->
-<div id="titleModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Название и слоган сайта</h2>
-    <label>Название</label>
-    <input id="tName" type="text" placeholder="Русификаторы от Atanvaron">
-    <label>Слоган</label>
-    <input id="tSlogan" type="text" placeholder="Мои переводы и проекты — бесплатно">
-    <p class="hint">Сохранение публикует изменения для всех посетителей и записывает их в общий файл data.json (название, слоган, донаты, контакты, каталог).</p>
-    <div class="modal-actions">
-      <button id="tCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="tSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
-    </div>
-  </div>
-</div>
-
-<!-- Редактор блока донатов (только для админа).
-     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
-<div id="donateModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Блок донатов</h2>
-    <label>Заголовок</label>
-    <input id="dTitle" type="text" placeholder="☕ Поддержать автора">
-    <label>Подпись</label>
-    <textarea id="dText" style="min-height:60px; resize:vertical;"></textarea>
-    <label>Способы поддержки — у каждого название и ссылка ИЛИ реквизиты для копирования:</label>
-    <div id="dList"></div>
-    <button id="dAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить способ</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: boostyto, telegram). Чтобы убрать блок донатов с сайта — удали все способы и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
-    <div class="modal-actions">
-      <button id="dCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="dSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
-    </div>
-  </div>
-</div>
-
-<!-- Редактор блока контактов (только для админа).
-     Закрывается ТОЛЬКО кнопкой «Отмена» или после успешного сохранения. -->
-<div id="contactsModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Блок контактов</h2>
-    <label>Заголовок</label>
-    <input id="cTitle" type="text" placeholder="💬 Связь со мной">
-    <label>Подпись</label>
-    <textarea id="cText" style="min-height:60px; resize:vertical;"></textarea>
-    <label>Контакты — у каждого название, надпись и ссылка:</label>
-    <div id="cList"></div>
-    <button id="cAdd" class="tool-btn" type="button" style="margin-top:10px;">+ Добавить контакт</button>
-    <p class="hint">Иконка — необязательный код с simpleicons.org (например: telegram, discord, vk, youtube). Надпись — необязательный текст, который появится рядом с кнопкой контакта. Чтобы убрать блок контактов с сайта — удали все контакты и сохрани. Чтобы вернуть — нажми ✏️ на плашке.</p>
-    <div class="modal-actions">
-      <button id="cCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="cSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
-    </div>
-  </div>
-</div>
-
-<!-- Вход по токену -->
-<div id="loginModal" class="overlay hidden">
-  <div class="modal">
-    <h2>Вход администратора</h2>
-    <p class="hint">Вставьте персональный токен GitHub (fine-grained) с правом <b>Contents: Read and write</b> на репозиторий сайта. Токен хранится только в вашем браузере.</p>
-    <label>Токен</label>
-    <input id="tokenInput" type="password" placeholder="github_pat_... или ghp_...">
-    <div class="modal-actions">
-      <button id="loginCancel" class="tool-btn" type="button">Отмена</button>
-      <button id="loginOk" class="tool-btn primary" type="button">Войти</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ================== НАСТРОЙКИ — ЗАПОЛНИ СВОЁ ==================
-const CONFIG = {
-  owner: "ВАШ_НИК_GITHUB",
-  repo: "russifiers",
-  branch: "main",
-  dataFile: "data.json",        // ЕДИНЫЙ файл данных: каталог + название/слоган + донаты + контакты
-  // Файлы ниже нужны только для чтения старой структуры при переходе;
-  // после первого сохранения через ✏️ всё пишется в data.json, и их можно удалить из репозитория.
-  donateFile: "donate.json",
-  contactsFile: "contacts.json",
-  siteFile: "site.json",
-  counterNS: "my-russifiers-site", // УНИКАЛЬНОЕ имя для счётчиков!
-  metricaId: "",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
-  // —— Загрузка файлов на диски через форму (необязательно) ——
-  gdriveClientId: "",            // OAuth Client ID из Google Cloud Console (...apps.googleusercontent.com)
-  yandexFolder: "Русификаторы"   // имя папки на обоих дисках — создаётся автоматически
-};
-const COUNTER_API = "https://abacus.jasoncameron.dev";
-
-// ==== СЧЁТЧИК ПОСЕЩЕНИЙ (Яндекс.Метрика) ====
-// Впишите в CONFIG.metricaId номер счётчика из https://metrica.yandex.ru — и статистика
-// начнёт собираться автоматически: уникальные посетители (новые/вернувшиеся), визиты,
-// переходы по внешним ссылкам (все ссылки на диски считаются сами), источники, карта кликов.
-// Счётчик невидим для посетителей, панель статистики — только у вас (вход по Яндекс-аккаунту).
-(function () {
-  const id = parseInt(String(CONFIG.metricaId || "").trim(), 10);
-  if (!id) return;
-  window.ym = window.ym || function () { (window.ym.a = window.ym.a || []).push(arguments); };
-  window.ym.l = 1 * new Date();
-  window.ym(id, "init", { clickmap: true, linktrack: true, accurateTrackBounce: true, webvisor: false });
-  const m = document.createElement("script");
-  m.async = true;
-  m.src = "https://mc.yandex.ru/metrika/tag.js";
-  document.head.appendChild(m);
-})();
-
-// ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
-const DONATE_DEFAULT = {
-  title: "☕ Поддержать автора",
-  text: "Все русификаторы бесплатны. Если перевод оказался полезен, можно поблагодарить донатом.",
-  methods: [
-    { name: "Boosty", url: "https://boosty.to/atanvaron/donate", icon: "boostyto", color: "#F15F2C" },
-    { name: "ЮMoney", url: "https://yoomoney.ru/to/4100XXXXXXXXXXXX", color: "#8B3FFE" },
-    { name: "Карта — нажмите, чтобы скопировать", value: "0000 0000 0000 0000", color: "#2E7D32" }
-  ]
-};
-
-// ==== БЛОК КОНТАКТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
-const CONTACTS_DEFAULT = {
-  title: "💬 Связь со мной",
-  text: "Вопросы, предложения и сообщения о багах — в Telegram-канале.",
-  contacts: [
-    { name: "Telegram-канал", url: "https://t.me/atanvaron", icon: "telegram", color: "#26A5E4", note: "Новости и обновления" }
-  ]
-};
-
-// ==== НАЗВАНИЕ И СЛОГАН ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
-const SITE_DEFAULT = {
-  name: "Русификаторы от Atanvaron",
-  slogan: "Мои переводы и проекты — бесплатно"
-};
-// ============================================================
-
-if (location.hostname.endsWith(".github.io")) {
-  CONFIG.owner = location.hostname.split(".")[0];
-  const seg = location.pathname.split("/").filter(Boolean);
-  if (seg.length) CONFIG.repo = seg[0];
-}
-
-const GH_API = "https://api.github.com";
-const LS_TOKEN = "russifiers_gh_token";
-const LS_YA_TOKEN = "russifiers_ya_token";
-const LS_DL = "russifiers_dl_cache_v1";
-const LS_SORT = "russifiers_sort";
-const LS_VIEW = "russifiers_view";
-const LS_FILTER = "russifiers_filter";
-const LS_STEAM_COMBO = "russifiers_steam_combo";
-const LS_APP_ROUTE = "russifiers_app_route";
-const LS_APPNAMES = "russifiers_appnames_v2";
-
-const isNarrowScreen = () => window.matchMedia("(max-width: 640px)").matches;
-
-const $ = id => document.getElementById(id);
-const state = {
-  projects: [], dataSha: null,
-  donateSha: null, donate: null,
-  contactsSha: null, contacts: null,
-  siteSha: null, site: null,
-  token: localStorage.getItem(LS_TOKEN) || "", user: ""
-};
-let dlCache = {}; try { dlCache = JSON.parse(localStorage.getItem(LS_DL)) || {}; } catch (e) {}
-const saveDl = () => localStorage.setItem(LS_DL, JSON.stringify(dlCache));
-
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-const slugify = s => (String(s).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).join("-") || "proj";
-const encPath = p => p.split("/").map(encodeURIComponent).join("/");
-const dedupe = arr => [...new Set(arr.filter(Boolean))];
-const pluralRu = (n, one, few, many) => {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-  return many;
-};
-
-// ---------- Ярлыки на плашках ----------
-const BADGE_DEFAULT = { text: "Не обновляется", color: "#F5C518" };
-const BADGE_ALPHA = 0.88;
-const hexToRgb = h => {
-  const m = String(h || "").replace("#", "").trim();
-  const v = m.length === 3 ? m.split("").map(c => c + c).join("") : m;
-  if (!/^[0-9a-fA-F]{6}$/.test(v)) return null;
-  const n = parseInt(v, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-};
-const badgeTextColor = c => {
-  const rgb = hexToRgb(c);
-  if (!rgb) return "#1c1c1c";
-  const lum = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-  return lum > 140 ? "#1c1c1c" : "#ffffff";
-};
-function badgeStyle(color, alpha = BADGE_ALPHA) {
-  const rgb = hexToRgb(color) || hexToRgb(BADGE_DEFAULT.color);
-  return `background:rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha});color:${badgeTextColor(color)}`;
-}
-const badgeHTML = p => (p?.badge?.text)
-  ? `<div class="stale-badge" style="${badgeStyle(p.badge.color)}">${esc(p.badge.text)}</div>`
-  : "";
-
-// ---------- Тосты ----------
-function toast(msg, type = "info", ms = 4000) {
-  const d = document.createElement("div");
-  d.className = "toast " + type;
-  d.textContent = msg;
-  $("toasts").appendChild(d);
-  setTimeout(() => { d.classList.add("out"); setTimeout(() => d.remove(), 400); }, ms);
-}
-
-// ---------- Логотип сайта ----------
-(function setupLogo() {
-  const img = $("siteLogo");
-  const fav = document.createElement("link");
-  fav.rel = "icon";
-  const candidates = ["logo.png", "logo.jpg", "logo.jpeg", "logo.webp", "logo.gif"];
-  let i = 0;
-  function tryNext() {
-    if (i >= candidates.length) {
-      img.style.display = "none";
-      $("logoFallback").style.display = "inline";
-      return;
-    }
-    const name = candidates[i++];
-    const probe = new Image();
-    probe.onload = () => {
-      img.src = name;
-      img.style.display = "block";
-      $("logoFallback").style.display = "none";
-      fav.type = name.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
-      fav.href = name;
-      document.head.appendChild(fav);
-    };
-    probe.onerror = tryNext;
-    probe.src = name;
-  }
-  tryNext();
-})();
-
-// ---------- Каталог сервисов ----------
-const SERVICES = {
-  yadisk:   { name:"Яндекс.Диск",   slug:"",            color:"#FFFFFF", hosts:["disk.yandex.ru","yadi.sk","360.yandex.ru"],
-              iconUrl:"https://www.google.com/s2/favicons?domain=disk.yandex.ru&sz=64", fallback:"Я", txt:"#FC3F1D" },
-  gdrive:   { name:"Google Drive",  slug:"googledrive", color:"#34A853", hosts:["drive.google.com","docs.google.com"] },
-  boosty:   { name:"Boosty",        slug:"boostyto",    color:"#F15F2C", hosts:["boosty.to"], altSlug:"boosty" },
-  pda4:     { name:"4PDA",          slug:"",            color:"#42A5F5", hosts:["4pda.to","4pda.cc","4pda.ru"],
-              iconUrl:"https://www.google.com/s2/favicons?domain=4pda.to&sz=64", fallback:"4P" },
-  github:   { name:"GitHub",        slug:"github",      color:"#6e7681", hosts:["github.com","gist.github.com","raw.githubusercontent.com","gist.githubusercontent.com"] },
-  telegram: { name:"Telegram",      slug:"telegram",    color:"#26A5E4", hosts:["t.me","telegram.me","telegra.ph","telesco.pe"] },
-  mega:     { name:"MEGA",          slug:"mega",        color:"#D9272E", hosts:["mega.nz","mega.io"] },
-  mediafire:{ name:"MediaFire",     slug:"mediafire",   color:"#1299F3", hosts:["mediafire.com"] },
-  dropbox:  { name:"Dropbox",       slug:"dropbox",     color:"#0061FF", hosts:["dropbox.com","dropboxusercontent.com"] },
-  cloudmr:  { name:"Облако Mail.ru",slug:"mailru",      color:"#005FF9", hosts:["cloud.mail.ru"] },
-  other:    { name:"Другое",        slug:"",            color:"#8A8F98", hosts:[] }
-};
-function detectService(url) {
-  try {
-    const h = new URL(url).hostname.toLowerCase();
-    for (const [k, s] of Object.entries(SERVICES))
-      if (s.hosts.some(host => h === host || h.endsWith("." + host))) return k;
-  } catch (e) {}
-  return "other";
-}
-function makeIcon(type) {
-  const s = SERVICES[type] || SERVICES.other;
-  if (s.iconUrl)
-    return `<span class="lk-ico" style="background:${s.color}"><img src="${s.iconUrl}" alt="" onerror="this.parentNode.style.color='${s.txt || "#fff"}';this.parentNode.textContent='${esc(s.fallback || s.name[0])}'"></span>`;
-  if (!s.slug) return `<span class="lk-ico" style="background:${s.color};color:${s.txt || "#fff"}">${esc(s.fallback || "🔗")}</span>`;
-  const fallbackJs = s.altSlug
-    ? `this.onerror=()=>{this.parentNode.textContent='${esc(s.name[0])}'};this.src='https://cdn.simpleicons.org/${s.altSlug}/ffffff'`
-    : `this.parentNode.textContent='${esc(s.name[0])}'`;
-  return `<span class="lk-ico" style="background:${s.color}"><img src="https://cdn.simpleicons.org/${s.slug}/ffffff" alt="" onerror="${fallbackJs}"></span>`;
-}
-
-// ---------- Обложки ----------
-const steamTallURLs = appid => [
-  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/library_600x900.jpg`,
-  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`,
-  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/library_600x900.jpg`
-];
-const steamHeaderURLs = appid => [
-  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
-  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/header.jpg`,
-  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/header.jpg`,
-  `https://cdn.steamstatic.com/steam/apps/${appid}/header.jpg`
-];
-const steamCapsuleURLs = appid => [
-  `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
-  `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appid}/capsule_616x353.jpg`,
-  `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`,
-  `https://cdn.akamai.steamstatic.com/steam/apps/${appid}/capsule_616x353.jpg`
-];
-function phSVG(letter) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="215"><rect width="460" height="215" fill="#232735"/><text x="50%" y="56%" font-size="84" fill="#6c5ce7" text-anchor="middle" dominant-baseline="middle" font-family="Arial">${esc(letter)}</text></svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-}
-function setCoverCascade(img, urls) {
-  let i = 0;
-  img.onerror = () => { i++; if (i < urls.length) img.src = urls[i]; else img.onerror = null; };
-  img.src = urls[0];
-}
-function coverURLs(p) {
-  const c = p.cover || {};
-  const urls = [
-    ...(c.appid ? steamHeaderURLs(c.appid) : []),
-    c.url, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
-    phSVG((p.title[0] || "?").toUpperCase())
-  ];
-  return dedupe(urls);
-}
-function gameCoverURLs(p) {
-  const c = p.cover || {};
-  const urls = [];
-  if (!isNarrowScreen() && c.appid) urls.push(...steamTallURLs(c.appid));
-  urls.push(...coverURLs(p));
-  return dedupe(urls);
-}
-
-function fetchTimeout(url, ms = 8000) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), ms);
-  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(t));
-}
-
-const STEAM_PROXIES = [
-  { name:"direct",         wrap: u => u },
-  { name:"codetabs",       wrap: u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
-  { name:"allorigins",     wrap: u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
-  { name:"allorigins-get", wrap: u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u), json:"contents" },
-  { name:"cors-lol",       wrap: u => "https://api.cors.lol/?url=" + encodeURIComponent(u) },
-  { name:"cors-workers",   wrap: u => "https://test.cors.workers.dev/?" + u }
-];
-const failedCombos = new Set();
-
-const SEARCH_SOURCES = [
-  { name:"community", url: t => "https://steamcommunity.com/actions/SearchApps/" + encodeURIComponent(t),
-    parse: j => Array.isArray(j) ? j.map(x => ({ id:String(x.appid ?? ""), name:x.name || "", tiny:x.icon || x.logo || "" })) : [] },
-  { name:"storesearch", url: t => "https://store.steampowered.com/api/storesearch/?term=" + encodeURIComponent(t) + "&cc=US&l=russian",
-    parse: j => (j && Array.isArray(j.items)) ? j.items.map(x => ({ id:String(x.id ?? x.appid ?? ""), name:x.name || "", tiny:x.tiny_capsule || "" })) : [] },
-  { name:"htmlpage", url: t => "https://store.steampowered.com/search/?term=" + encodeURIComponent(t), html:true }
-];
-function parseSearchHTML(html) {
-  const out = [];
-  const dec = t => { const ta = document.createElement("textarea"); ta.innerHTML = t; return ta.value; };
-  const re = /<a[^>]*data-ds-appid="(\d+)"[^>]*>[\s\S]*?<span class="title">([^<]*)<\/span>/g;
-  let m;
-  while ((m = re.exec(html)) && out.length < 7) {
-    const id = m[1], name = dec(m[2] || "").trim();
-    if (id && name) out.push({ id, name, tiny: "" });
-  }
-  return out;
-}
-function comboList() {
-  const list = [];
-  const saved = localStorage.getItem(LS_STEAM_COMBO);
-  if (saved) {
-    const [s, p] = saved.split(":").map(Number);
-    if (SEARCH_SOURCES[s] && STEAM_PROXIES[p]) list.push([s, p]);
-  }
-  list.push([0, 0], [1, 0]);
-  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([0, p], [1, p]);
-  for (let p = 1; p < STEAM_PROXIES.length; p++) list.push([2, p]);
-  return list;
-}
-async function steamSearch(term) {
-  let anyAnswered = false;
-  for (const [s, p] of comboList()) {
-    const combo = s + ":" + p;
-    if (failedCombos.has(combo)) continue;
-    const src = SEARCH_SOURCES[s];
-    const url = STEAM_PROXIES[p].wrap(src.url(term));
-    try {
-      const r = await fetchTimeout(url, 15000);
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const text = await r.text();
-      let items;
-      if (src.html) items = parseSearchHTML(text);
-      else {
-        let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
-        items = src.parse(j);
+{
+  "name": "Русификаторы от Atanvaron",
+  "slogan": "Перевод и адаптация цифровых настолок, и не только...",
+  "donate": {
+    "title": "☕ Поддержать автора",
+    "text": "Все русификаторы бесплатны. Если у вас есть желание отблагодарить автора за понравившуюся работу или выразить поддержку, можете оформить подписку на Boosty или отправить донат.",
+    "methods": [
+      {
+        "name": "Boosty",
+        "color": "#fc6f3b",
+        "icon": "boosty",
+        "url": "https://boosty.to/atanvaron_/donate"
+      },
+      {
+        "name": "МИР",
+        "color": "#049f47",
+        "value": "2200 2711 8271 6622"
       }
-      items = items.filter(x => x.id && x.name);
-      if (items.length) {
-        localStorage.setItem(LS_STEAM_COMBO, combo);
-        return items.slice(0, 7);
+    ]
+  },
+  "contacts": {
+    "title": "💬 Контакты и каналы",
+    "text": "",
+    "contacts": [
+      {
+        "name": "Telegram-чат",
+        "color": "#26a5e4",
+        "icon": "telegram",
+        "note": "По поводу вопросов и найденных багов",
+        "url": "https://t.me/mr_smith90"
+      },
+      {
+        "name": "Канал на Boosty",
+        "color": "#fc6f3b",
+        "icon": "boosty",
+        "note": "Отслеживайте выход новых версий",
+        "url": "https://boosty.to/atanvaron_"
+      },
+      {
+        "name": "Telegram-канал",
+        "color": "#25bee4",
+        "icon": "telegram",
+        "url": "https://t.me/atn_digitalboardru"
       }
-      anyAnswered = true;
-    } catch (e) {
-      failedCombos.add(combo);
-      console.warn("Steam-поиск: маршрут не ответил —", src.name + "/" + STEAM_PROXIES[p].name, "(", e.message, ")");
-    }
-  }
-  return anyAnswered ? [] : null;
-}
-
-const appInfoCache = (() => { try { return JSON.parse(localStorage.getItem(LS_APPNAMES)) || {}; } catch (e) { return {}; } })();
-function cacheInfo(id, info) {
-  appInfoCache[id] = info;
-  const keys = Object.keys(appInfoCache);
-  if (keys.length > 300) delete appInfoCache[keys[0]];
-  localStorage.setItem(LS_APPNAMES, JSON.stringify(appInfoCache));
-}
-function cachedInfo(id) {
-  const v = appInfoCache[id];
-  if (!v) return null;
-  return typeof v === "string" ? { name: v, header: "", capsule: "" } : v;
-}
-const APP_ROUTES = [
-  { name:"appdetails", url: id => `https://store.steampowered.com/api/appdetails?appids=${id}&cc=US&l=russian`,
-    parse: (j, id) => {
-      const d = j && j[id];
-      if (d && d.success && d.data) {
-        return {
-          name: String(d.data.name || ""),
-          header: String(d.data.header_image || ""),
-          capsule: String(d.data.capsule_imagev5 || d.data.capsule_image || "")
-        };
-      }
-      return null;
-    } },
-  { name:"steamspy", url: id => `https://steamspy.com/api.php?request=appdetails&appid=${id}`,
-    parse: j => (j && j.name) ? { name: String(j.name), header: "", capsule: "" } : null },
-  { name:"htmlpage", url: id => `https://store.steampowered.com/app/${id}/?l=russian`, html: true }
-];
-function parseOgTitle(html) {
-  const m = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)
-        || html.match(/<title>([^<]+)<\/title>/i);
-  if (!m) return null;
-  let t = m[1].trim();
-  t = t.replace(/^Save \d+% on\s+/i, "").replace(/^(Купить|Сохранить \d+% на|Скидка \d+% на)\s+/i, "");
-  t = t.replace(/\s+(on Steam|в Steam)$/i, "");
-  return t || null;
-}
-function parseOg(html) {
-  const im = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
-  return {
-    name: parseOgTitle(html) || "",
-    header: im ? im[1].replace(/^http:/, "https:") : "",
-    capsule: ""
-  };
-}
-async function tryRoute(route, proxy, appid, ms) {
-  const r = await fetchTimeout(proxy.wrap(route.url(appid)), ms);
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  let text = await r.text();
-  if (proxy.json) {
-    try { text = JSON.parse(text)[proxy.json] || ""; } catch (e) { throw new Error("нет обёртки"); }
-  }
-  let info;
-  if (route.html) {
-    info = parseOg(text);
-    if (!info.name && !info.header) throw new Error("og-теги не найдены");
-  } else {
-    let j; try { j = JSON.parse(text); } catch (e) { throw new Error("ответ не JSON"); }
-    info = route.parse(j, appid);
-    if (!info || (!info.name && !info.header)) throw new Error("пустой ответ");
-  }
-  return info;
-}
-async function fetchAppInfo(appid) {
-  const cached = cachedInfo(appid);
-  if (cached && cached.header) return cached;
-
-  const saved = localStorage.getItem(LS_APP_ROUTE);
-  if (saved) {
-    const [ri, pi] = saved.split(":").map(Number);
-    if (APP_ROUTES[ri] && STEAM_PROXIES[pi]) {
-      try {
-        const info = await tryRoute(APP_ROUTES[ri], STEAM_PROXIES[pi], appid, 8000);
-        if (!info.name && cached?.name) info.name = cached.name;
-        cacheInfo(appid, info);
-        return info;
-      } catch (e) {
-        localStorage.removeItem(LS_APP_ROUTE);
-        console.warn("Инфо по AppID: сохранённый маршрут не ответил —", APP_ROUTES[ri].name + "/" + STEAM_PROXIES[pi].name, "(", e.message, ")");
-      }
-    }
-  }
-
-  const tasks = [];
-  for (let pi = 0; pi < STEAM_PROXIES.length; pi++)
-    for (let ri = 0; ri < APP_ROUTES.length; ri++) {
-      const route = APP_ROUTES[ri], proxy = STEAM_PROXIES[pi];
-      if (route.html && proxy.name === "direct") continue;
-      tasks.push(
-        tryRoute(route, proxy, appid, 20000)
-          .then(info => {
-            localStorage.setItem(LS_APP_ROUTE, ri + ":" + pi);
-            return info;
-          })
-          .catch(e => {
-            console.warn("Инфо по AppID: не ответил —", route.name + "/" + proxy.name, "(", e.message, ")");
-            throw e;
-          })
-      );
-    }
-  try {
-    const info = await Promise.any(tasks);
-    if (!info.name && cached?.name) info.name = cached.name;
-    cacheInfo(appid, info);
-    return info;
-  } catch (e) {
-    return cached && (cached.name || cached.header) ? cached : null;
-  }
-}
-
-const extractAppId = s => { const m = String(s).match(/(\d{2,10})/); return m ? m[1] : null; };
-const titleFromSlug = s => { const m = String(s).match(/steampowered\.com\/app\/\d+\/([^\/?#]+)/i); return m ? m[1].replace(/[_+]+/g, " ").trim() : ""; };
-
-function migrate(p) {
-  if (!Array.isArray(p.links)) {
-    const flat = [];
-    for (const v of (p.versions || []))
-      for (const l of (v.links || []))
-        if (l && l.url) flat.push(l);
-    p.links = flat;
-  }
-  delete p.versions;
-  p.links = (p.links || []).filter(l => l && l.url).map(l => ({
-    type: l.type || detectService(l.url), url: l.url, dl: l.dl || 0
-  }));
-  if (p.stale && !p.badge) p.badge = { ...BADGE_DEFAULT };
-  delete p.stale;
-  if (p.badge && !p.badge.text) delete p.badge;
-  return p;
-}
-
-function gh(path, opts = {}) {
-  const headers = { Accept: "application/vnd.github+json", ...(opts.headers || {}) };
-  if (state.token) headers.Authorization = "Bearer " + state.token;
-  return fetch(GH_API + path, { ...opts, headers }).then(async r => {
-    if (!r.ok) { let m = ""; try { m = (await r.json()).message || ""; } catch (e) {} throw new Error(`${r.status} ${m}`); }
-    return r.json();
-  });
-}
-function utf8B64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = "";
-  for (let i = 0; i < bytes.length; i += 0x8000)
-    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return btoa(bin);
-}
-async function getSha(file) {
-  try {
-    const j = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}?ref=${CONFIG.branch}`);
-    return j.sha;
-  } catch (e) { return null; }
-}
-async function putJson(file, obj, message, retried = false) {
-  const body = { message, content: utf8B64(JSON.stringify(obj, null, 2)), branch: CONFIG.branch };
-  const cached =
-    file === CONFIG.dataFile ? state.dataSha :
-    file === CONFIG.donateFile ? state.donateSha :
-    file === CONFIG.contactsFile ? state.contactsSha :
-    state.siteSha;
-  const sha = cached || await getSha(file);
-  if (sha) body.sha = sha;
-  try {
-    const res = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${encPath(file)}`,
-      { method: "PUT", body: JSON.stringify(body) });
-    if (file === CONFIG.dataFile) state.dataSha = res.content.sha;
-    else if (file === CONFIG.donateFile) state.donateSha = res.content.sha;
-    else if (file === CONFIG.contactsFile) state.contactsSha = res.content.sha;
-    else state.siteSha = res.content.sha;
-  } catch (e) {
-    if (!retried && /42[02]|409/.test(e.message)) {
-      if (file === CONFIG.dataFile) state.dataSha = null;
-      else if (file === CONFIG.donateFile) state.donateSha = null;
-      else if (file === CONFIG.contactsFile) state.contactsSha = null;
-      else state.siteSha = null;
-      return putJson(file, obj, message, true);
-    }
-    throw e;
-  }
-}
-// ---------- Единый файл данных: data.json = { name, slogan, donate, contacts, projects } ----------
-const mergedData = () => ({
-  name: state.site?.name || SITE_DEFAULT.name,
-  slogan: state.site?.slogan || SITE_DEFAULT.slogan,
-  donate: state.donate || DONATE_DEFAULT,
-  contacts: state.contacts || CONTACTS_DEFAULT,
-  projects: state.projects
-});
-const writeData = message => putJson(CONFIG.dataFile, mergedData(), message);
-async function loadData() {
-  // Дефолты — пока файлы не загружены (или их нет)
-  state.site = { ...SITE_DEFAULT };
-  state.donate = DONATE_DEFAULT;
-  state.contacts = CONTACTS_DEFAULT;
-  const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
-  if (r.status === 404) {
-    // data.json ещё не создан — читаем старые отдельные файлы (переходный период)
-    state.projects = []; state.dataSha = null;
-    await loadSite(); await loadDonate(); await loadContacts();
-    return;
-  }
-  if (!r.ok) throw new Error("GitHub вернул " + r.status);
-  const data = await r.json();
-  if (Array.isArray(data)) {
-    // Старый формат: в data.json только каталог, остальное — в отдельных файлах
-    state.projects = data.filter(p => p && p.title).map(migrate);
-    state.dataSha = null;
-    await loadSite(); await loadDonate(); await loadContacts();
-    return;
-  }
-  if (!data || typeof data !== "object") throw new Error("data.json имеет неверный формат");
-  // Новый объединённый формат — все данные в одном файле
-  if (typeof data.name === "string" || typeof data.slogan === "string")
-    state.site = { name: data.name ?? SITE_DEFAULT.name, slogan: data.slogan ?? SITE_DEFAULT.slogan };
-  if (data.donate && typeof data.donate === "object" && Array.isArray(data.donate.methods)) state.donate = data.donate;
-  if (data.contacts && typeof data.contacts === "object" && Array.isArray(data.contacts.contacts)) state.contacts = data.contacts;
-  state.projects = (Array.isArray(data.projects) ? data.projects : []).filter(p => p && p.title).map(migrate);
-  state.dataSha = null;
-}
-
-// ---------- Название и слоган сайта ----------
-async function loadSite() {
-  try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.siteFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
-      if (j && typeof j === "object") { state.site = j; return; }
-    }
-  } catch (e) {}
-  state.site = { ...SITE_DEFAULT };
-}
-function renderSite() {
-  const s = state.site;
-  $("siteTitle").textContent = s?.name || SITE_DEFAULT.name;
-  $("siteSlogan").textContent = s?.slogan || SITE_DEFAULT.slogan;
-}
- $("titleEdit").addEventListener("click", () => {
-  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const s = state.site || {};
-  $("tName").value = s?.name || SITE_DEFAULT.name;
-  $("tSlogan").value = s?.slogan || SITE_DEFAULT.slogan;
-  $("titleModal").classList.remove("hidden");
-});
- $("tCancel").addEventListener("click", () => $("titleModal").classList.add("hidden"));
- $("tSaveBtn").addEventListener("click", async () => {
-  const btn = $("tSaveBtn");
-  if (btn.disabled) return;
-  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const name = $("tName").value.trim() || SITE_DEFAULT.name;
-  const slogan = $("tSlogan").value.trim() || SITE_DEFAULT.slogan;
-  btn.disabled = true;
-  try {
-    state.site = { name, slogan };
-    await putJson(CONFIG.dataFile, mergedData(), "Обновлены название и слоган сайта");
-    renderSite();
-    $("titleModal").classList.add("hidden");
-    toast("Название и слоган обновлены", "ok", 4000);
-  } catch (e) {
-    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
-  }
-  btn.disabled = false;
-});
-
-// ---------- Авторемонт обложек ----------
-const autoHealTried = new Set();
-const isConstructedUrl = (p) => {
-  const u = p.cover?.url;
-  if (!u || !p.cover?.appid) return false;
-  return new RegExp(`steamstatic\\.com\\/(steam|store_item_assets)\\/steam\\/apps\\/${p.cover.appid}\\/header\\.jpg$`, "i").test(u);
-};
-async function autoHealCovers() {
-  if (!state.token) return;
-  const need = state.projects.filter(p =>
-    p.cover?.appid && (!p.cover.url || isConstructedUrl(p)) &&
-    !cachedInfo(p.cover.appid)?.header && !autoHealTried.has(p.cover.appid));
-  if (!need.length) return;
-  let fixed = 0;
-  for (const p of need) {
-    autoHealTried.add(p.cover.appid);
-    try {
-      const info = await fetchAppInfo(p.cover.appid);
-      if (info?.header && info.header !== p.cover.url) {
-        p.cover.url = info.header;
-        if (info.capsule) p.cover.capsule = info.capsule;
-        fixed++;
-      }
-    } catch (e) {}
-    await new Promise(r => setTimeout(r, 350));
-  }
-  if (fixed) {
-    try {
-      await writeData("Обложки: канонические URL из Steam");
-      render();
-      toast(`Обложки обновлены автоматически: ${fixed} шт.`, "ok", 5000);
-    } catch (e) {
-      console.warn("Авторемонт обложек: не удалось сохранить —", e.message);
-    }
-  }
-}
-
-// ---------- Донаты ----------
-async function loadDonate() {
-  try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.donateFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
-      if (j && typeof j === "object" && Array.isArray(j.methods)) { state.donate = j; return; }
-    }
-  } catch (e) {}
-  state.donate = DONATE_DEFAULT;
-}
-function renderDonate() {
-  const sec = $("donate");
-  const d = state.donate;
-  const methods = (d && Array.isArray(d.methods))
-    ? d.methods.filter(m => m && m.name && (m.url || m.value)) : [];
-  if (!methods.length) {
-    sec.classList.add("no-methods");
-    $("donTitle").textContent = "Блок донатов выключен";
-    $("donText").textContent = "Нажми ✏️, чтобы настроить способы поддержки.";
-    $("donateList").innerHTML = "";
-    return;
-  }
-  sec.classList.remove("no-methods");
-  $("donTitle").textContent = d.title || "Поддержать автора";
-  $("donText").textContent = d.text || "";
-  const box = $("donateList");
-  box.innerHTML = "";
-  for (const m of methods) {
-    const ico = m.icon
-      ? `<span class="don-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
-      : `<span class="don-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
-    if (m.url) {
-      box.insertAdjacentHTML("beforeend", `<a class="don-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a>`);
-    } else {
-      box.insertAdjacentHTML("beforeend", `<button type="button" class="don-btn don-copy" data-value="${esc(m.value)}" data-label="${esc(m.name)}" title="Нажмите, чтобы скопировать">${ico}<span>${esc(m.name)}: ${esc(m.value)}</span></button>`);
-    }
-  }
-}
- $("donateList").addEventListener("click", async e => {
-  const b = e.target.closest(".don-copy");
-  if (!b) return;
-  try {
-    await navigator.clipboard.writeText(b.dataset.value);
-    toast("Скопировано: " + b.dataset.label, "ok", 2500);
-  } catch (err) {
-    toast("Не удалось скопировать — выделите реквизит вручную", "err");
-  }
-});
-function addDonateRow(m = {}) {
-  const box = document.createElement("div");
-  box.className = "dn-row";
-  box.innerHTML = `
-    <input class="dn-name" placeholder="Название (Boosty, ЮMoney, Карта…)" value="${esc(m.name || "")}">
-    <input class="dn-color" type="color" value="${esc(m.color || "#6c5ce7")}" title="Цвет значка">
-    <input class="dn-icon" placeholder="иконка (boostyto)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
-    <input class="dn-url full" placeholder="https:// ссылка (необязательно)" value="${esc(m.url || "")}">
-    <input class="dn-val full" placeholder="…или реквизиты для копирования (необязательно)" value="${esc(m.value || "")}">
-    <button type="button" class="ver-del" title="Убрать способ">✕</button>`;
-  $("dList").appendChild(box);
-}
- $("donEdit").addEventListener("click", () => {
-  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const d = state.donate || {};
-  $("dTitle").value = d.title || "";
-  $("dText").value = d.text || "";
-  $("dList").innerHTML = "";
-  (d.methods?.length ? d.methods : [{}]).forEach(addDonateRow);
-  $("donateModal").classList.remove("hidden");
-});
- $("dAdd").addEventListener("click", () => addDonateRow());
- $("dList").addEventListener("click", e => {
-  if (e.target.closest(".ver-del")) e.target.closest(".dn-row").remove();
-});
-const closeDonate = () => $("donateModal").classList.add("hidden");
- $("dCancel").addEventListener("click", closeDonate);
- $("dSaveBtn").addEventListener("click", async () => {
-  const btn = $("dSaveBtn");
-  if (btn.disabled) return;
-  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const data = { title: $("dTitle").value.trim(), text: $("dText").value.trim(), methods: [] };
-  for (const b of document.querySelectorAll("#dList .dn-row")) {
-    const name = b.querySelector(".dn-name").value.trim();
-    if (!name) continue;
-    const m = { name, color: b.querySelector(".dn-color").value };
-    const icon = b.querySelector(".dn-icon").value.trim();
-    if (icon) m.icon = icon;
-    const url = b.querySelector(".dn-url").value.trim();
-    const val = b.querySelector(".dn-val").value.trim();
-    if (url) {
-      if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
-      m.url = url;
-    }
-    if (val) m.value = val;
-    if (m.url || m.value) data.methods.push(m);
-  }
-  btn.disabled = true;
-  try {
-    state.donate = data;
-    await putJson(CONFIG.dataFile, mergedData(), "Обновлён блок донатов");
-    renderDonate();
-    $("donateModal").classList.add("hidden");
-    toast("Блок донатов обновлён", "ok", 4000);
-  } catch (e) {
-    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
-  }
-  btn.disabled = false;
-});
-
-// ---------- Контакты ----------
-async function loadContacts() {
-  try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.contactsFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
-      if (j && typeof j === "object" && Array.isArray(j.contacts)) { state.contacts = j; return; }
-    }
-  } catch (e) {}
-  state.contacts = CONTACTS_DEFAULT;
-}
-function renderContacts() {
-  const sec = $("contacts");
-  const c = state.contacts;
-  const items = (c && Array.isArray(c.contacts))
-    ? c.contacts.filter(m => m && m.name && m.url) : [];
-  if (!items.length) {
-    sec.classList.add("no-methods");
-    $("ctTitle").textContent = "Блок контактов выключен";
-    $("ctText").textContent = "Нажми ✏️, чтобы добавить контакты.";
-    $("contactsList").innerHTML = "";
-    return;
-  }
-  sec.classList.remove("no-methods");
-  $("ctTitle").textContent = c.title || "💬 Связь со мной";
-  $("ctText").textContent = c.text || "";
-  const box = $("contactsList");
-  box.innerHTML = "";
-  for (const m of items) {
-    const ico = m.icon
-      ? `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}"><img src="https://cdn.simpleicons.org/${esc(m.icon)}/ffffff" alt="" onerror="this.parentNode.textContent='${esc((m.name[0] || "?").toUpperCase())}'"></span>`
-      : `<span class="ct-ico" style="background:${m.color || "#6c5ce7"}">${esc((m.name[0] || "?").toUpperCase())}</span>`;
-    box.insertAdjacentHTML("beforeend", `<span class="ct-item${m.note ? " has-note" : ""}">${m.note ? `<span class="ct-note">${esc(m.note)}</span>` : ""}<a class="ct-btn" href="${esc(m.url)}" target="_blank" rel="noopener">${ico}<span>${esc(m.name)}</span></a></span>`);
-  }
-}
-function addContactsRow(m = {}) {
-  const box = document.createElement("div");
-  box.className = "ct-row";
-  box.innerHTML = `
-    <input class="ct-name" placeholder="Название (Telegram-канал, Discord…)" value="${esc(m.name || "")}">
-    <input class="ct-color" type="color" value="${esc(m.color || "#26A5E4")}" title="Цвет значка">
-    <input class="ct-icon" placeholder="иконка (telegram)" value="${esc(m.icon || "")}" title="Код иконки с simpleicons.org — необязательно">
-    <input class="ct-url full" placeholder="https:// ссылка" value="${esc(m.url || "")}">
-    <input class="ct-note-in full" placeholder="Надпись рядом с кнопкой — необязательно (напр. Новости и обновления)" value="${esc(m.note || "")}">
-    <button type="button" class="ver-del" title="Убрать контакт">✕</button>`;
-  $("cList").appendChild(box);
-}
- $("ctEdit").addEventListener("click", () => {
-  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const c = state.contacts || {};
-  $("cTitle").value = c.title || "";
-  $("cText").value = c.text || "";
-  $("cList").innerHTML = "";
-  (c.contacts?.length ? c.contacts : [{}]).forEach(addContactsRow);
-  $("contactsModal").classList.remove("hidden");
-});
- $("cAdd").addEventListener("click", () => addContactsRow());
- $("cList").addEventListener("click", e => {
-  if (e.target.closest(".ver-del")) e.target.closest(".ct-row").remove();
-});
-const closeContacts = () => $("contactsModal").classList.add("hidden");
- $("cCancel").addEventListener("click", closeContacts);
- $("cSaveBtn").addEventListener("click", async () => {
-  const btn = $("cSaveBtn");
-  if (btn.disabled) return;
-  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  const data = { title: $("cTitle").value.trim(), text: $("cText").value.trim(), contacts: [] };
-  for (const b of document.querySelectorAll("#cList .ct-row")) {
-    const name = b.querySelector(".ct-name").value.trim();
-    if (!name) continue;
-    const m = { name, color: b.querySelector(".ct-color").value };
-    const icon = b.querySelector(".ct-icon").value.trim();
-    if (icon) m.icon = icon;
-    const note = b.querySelector(".ct-note-in").value.trim();
-    if (note) m.note = note;
-    const url = b.querySelector(".ct-url").value.trim();
-    if (!url) { alert(`У контакта «${name}» нет ссылки`); return; }
-    if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
-    m.url = url;
-    data.contacts.push(m);
-  }
-  btn.disabled = true;
-  try {
-    state.contacts = data;
-    await putJson(CONFIG.dataFile, mergedData(), "Обновлён блок контактов");
-    renderContacts();
-    $("contactsModal").classList.add("hidden");
-    toast("Блок контактов обновлён", "ok", 4000);
-  } catch (e) {
-    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
-  }
-  btn.disabled = false;
-});
-
-// ---------- Счётчик переходов ----------
-const hstr = s => { let h = 5381; for (const c of s) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
-const linkKey = (p, l) => `${p.id}_${hstr(l.url)}`;
-const getDl = (p, l) => Math.max(l.dl || 0, dlCache[linkKey(p, l)] || 0);
-const totalDl = p => (p.links || []).reduce((s, l) => s + getDl(p, l), 0);
-async function remoteGet(key) {
-  try {
-    const r = await fetch(`${COUNTER_API}/get/${CONFIG.counterNS}/${key}`);
-    if (r.ok) return (await r.json()).value || 0;
-  } catch (e) {}
-  return null;
-}
-const remoteHit = key => fetch(`${COUNTER_API}/hit/${CONFIG.counterNS}/${key}`).catch(() => {});
-
-let lastSync = 0;
-async function syncCounters() {
-  if (Date.now() - lastSync < 15000) return;
-  lastSync = Date.now();
-  let dirty = false;
-  for (const p of state.projects)
-    for (const l of (p.links || [])) {
-      const k = linkKey(p, l);
-      const remote = await remoteGet(k);
-      if (remote != null && remote > (dlCache[k] || 0)) { dlCache[k] = remote; dirty = true; }
-    }
-  if (dirty) saveDl();
-  render();
-}
-
-// ---------- Уникальные посещения (плашка видна только админу) ----------
-const LS_UV_EVER = "russifiers_uv_ever";
-const LS_UV_DAY = "russifiers_uv_day";
-const uvDayKey = () => {
-  const d = new Date();
-  return "uvDay_" + d.getFullYear() + "_" + String(d.getMonth() + 1).padStart(2, "0") + "_" + String(d.getDate()).padStart(2, "0");
-};
-function countVisit() {
-  try {
-    if (state.token) return; // собственные визиты администратора не считаем
-    if (!localStorage.getItem(LS_UV_EVER)) {
-      remoteHit("uvTotal");
-      localStorage.setItem(LS_UV_EVER, "1");
-    }
-    if (localStorage.getItem(LS_UV_DAY) !== uvDayKey()) {
-      remoteHit(uvDayKey());
-      localStorage.setItem(LS_UV_DAY, uvDayKey());
-    }
-  } catch (e) {}
-}
-async function showVisitors() {
-  const [total, today] = await Promise.all([remoteGet("uvTotal"), remoteGet(uvDayKey())]);
-  const fmt = v => (v == null ? "—" : v);
-  const short = $("uvShort");
-  if (short) short.textContent = fmt(total) + "/" + fmt(today);
-  const tEl = $("uvTotal");
-  const dEl = $("uvToday");
-  if (tEl) tEl.textContent = fmt(total);
-  if (dEl) dEl.textContent = fmt(today);
-}
-$("statVisitors").addEventListener("click", () => {
-  const p = $("visitorsPanel");
-  p.classList.toggle("hidden");
-  if (!p.classList.contains("hidden")) showVisitors();
-});
-document.addEventListener("click", e => {
-  if (!e.target.closest(".uv-wrap")) $("visitorsPanel").classList.add("hidden");
-});
-document.addEventListener("keydown", e => { if (e.key === "Escape") $("visitorsPanel").classList.add("hidden"); });
-
-// ---------- Сортировка ----------
-const SORTS = {
-  az:  { fn: (a, b) => a.title.localeCompare(b.title, "ru", { sensitivity: "base" }) },
-  za:  { fn: (a, b) => b.title.localeCompare(a.title, "ru", { sensitivity: "base" }) },
-  dl:  { fn: (a, b) => totalDl(b) - totalDl(a) },
-  new: { fn: (a, b) => (b.created || 0) - (a.created || 0) }
-};
-function currentSort() {
-  const v = localStorage.getItem(LS_SORT);
-  return SORTS[v] ? v : "az";
-}
-
-// ---------- Вид списка ----------
-function currentView() {
-  let v = localStorage.getItem(LS_VIEW);
-  if (v === "list") v = "grid";
-  return ["grid", "compact"].includes(v) ? v : "grid";
-}
-function applyView() {
-  grid.classList.remove("view-grid", "view-list", "view-compact");
-  grid.classList.add("view-" + currentView());
-  $("viewBy").value = currentView();
-  $("viewByM").value = currentView();
-}
- $("viewBy").addEventListener("change", e => {
-  localStorage.setItem(LS_VIEW, e.target.value);
-  applyView();
-  render();
-});
- $("viewByM").addEventListener("change", e => {
-  localStorage.setItem(LS_VIEW, e.target.value);
-  applyView();
-  render();
-});
-
-// ---------- Фильтр по ярлыкам ----------
-function currentFilter() {
-  return localStorage.getItem(LS_FILTER) || "";
-}
-function renderFilterPanel() {
-  const cur = currentFilter();
-  const counts = new Map();
-  for (const p of state.projects) {
-    if (p.badge?.text) counts.set(p.badge.text, (counts.get(p.badge.text) || 0) + 1);
-  }
-  let html = '<div class="f-title">Фильтр по ярлыкам</div>';
-  html += `<button type="button" class="f-chip ${cur === "" ? "sel" : ""}" data-f="">Все записи</button>`;
-  for (const [t, n] of counts) {
-    const b = state.projects.find(p => p.badge?.text === t)?.badge;
-    html += `<button type="button" class="f-chip ${cur === t ? "sel" : ""}" data-f="${esc(t)}" style="${badgeStyle(b?.color)}">${esc(t)} <span class="n">${n}</span></button>`;
-  }
-  $("filterPanel").innerHTML = html;
-}
-function updateFilterBtn() {
-  const cur = currentFilter();
-  const btn = $("filterBtn");
-  btn.classList.toggle("on", !!cur);
-  btn.title = cur ? `Фильтр: ${cur} — нажмите, чтобы изменить` : "Фильтр по ярлыкам";
-}
-function toggleFilterPanel(force) {
-  const panel = $("filterPanel");
-  const open = typeof force === "boolean" ? force : panel.classList.contains("hidden");
-  if (open) renderFilterPanel();
-  panel.classList.toggle("hidden", !open);
-}
- $("filterBtn").addEventListener("click", e => {
-  e.stopPropagation();
-  toggleFilterPanel();
-});
- $("filterPanel").addEventListener("click", e => {
-  const chip = e.target.closest(".f-chip");
-  if (!chip) return;
-  localStorage.setItem(LS_FILTER, chip.dataset.f || "");
-  toggleFilterPanel(false);
-  render();
-});
-document.addEventListener("click", e => {
-  const fp = $("filterPanel");
-  if (!fp.classList.contains("hidden") &&
-      !fp.contains(e.target) && !$("filterBtn").contains(e.target)) {
-    toggleFilterPanel(false);
-  }
-  const sp = $("settingsPanel");
-  if (!sp.classList.contains("hidden") && !$("gearBtn").contains(e.target)) {
-    sp.classList.add("hidden");
-    $("gearBtn").classList.remove("on");
-  }
-});
-
-// ---------- Отрисовка ----------
-const grid = $("grid");
-let query = "";
-
-function render() {
-  const view = currentView();
-  const fval = currentFilter();
-
-  const list = state.projects
-    .filter(p => !query || p.title.toLowerCase().includes(query))
-    .filter(p => !fval || p.badge?.text === fval)
-    .sort(SORTS[currentSort()].fn);
-
-  updateFilterBtn();
-
-  const total = state.projects.length;
-  $("statCount").textContent = (query || fval)
-    ? `Найдено: ${list.length} из ${total}`
-    : `${total} ${pluralRu(total, "русификатор", "русификатора", "русификаторов")}`;
-
-  grid.innerHTML = "";
-  if (!list.length) {
-    grid.innerHTML = `<div class="empty">${(query || fval)
-      ? "По заданным условиям ничего не найдено"
-      : (state.token ? "Пока ничего нет — нажмите «Добавить русификатор»" : "Пока ничего не опубликовано 😕")}</div>`;
-    return;
-  }
-  for (const p of list) {
-    const services = dedupe((p.links || [])
-      .map(l => (SERVICES[l.type] || SERVICES.other).name));
-    grid.insertAdjacentHTML("beforeend", `
-      <div class="card" data-id="${esc(p.id)}">
-        ${badgeHTML(p)}
-        <div class="card-actions admin-only">
-          <button class="icon-btn edit" title="Редактировать">✏️</button>
-          <button class="icon-btn del" title="Удалить">🗑️</button>
-        </div>
-        <img class="cover" alt="">
-        <h2><span>${esc(p.title)}</span></h2>
-        ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
-        ${services.length ? `<div class="meta">${esc(services.join(" • "))}</div>` : ""}
-      </div>`);
-    if (view !== "compact")
-      setCoverCascade(grid.lastElementChild.querySelector(".cover"), coverURLs(p));
-  }
-
-  if (view === "compact") requestAnimationFrame(setupMarquees);
-}
-
-function setupMarquees() {
-  const old = document.getElementById("mqStyles");
-  if (old) old.remove();
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  let rules = "", n = 0;
-  grid.querySelectorAll(".card h2").forEach(h => {
-    const span = h.querySelector("span");
-    if (!span) return;
-    span.style.animation = "";
-    span.style.transform = "";
-    if (h.scrollWidth <= h.clientWidth + 1) return;
-    const dist = h.scrollWidth - h.clientWidth + 14;
-    const name = "mqrun" + (++n);
-    const dur = Math.max(6, Math.round(dist / 28));
-    rules += `@keyframes ${name}{0%,12%{transform:translateX(0)}88%,100%{transform:translateX(-${dist}px)}}`;
-    span.style.animation = `${name} ${dur}s ease-in-out infinite alternate`;
-  });
-  if (rules) {
-    const st = document.createElement("style");
-    st.id = "mqStyles";
-    st.textContent = rules;
-    document.head.appendChild(st);
-  }
-}
-let mqResizeTimer = null;
-window.addEventListener("resize", () => {
-  clearTimeout(mqResizeTimer);
-  mqResizeTimer = setTimeout(() => {
-    if (currentView() === "compact") setupMarquees();
-  }, 200);
-});
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    if (currentView() === "compact") setupMarquees();
-  });
-}
-
- $("sortBy").value = currentSort();
- $("sortByM").value = currentSort();
- $("sortBy").addEventListener("change", e => {
-  localStorage.setItem(LS_SORT, e.target.value);
-  $("sortByM").value = e.target.value;
-  render();
-});
- $("sortByM").addEventListener("change", e => {
-  localStorage.setItem(LS_SORT, e.target.value);
-  $("sortBy").value = e.target.value;
-  render();
-});
- $("search").addEventListener("input", e => { query = e.target.value.toLowerCase(); render(); });
-
- // Мобильная версия: лупа вместо поля — по тапу поле выдвигается поверх элементов строки
- const toolbarEl = document.querySelector(".toolbar");
- $("searchToggle").addEventListener("click", () => {
-   toolbarEl.classList.add("search-open");
-   $("search").focus();
- });
- $("search").addEventListener("input", () => $("searchToggle").classList.toggle("on", $("search").value.trim() !== ""));
- document.addEventListener("click", e => {
-   if (!toolbarEl.classList.contains("search-open")) return;
-   if (e.target.closest(".search-wrap") || e.target.closest("#searchToggle")) return;
-   toolbarEl.classList.remove("search-open");
- });
- document.addEventListener("keydown", e => { if (e.key === "Escape") toolbarEl.classList.remove("search-open"); });
-
-// ---------- Удаление ----------
-async function deleteProject(id) {
-  if (!state.token) { alert("Войдите как администратор (🔐 вверху справа)"); return false; }
-  const p = state.projects.find(x => x.id === id);
-  if (!p) return false;
-  if (!confirm(`Удалить «${p.title}»? Запись исчезнет с сайта (можно вернуть откатом коммита в истории data.json).`)) return false;
-  state.projects = state.projects.filter(x => x.id !== id);
-  render();
-  try {
-    await writeData("Удалён: " + p.title);
-    toast("Удалено: " + p.title, "ok", 3000);
-  } catch (e) {
-    toast("Запись убрана со страницы, но data.json не обновлён: " + e.message, "err", 6000);
-  }
-  return true;
-}
-
-grid.addEventListener("click", e => {
-  const card = e.target.closest(".card");
-  if (!card) return;
-  const p = state.projects.find(x => x.id === card.dataset.id);
-  if (!p) return;
-  if (e.target.closest(".edit")) { openForm(p.id); return; }
-  if (e.target.closest(".del")) { deleteProject(p.id); return; }
-  openGame(p.id);
-});
-
-// ---------- Окно игры ----------
-let openedId = null;
-const steamStoreURL = p => p.cover?.appid ? `https://store.steampowered.com/app/${p.cover.appid}/` : null;
-
-// Высота окна игры подгоняется под высоту обложки слева; обложка не обрезается,
-// а если ссылок много — они листаются внутри правой части.
-function syncGameBody() {
-  const body = $("gBody"), img = $("gCover");
-  if ($("gameModal").classList.contains("hidden") || isNarrowScreen()) {
-    body.style.maxHeight = "";
-    return;
-  }
-  // 375 — высота высокой обложки 600×900 при ширине колонки 250px; 340 — прежний минимум окна
-  const h = Math.round(img.getBoundingClientRect().height) || 375;
-  body.style.maxHeight = Math.min(Math.round(window.innerHeight * 0.82), Math.max(h, 340)) + "px";
-}
-$("gCover").addEventListener("load", syncGameBody);
-window.addEventListener("resize", syncGameBody);
-
-function openGame(id) {
-  const p = state.projects.find(x => x.id === id);
-  if (!p) return;
-  openedId = id;
-
-  const store = steamStoreURL(p);
-  const titleEl = $("gTitle");
-  if (store) {
-    titleEl.innerHTML = `<a class="g-title-link" href="${esc(store)}" target="_blank" rel="noopener" title="Открыть страницу игры в Steam">${esc(p.title)}</a>`;
-  } else {
-    titleEl.textContent = p.title;
-  }
-  const coverLink = $("gCoverLink");
-  coverLink.removeAttribute("href");
-  coverLink.classList.add("no-link");
-  coverLink.removeAttribute("title");
-
-  const st = $("gStale");
-  const b = p.badge;
-  if (b?.text) {
-    st.textContent = b.text;
-    st.style.background = badgeStyle(b.color).match(/background:([^;]+)/)[1];
-    st.style.color = badgeTextColor(b.color);
-    st.style.display = "inline-flex";
-  } else {
-    st.style.display = "none";
-  }
-
-  $("gDesc").textContent = p.description || "";
-  $("gDesc").style.display = p.description ? "" : "none";
-
-  setCoverCascade($("gCover"), gameCoverURLs(p));
-  syncGameBody();
-
-  const box = $("gLinks");
-  box.innerHTML = "";
-  const links = p.links || [];
-  if (!links.length) box.innerHTML = '<p class="hint">Ссылки пока не добавлены.</p>';
-  links.forEach((l, i) => {
-    const s = SERVICES[l.type] || SERVICES.other;
-    box.insertAdjacentHTML("beforeend", `
-      <div class="lk">
-        ${makeIcon(l.type)}
-        <div class="lk-info"><b>${esc(s.name)}</b>
-          <span class="cnt">Переходов: ${getDl(p, l)}</span></div>
-        <a class="lk-btn" data-i="${i}" href="${esc(l.url)}" target="_blank" rel="noopener">Перейти</a>
-      </div>`);
-  });
-  $("gameModal").classList.remove("hidden");
-}
-
- $("gLinks").addEventListener("click", e => {
-  const a = e.target.closest(".lk-btn");
-  if (!a) return;
-  const p = state.projects.find(x => x.id === openedId);
-  if (!p) return;
-  const l = (p.links || [])[+a.dataset.i];
-  if (!l) return;
-  const k = linkKey(p, l);
-  dlCache[k] = getDl(p, l) + 1;
-  saveDl();
-  remoteHit(k);
-  a.closest(".lk").querySelector(".cnt").textContent = "Переходов: " + dlCache[k];
-});
-
- $("gEdit").addEventListener("click", () => {
-  if (!openedId) return;
-  $("gameModal").classList.add("hidden");
-  openForm(openedId);
-});
- $("gDel").addEventListener("click", async () => {
-  if (!openedId) return;
-  if (await deleteProject(openedId)) $("gameModal").classList.add("hidden");
-});
- $("gClose").addEventListener("click", () => $("gameModal").classList.add("hidden"));
-
-// ---------- Вход администратора ----------
-function setAdmin(on) {
-  document.body.classList.toggle("admin", on);
-  $("authBtn").textContent = on ? "🚪" : "🔐";
-  $("authBtn").title = on
-    ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
-    : "Вход администратора";
-}
- $("authBtn").addEventListener("click", () => {
-  if (state.token) {
-    if (!confirm("Выйти из режима администратора?")) return;
-    state.token = ""; state.user = "";
-    localStorage.removeItem(LS_TOKEN);
-    setAdmin(false); render();
-  } else {
-    $("loginModal").classList.remove("hidden");
-    $("tokenInput").focus();
-  }
-});
- $("loginOk").addEventListener("click", async () => {
-  const t = $("tokenInput").value.trim();
-  if (!t) return;
-  const old = state.token;
-  state.token = t;
-  try {
-    const u = await gh("/user");
-    state.user = u.login;
-    localStorage.setItem(LS_TOKEN, t);
-    setAdmin(true);
-    $("loginModal").classList.add("hidden");
-    $("tokenInput").value = "";
-    autoHealCovers();
-    showVisitors();
-  } catch (e) {
-    state.token = old;
-    alert("GitHub не принял токен: " + e.message);
-  }
-});
- $("loginCancel").addEventListener("click", () => $("loginModal").classList.add("hidden"));
- $("tokenInput").addEventListener("keydown", e => { if (e.key === "Enter") $("loginOk").click(); });
-
-// ---------- Форма ----------
-let editId = null;
-let searchTimer = null, searchSeq = 0, appIdTimer = null, appIdSeq = 0;
-let titlePick = null, lastFound = [], titleAuto = false;
-
-const setNote = html => { $("fNote").innerHTML = html || ""; };
-
-function effectiveCover() {
-  const url = $("fCoverUrl").value.trim();
-  if (url) return { url };
-  const aid = extractAppId($("fAppId").value);
-  if (aid) {
-    const info = cachedInfo(aid) || {};
-    const found = lastFound.find(x => x.id === aid);
-    return {
-      appid: aid,
-      name: found?.name || info.name || "",
-      header: info.header || "",
-      capsule: info.capsule || ""
-    };
-  }
-  return titlePick;
-}
-
-function updateCoverPreview() {
-  const box = $("coverPreview"), img = $("covImg"), label = $("covLabel"), alts = $("covAlts");
-  const c = effectiveCover();
-  if (!c) { box.classList.add("hidden"); return; }
-  box.classList.remove("hidden");
-  alts.innerHTML = "";
-  if (c.url) {
-    label.textContent = "Обложка: своя ссылка на картинку";
-    setCoverCascade(img, [c.url, phSVG("?")]);
-  } else {
-    label.textContent = c.name ? `Найдено в Steam: «${c.name}»` : `Обложка из Steam (AppID ${c.appid})`;
-    setCoverCascade(img, dedupe([
-      ...(c.appid ? steamHeaderURLs(c.appid) : []),
-      c.header, c.capsule, ...(c.appid ? steamCapsuleURLs(c.appid) : []),
-      phSVG("?")
-    ]));
-    const explicit = $("fAppId").value.trim() || $("fCoverUrl").value.trim();
-    const others = lastFound.filter(x => x.id !== String(c.appid)).slice(0, 5);
-    if (!explicit && others.length) {
-      alts.innerHTML = '<span class="hint">Не та игра? Выберите другую:</span>' + others.map(x =>
-        `<button type="button" class="steam-item" data-id="${esc(x.id)}" data-name="${esc(x.name)}">
-           <img src="${esc(x.tiny || steamHeaderURLs(x.id)[0])}" alt="" onerror="this.onerror=null;this.src='${steamHeaderURLs(x.id)[1]}'">
-           <span>${esc(x.name)}</span>
-         </button>`).join("");
-    }
-  }
-}
-
-function queueTitleSearch(immediate = false) {
-  clearTimeout(searchTimer);
-  const seq = ++searchSeq;
-  const q = $("fTitle").value.trim();
-  if (q.length < 2 || $("fCoverUrl").value.trim() || extractAppId($("fAppId").value)) {
-    updateCoverPreview();
-    return;
-  }
-  const run = async () => {
-    $("coverPreview").classList.remove("hidden");
-    $("covImg").src = phSVG("…");
-    $("covAlts").innerHTML = "";
-    $("covLabel").textContent = "Ищу игру в Steam…";
-    const res = await steamSearch(q);
-    if (seq !== searchSeq) return;
-    if (res && res.length) {
-      lastFound = res;
-      titlePick = { appid: res[0].id, name: res[0].name };
-      updateCoverPreview();
-    } else if (res) {
-      lastFound = []; titlePick = null;
-      $("covImg").src = phSVG("?");
-      $("covLabel").textContent = "В Steam по этому названию ничего не найдено — проверьте название или вставьте ссылку / AppID в первое поле";
-    } else {
-      lastFound = []; titlePick = null;
-      $("covImg").src = phSVG("?");
-      $("covLabel").innerHTML = 'Steam-поиск заблокирован в этой сети (отключите блокировщик рекламы для сайта или впишите AppID в первое поле) <button type="button" class="retry-search">↻ Повторить</button>';
-    }
-  };
-  if (immediate) run();
-  else searchTimer = setTimeout(run, 500);
-}
-
-function queueAppIdLookup(immediate = false) {
-  clearTimeout(appIdTimer);
-  const seq = ++appIdSeq;
-  const raw = $("fAppId").value.trim();
-  const appid = extractAppId(raw);
-  updateCoverPreview();
-  if (!appid) return;
-  if ((titleAuto || !$("fTitle").value.trim())) {
-    const slugName = titleFromSlug(raw);
-    if (slugName) {
-      $("fTitle").value = slugName;
-      setNote("Черновик названия из ссылки (Steam не хранит в ней знаки препинания) — получаю точное название и обложку из Steam…");
-    } else {
-      setNote("Получаю название и обложку из Steam…");
-    }
-  }
-  const run = async () => {
-    const info = await fetchAppInfo(appid);
-    if (seq !== appIdSeq) return;
-    if (info && (info.name || info.header)) {
-      if (info.name) { titleAuto = true; $("fTitle").value = info.name; }
-      updateCoverPreview();
-      setNote(info.header
-        ? "Название и обложка из Steam (точный адрес картинки) — можно отредактировать вручную."
-        : "Название из Steam — можно отредактировать вручную.");
-    } else {
-      setNote(`Steam API недоступен из этой сети. Впиши название вручную — обложка по AppID подтянется. Сверить название: <a href="https://store.steampowered.com/app/${appid}/" target="_blank" rel="noopener">страница игры в Steam</a>`);
-    }
-  };
-  if (immediate) run();
-  else appIdTimer = setTimeout(run, 450);
-}
-
- $("fAppId").addEventListener("input", () => queueAppIdLookup(false));
- $("fTitle").addEventListener("input", () => {
-  titleAuto = false;
-  setNote("");
-  if (extractAppId($("fAppId").value)) { updateCoverPreview(); return; }
-  queueTitleSearch(false);
-});
- $("fCoverUrl").addEventListener("input", () => {
-  if ($("fCoverUrl").value.trim()) updateCoverPreview();
-  else if (extractAppId($("fAppId").value)) updateCoverPreview();
-  else queueTitleSearch(false);
-});
- $("coverPreview").addEventListener("click", e => {
-  if (e.target.closest(".retry-search")) { failedCombos.clear(); queueTitleSearch(true); return; }
-  const b = e.target.closest(".steam-item");
-  if (!b) return;
-  titlePick = null;
-  $("fAppId").value = b.dataset.id;
-  $("fTitle").value = b.dataset.name;
-  titleAuto = true;
-  appIdSeq++;
-  setNote("");
-  queueAppIdLookup(true);
-  updateCoverPreview();
-});
-
-function renderBadgePresets() {
-  const seen = new Map();
-  for (const p of state.projects) {
-    const b = p.badge;
-    if (b?.text) seen.set(b.text + "|" + (b.color || ""), b);
-  }
-  const box = $("badgePresets");
-  const items = [...seen.values()];
-  box.innerHTML = items.length
-    ? '<span class="hint">Готовые ярлыки:</span>'
-    : "";
-  for (const b of items.slice(0, 12)) {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "badge-chip";
-    chip.textContent = b.text;
-    chip.style.cssText = badgeStyle(b.color);
-    chip.addEventListener("click", () => {
-      $("fBadgeOn").checked = true;
-      $("fBadgeText").value = b.text;
-      $("fBadgeColor").value = b.color || BADGE_DEFAULT.color;
-    });
-    box.appendChild(chip);
-  }
-}
-
-function openForm(id = null) {
-  if (!state.token) { alert("Сначала войдите как администратор (иконка 🔐 вверху справа)"); return; }
-  editId = id;
-  searchSeq++; appIdSeq++;
-  clearTimeout(searchTimer); clearTimeout(appIdTimer);
-  titlePick = null; lastFound = []; titleAuto = false;
-  const p = id ? state.projects.find(x => x.id === id) : null;
-  $("formModalTitle").textContent = p ? "Редактирование русификатора" : "Добавление русификатора";
-  $("fSave").textContent = p ? "Сохранить" : "Опубликовать";
-  $("fAppId").value = p?.cover?.appid ? String(p.cover.appid) : "";
-  $("fTitle").value = p ? p.title : "";
-  $("fCoverUrl").value = p?.cover?.url && !p.cover.appid ? p.cover.url : "";
-  const b = p?.badge;
-  $("fBadgeOn").checked = !!b;
-  $("fBadgeText").value = b?.text || BADGE_DEFAULT.text;
-  $("fBadgeColor").value = b?.color || BADGE_DEFAULT.color;
-  renderBadgePresets();
-  setNote("");
-  $("lkList").innerHTML = "";
-  const links = p?.links?.length ? p.links : [{}];
-  links.forEach(addLinkRow);
-  refreshOrder();
-  updateCoverPreview();
-  if (p?.cover?.appid && !cachedInfo(p.cover.appid)?.header) queueAppIdLookup(true);
-  updateDriveStates();
-  $("upBlock").open = false;
-  $("formModal").classList.remove("hidden");
-}
-const closeForm = () => $("formModal").classList.add("hidden");
-
-function addLinkRow(l = {}) {
-  const box = document.createElement("div");
-  box.className = "lk-row";
-  const opts = Object.entries(SERVICES)
-    .map(([k, s]) => `<option value="${k}" ${l.type === k ? "selected" : ""}>${s.name}</option>`).join("");
-  box.innerHTML = `
-    <div class="lk-order">
-      <button type="button" class="ord up" title="Поднять выше">▲</button>
-      <button type="button" class="ord down" title="Опустить ниже">▼</button>
-    </div>
-    <select class="l-type">${opts}</select>
-    <input class="l-url" placeholder="https:// ссылка на скачивание" value="${esc(l.url || "")}">
-    <button type="button" class="ver-del" title="Убрать ссылку">✕</button>`;
-  $("lkList").appendChild(box);
-}
-
-function refreshOrder() {
-  const rows = [...$("lkList").querySelectorAll(".lk-row")];
-  rows.forEach((r, i) => {
-    r.querySelector(".ord.up").disabled = i === 0;
-    r.querySelector(".ord.down").disabled = i === rows.length - 1;
-  });
-}
-
- $("btnAdd").addEventListener("click", () => openForm());
- $("fAddLink").addEventListener("click", () => { addLinkRow(); refreshOrder(); });
- $("fCancel").addEventListener("click", closeForm);
-
- $("lkList").addEventListener("click", e => {
-  const row = e.target.closest(".lk-row");
-  if (!row) return;
-  if (e.target.closest(".ver-del")) { row.remove(); refreshOrder(); return; }
-  if (e.target.closest(".ord.up") && row.previousElementSibling) {
-    row.previousElementSibling.before(row);
-    refreshOrder();
-  } else if (e.target.closest(".ord.down") && row.nextElementSibling) {
-    row.nextElementSibling.after(row);
-    refreshOrder();
-  }
-});
- $("lkList").addEventListener("input", e => {
-  if (!e.target.classList.contains("l-url")) return;
-  const sel = e.target.closest(".lk-row").querySelector(".l-type");
-  const det = detectService(e.target.value.trim());
-  if (det !== "other") sel.value = det;
-});
-
-// ---------- Загрузка файлов на Яндекс.Диск и Google Drive ----------
-const GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-let gdToken = null, gdTokenExp = 0;
-
-const yaToken = () => localStorage.getItem(LS_YA_TOKEN) || "";
-const upBar = (id, pct) => { $(id).style.width = Math.max(0, Math.min(100, pct)) + "%"; };
-const upState = (id, text, cls = "") => { const el = $(id); el.textContent = text; el.className = "up-state " + cls; };
-
-function updateDriveStates() {
-  const has = yaToken();
-  upState("yaState", has ? "подключён" : "не подключён", has ? "ok" : "");
-  upState("gdState", CONFIG.gdriveClientId ? "настроен" : "нет Client ID в CONFIG");
-  upBar("yaBar", 0); upBar("gdBar", 0);
-}
-
-function xhrSend(url, { method = "PUT", headers = {}, body, onProgress } = {}) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(method, url);
-    for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
-    if (onProgress) xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded / e.total * 100); };
-    xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve(xhr) : reject(new Error("HTTP " + xhr.status));
-    xhr.onerror = () => reject(new Error("сеть недоступна"));
-    xhr.send(body);
-  });
-}
-
-// —— Яндекс.Диск: один PUT (без докачки) + публикация ——
-function yaApi(path, opts = {}) {
-  return fetch("https://cloud-api.yandex.net" + path,
-    { ...opts, headers: { Authorization: "OAuth " + yaToken(), ...(opts.headers || {}) } });
-}
-async function yaUpload(file, barId, stateId) {
-  if (!yaToken()) throw new Error("токен не подключён");
-  const folder = CONFIG.yandexFolder || "Русификаторы";
-  upState(stateId, "папка…");
-  const mkdir = await yaApi(`/v1/disk/resources?path=${encodeURIComponent("/" + folder)}`, { method: "PUT" });
-  if (!mkdir.ok && mkdir.status !== 409) throw new Error("не создать папку (HTTP " + mkdir.status + ")");
-  upState(stateId, "запрос…");
-  let href = null;
-  for (let i = 0; i < 5; i++) {
-    const name = i ? file.name.replace(/(\.[^.]*)$/, ` (${i})$1`) : file.name;
-    const p = "/" + folder + "/" + name;
-    const r = await yaApi(`/v1/disk/resources/upload?path=${encodeURIComponent(p)}&overwrite=false`);
-    if (r.status === 409) continue; // имя занято — пробуем «имя (2)»
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    href = { url: (await r.json()).href, path: p };
-    break;
-  }
-  if (!href) throw new Error("не нашлось свободное имя файла");
-  upState(stateId, "загрузка…");
-  await xhrSend(href.url, { body: file, onProgress: pct => { upBar(barId, pct); upState(stateId, Math.round(pct) + "%"); } });
-  upState(stateId, "публикация…");
-  const pub = await yaApi(`/v1/disk/resources/publish?path=${encodeURIComponent(href.path)}`, { method: "PUT" });
-  if (!pub.ok) throw new Error("публикация HTTP " + pub.status);
-  const link = (await pub.json()).href;
-  upBar(barId, 100);
-  upState(stateId, "готово", "ok");
-  return link;
-}
-
-// —— Google Drive: resumable частями по 8 МБ (можно докачать) ——
-function loadGsi() {
-  if (window.google?.accounts?.oauth2) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = "https://accounts.google.com/gsi/client";
-    s.async = true;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error("не удалось загрузить Google-клиент"));
-    document.head.appendChild(s);
-  });
-}
-function gdEnsureToken() {
-  if (gdToken && Date.now() < gdTokenExp) return Promise.resolve(gdToken);
-  if (!CONFIG.gdriveClientId) return Promise.reject(new Error("в CONFIG не заполнен gdriveClientId"));
-  return loadGsi().then(() => new Promise((resolve, reject) => {
-    try {
-      google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.gdriveClientId,
-        scope: GDRIVE_SCOPE,
-        callback: resp => {
-          if (resp.error) return reject(new Error("Google: " + resp.error));
-          gdToken = resp.access_token;
-          gdTokenExp = Date.now() + Math.max((resp.expires_in || 3600) - 120, 60) * 1000;
-          resolve(gdToken);
+    ]
+  },
+  "projects": [
+    {
+      "id": "blood-rage-digital-edition-mvmct4j8",
+      "title": "Blood Rage: Digital Edition",
+      "cover": {
+        "appid": "1015930",
+        "name": "Blood Rage: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1015930/capsule_616x353.jpg?t=1760950360"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/wVKPjjKESOG0iA",
+          "dl": 0
         },
-        error_callback: err => reject(new Error("Google: " + (err?.message || err?.type || "окно закрыто")))
-      }).requestAccessToken({});
-    } catch (e) { reject(e); }
-  }));
-}
-async function gdFolder(token) {
-  const name = (CONFIG.yandexFolder || "Русификаторы").replace(/'/g, "\\'");
-  const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-  const found = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`,
-    { headers: { Authorization: "Bearer " + token } });
-  if (found.ok) {
-    const j = await found.json();
-    if (j.files?.length) return j.files[0].id;
-  }
-  const made = await fetch("https://www.googleapis.com/drive/v3/files", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: JSON.stringify({ name: CONFIG.yandexFolder || "Русификаторы", mimeType: "application/vnd.google-apps.folder" })
-  });
-  if (!made.ok) throw new Error("не создать папку (HTTP " + made.status + ")");
-  return (await made.json()).id;
-}
-async function gdFinish(token, id, stateId) {
-  upState(stateId, "публикация…");
-  const perm = await fetch(`https://www.googleapis.com/drive/v3/files/${id}/permissions`, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-    body: JSON.stringify({ role: "reader", type: "anyone" })
-  });
-  if (!perm.ok) throw new Error("открыть доступ HTTP " + perm.status);
-  upState(stateId, "готово", "ok");
-  return `https://drive.google.com/file/d/${id}/view`;
-}
-async function gdUpload(file, barId, stateId) {
-  if (!file.size) throw new Error("пустой файл");
-  const token = await gdEnsureToken();
-  upState(stateId, "папка…");
-  const folderId = await gdFolder(token);
-  upState(stateId, "запрос…");
-  const init = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json; charset=UTF-8",
-      "X-Upload-Content-Type": file.type || "application/octet-stream",
-      "X-Upload-Content-Length": String(file.size)
-    },
-    body: JSON.stringify({ name: file.name, parents: [folderId] })
-  });
-  if (!init.ok) throw new Error("сессия HTTP " + init.status);
-  const loc = init.headers.get("Location") || init.headers.get("location");
-  if (!loc) {
-    // Резерв: адрес сессии не отдали — multipart одним запросом
-    upState(stateId, "загрузка…");
-    const fd = new FormData();
-    fd.append("metadata", new Blob([JSON.stringify({ name: file.name, parents: [folderId] })], { type: "application/json" }));
-    fd.append("file", file);
-    const xhr = await xhrSend("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
-      method: "POST", headers: { Authorization: "Bearer " + token }, body: fd,
-      onProgress: pct => { upBar(barId, pct); upState(stateId, Math.round(pct) + "%"); }
-    });
-    return await gdFinish(token, JSON.parse(xhr.responseText).id, stateId);
-  }
-  const chunk = 8 * 1024 * 1024;
-  let offset = 0;
-  while (true) {
-    const end = Math.min(offset + chunk, file.size);
-    upState(stateId, Math.round(end / file.size * 100) + "%");
-    const r = await fetch(loc, {
-      method: "PUT",
-      headers: { "Content-Range": `bytes ${offset}-${end - 1}/${file.size}` },
-      body: file.slice(offset, end)
-    });
-    if (r.status === 308) { offset = end; upBar(barId, end / file.size * 100); continue; }
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const id = (await r.json()).id;
-    upBar(barId, 100);
-    return await gdFinish(token, id, stateId);
-  }
-}
-
-// —— Общий процесс: параллельно на оба диска ——
-let uploading = false;
-$("upBtn").addEventListener("click", () => {
-  if (uploading) return;
-  if (!yaToken() && !CONFIG.gdriveClientId) {
-    toast("Сначала подключите хотя бы один диск", "err", 5000);
-    openDrives();
-    return;
-  }
-  $("upFile").click();
-});
-$("upFile").addEventListener("change", async () => {
-  const file = $("upFile").files[0];
-  $("upFile").value = "";
-  if (!file || uploading) return;
-  uploading = true;
-  $("upBtn").disabled = true;
-  let added = 0;
-  const finishOne = link => {
-    if (!link) return;
-    addLinkRow({ type: detectService(link), url: link });
-    refreshOrder();
-    added++;
-  };
-  const tasks = [];
-  if (yaToken()) tasks.push(
-    yaUpload(file, "yaBar", "yaState").then(finishOne)
-      .catch(e => { upState("yaState", "ошибка", "err"); toast("Яндекс.Диск: " + e.message, "err", 6000); }));
-  if (CONFIG.gdriveClientId) tasks.push(
-    gdUpload(file, "gdBar", "gdState").then(finishOne)
-      .catch(e => { upState("gdState", "ошибка", "err"); toast("Google Drive: " + e.message, "err", 6000); }));
-  await Promise.allSettled(tasks);
-  if (added) toast(added === 1 ? "Готово: ссылка добавлена — не забудьте сохранить" : `Готово: добавлено ссылок — ${added}. Не забудьте сохранить`, "ok", 6000);
-  uploading = false;
-  $("upBtn").disabled = false;
-});
-
-// —— Окно «Подключить диски» ——
-function openDrives() {
-  $("yaTokenInput").value = yaToken();
-  updateDriveStates();
-  $("drivesModal").classList.remove("hidden");
-  yaCheck();
-}
-async function yaCheck() {
-  const el = $("yaStatus");
-  if (!yaToken()) { el.textContent = "Токен не задан."; return; }
-  el.textContent = "Проверяем токен…";
-  try {
-    const r = await yaApi("/v1/disk/");
-    el.textContent = r.ok ? "Токен работает, Диск доступен." : "Токен не принят (HTTP " + r.status + ") — выпустите новый.";
-  } catch (e) { el.textContent = "Не удалось связаться с Яндексом: " + e.message; }
-}
-$("drivesSetup").addEventListener("click", openDrives);
-$("yaTokenSave").addEventListener("click", () => {
-  const v = $("yaTokenInput").value.trim();
-  if (v) localStorage.setItem(LS_YA_TOKEN, v); else localStorage.removeItem(LS_YA_TOKEN);
-  updateDriveStates();
-  yaCheck();
-  toast(v ? "Токен Яндекс.Диска сохранён" : "Токен Яндекс.Диска удалён", "ok", 4000);
-});
-$("gdConnect").addEventListener("click", async () => {
-  const el = $("gdStatus");
-  el.textContent = "Открываем окно Google…";
-  try {
-    await gdEnsureToken();
-    el.textContent = "Google Drive подключён. Токен действует ~1 час — после перерыва нажмите кнопку ещё раз.";
-    upState("gdState", "подключён", "ok");
-  } catch (e) {
-    el.textContent = e.message;
-  }
-});
-$("drivesClose").addEventListener("click", () => $("drivesModal").classList.add("hidden"));
-
-// ---------- Сохранение ----------
- $("fSave").addEventListener("click", async () => {
-  const btn = $("fSave");
-  if (btn.disabled) return;
-  if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
-
-  const title = $("fTitle").value.trim();
-  if (!title) { alert("Введите название игры"); return; }
-
-  const links = [];
-  for (const b of document.querySelectorAll("#lkList .lk-row")) {
-    const url = b.querySelector(".l-url").value.trim();
-    if (!url) continue;
-    if (!/^https?:\/\//i.test(url)) { alert("Ссылка должна начинаться с http:// или https://"); return; }
-    links.push({ type: b.querySelector(".l-type").value, url, dl: 0 });
-  }
-  if (!links.length) { alert("Добавьте хотя бы одну ссылку на скачивание"); return; }
-
-  const oldMap = new Map();
-  if (editId) {
-    const p = migrate(state.projects.find(x => x.id === editId));
-    (p.links || []).forEach(l => oldMap.set(l.url, l));
-  }
-  links.forEach(l => { const o = oldMap.get(l.url); if (o) l.dl = o.dl || 0; });
-
-  const c = effectiveCover();
-  let cover = null;
-  if (c) {
-    if (c.url) cover = { url: c.url };
-    else {
-      cover = { appid: c.appid, name: c.name || appInfoCache[c.appid]?.name || "" };
-      cover.url = c.header || steamHeaderURLs(c.appid)[0];
-      if (c.capsule) cover.capsule = c.capsule;
-    }
-  }
-
-  let badge = null;
-  if ($("fBadgeOn").checked) {
-    badge = {
-      text: $("fBadgeText").value.trim() || BADGE_DEFAULT.text,
-      color: $("fBadgeColor").value || BADGE_DEFAULT.color
-    };
-  }
-
-  if (editId) {
-    const p = state.projects.find(x => x.id === editId);
-    Object.assign(p, { title, cover, links });
-    if (badge) p.badge = badge; else delete p.badge;
-    delete p.tags;
-    delete p.stale;
-  } else {
-    state.projects.unshift({
-      id: `${slugify(title)}-${Date.now().toString(36)}`,
-      title, cover, links,
-      ...(badge ? { badge } : {}),
-      created: Date.now()
-    });
-  }
-
-  const lbl = btn.textContent;
-  btn.disabled = true; btn.textContent = editId ? "Сохраняю…" : "Публикую…";
-  try {
-    await writeData((editId ? "Обновлён: " : "Добавлен: ") + title);
-  } catch (e) {
-    toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
-    btn.disabled = false; btn.textContent = lbl;
-    return;
-  }
-  btn.disabled = false; btn.textContent = lbl;
-  render();
-  closeForm();
-  toast("Опубликовано! Посетители увидят изменения при следующем открытии сайта.", "ok", 5000);
-});
-
-for (const m of [$("loginModal"), $("gameModal")]) {
-  m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
-}
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    $("loginModal").classList.add("hidden");
-    $("gameModal").classList.add("hidden");
-    toggleFilterPanel(false);
-    $("settingsPanel").classList.add("hidden");
-    $("gearBtn").classList.remove("on");
-  }
-});
-
-function banner(text) {
-  const d = document.createElement("div");
-  d.className = "banner";
-  d.innerHTML = text;
-  grid.before(d);
-}
-
-(function setupScrollBtn() {
-  const btn = $("scrollBtn");
-  if (!btn) return;
-
-  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-  let ticking = false;
-  window.addEventListener("scroll", () => {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(() => {
-        btn.classList.toggle("show", window.scrollY > window.innerHeight * 0.6);
-        ticking = false;
-      });
-    }
-  }, { passive: true });
-
-  btn.addEventListener("click", toTop);
-})();
-
-(function setupGear() {
-  const gear = $("gearBtn"), panel = $("settingsPanel");
-  gear.addEventListener("click", e => {
-    e.stopPropagation();
-    const hidden = panel.classList.toggle("hidden");
-    gear.classList.toggle("on", !hidden);
-  });
-  panel.addEventListener("click", e => e.stopPropagation());
-})();
-
-(async function init() {
-  setAdmin(!!state.token);
-  if (CONFIG.owner === "ВАШ_НИК_GITHUB") {
-    renderSite(); renderDonate(); renderContacts(); applyView();
-    grid.innerHTML = '<div class="empty">Сайт не настроен: заполните CONFIG в начале скрипта</div>';
-    banner("⚠️ Заполните <b>CONFIG</b> (owner, repo, counterNS) и дефолтные блоки — см. настройки в начале скрипта.");
-    return;
-  }
-  try { await loadData(); }
-  catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
-  countVisit();
-  renderSite();
-  renderDonate();
-  renderContacts();
-  applyView();
-  if (state.token) {
-    gh("/user").then(u => { state.user = u.login; setAdmin(true); showVisitors(); })
-      .then(() => autoHealCovers())
-      .catch(e => {
-        if (/401/.test(e.message)) {
-          state.token = ""; localStorage.removeItem(LS_TOKEN); setAdmin(false);
-          banner("⚠️ Токен истёк или отозван. Выпустите новый на GitHub и войдите заново.");
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/9c4418d8-76a9-4b43-920d-f2510ba519c6?view=grid",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1_tlzWx6plq25kwi-Ug5-Z-hyYmPGhisM?usp=sharing",
+          "dl": 0
         }
-      });
-  }
-  render();
-})();
-</script>
-
-</body>
-</html>
+      ],
+      "created": 1792843632692
+    },
+    {
+      "id": "talisman-the-horus-heresy-classic-mvm9buvh",
+      "title": "Talisman: The Horus Heresy (Classic)",
+      "cover": {
+        "appid": "358460",
+        "name": "Talisman: The Horus Heresy (Classic)",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/358460/0a03fe70485dd8391024356818380a13059f1375/header_alt_assets_1.jpg?t=1777539901",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/358460/5d26ae03e2fc6e92295481947dca8531e12790bb/capsule_184x69_alt_assets_1.jpg?t=1777539901"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/AEJYBdv67Uw4LA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/8e9d1cd9-9c6a-41f8-9d70-0eac2b075c85?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "badge": {
+        "text": "Совместная работа",
+        "color": "#9d19f5"
+      },
+      "created": 1792837788173
+    },
+    {
+      "id": "fighting-fantasy-legends-mvm99hnx",
+      "title": "Fighting Fantasy Legends",
+      "cover": {
+        "appid": "496340",
+        "name": "Fighting Fantasy Legends",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/496340/header.jpg?t=1760518443",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/496340/capsule_184x69.jpg?t=1760518443"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/5jgHpjejNQjIHA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/cb84a790-a101-45e3-bc9a-cd9fc164879a?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1rSdFemN7FXrVVxkqOJL1A2ejc8-m-RTI?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "badge": {
+        "text": "Совместная работа",
+        "color": "#9d19f5"
+      },
+      "created": 1792837677741
+    },
+    {
+      "id": "broforce-mvm8cp2z",
+      "title": "Broforce",
+      "cover": {
+        "appid": "274190",
+        "name": "Broforce",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/274190/capsule_616x353.jpg?t=1764247760"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/hmqHc_oCJ4_Y9A",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/b8fe46cf-1c1e-435e-ba80-e2d164c21759?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1aMb0fFLnsw0Rrwfl7aJdtvxB6gj_Uoi5?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792836147707,
+      "badge": {
+        "text": "Совместная работа",
+        "color": "#9d19f5"
+      }
+    },
+    {
+      "id": "talisman-digital-classic-edition-mvlpscdl",
+      "title": "Talisman: Digital Classic Edition",
+      "cover": {
+        "appid": "247000",
+        "name": "Talisman: Digital Classic Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/247000/header_russian.jpg?t=1756199630",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/247000/capsule_184x69_russian.jpg?t=1756199630"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/BUs86J1QHJszcw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/39d8c5b8-3e39-4727-86c3-e1c2ef7e7681?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1vgkkfqnVipP-hY9axoa3Kre5gW1MwcZX?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792804965033,
+      "badge": {
+        "text": "Не обновляется",
+        "color": "#f5c518"
+      }
+    },
+    {
+      "id": "monopoly-mvlp6rew",
+      "title": "MONOPOLY",
+      "cover": {
+        "url": "https://images.igdb.com/igdb/image/upload/t_1080p/co631b.jpg"
+      },
+      "links": [
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=974747",
+          "dl": 0
+        }
+      ],
+      "created": 1792803958088
+    },
+    {
+      "id": "reiner-knizia-yellow-yangtze-mvlo3eha",
+      "title": "Reiner Knizia Yellow & Yangtze",
+      "cover": {
+        "appid": "965610",
+        "name": "Reiner Knizia Yellow & Yangtze",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965610/header.jpg?t=1767904056",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965610/capsule_184x69.jpg?t=1767904056"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/zZ10OCHmMHwlLw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/8b04da49-4a01-4ba2-a2f6-28263d071c2e?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/18gXN3da15EUztnVYzbJMspjc2osVkTIm?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792802121742
+    },
+    {
+      "id": "wings-of-glory-mvlo2t36",
+      "title": "Wings of Glory",
+      "cover": {
+        "appid": "965620",
+        "name": "Wings of Glory",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965620/capsule_616x353.jpg?t=1767903931"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/ODQ0gjvjaPc1ig",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/4255a031-bf62-485c-8d68-890a4feb73f1?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/14imDN8rTAxX8jtfdwJehb3tjGYl-36o1?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792802094018
+    },
+    {
+      "id": "welcome-to-everdell-mvlo2fg9",
+      "title": "Welcome To Everdell",
+      "cover": {
+        "appid": "2553410",
+        "name": "Welcome To Everdell",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2553410/capsule_616x353.jpg?t=1767903794"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/F5FsQKYijS_e7w",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/223d565c-c5ec-421d-add1-c533626364b7?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1OGlExBMVtkxF5xQK_XRVy8jdFmIwgGFw?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1092448",
+          "dl": 0
+        }
+      ],
+      "created": 1792802076345
+    },
+    {
+      "id": "unmatched-digital-edition-mvlo1r5q",
+      "title": "Unmatched: Digital Edition",
+      "cover": {
+        "appid": "1677980",
+        "name": "Unmatched: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1677980/13629a9a1a5067b28d01f99d885bb953b8c55c23/capsule_616x353.jpg?t=1785423348"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/xMZKgBjZBp1UAA",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1NZ1i8y9rchJeT6jiuFSHg2D27gGypO7N?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/00853402-3a7a-446e-83ec-9fc25ab05504?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1072852",
+          "dl": 0
+        }
+      ],
+      "created": 1792802044862
+    },
+    {
+      "id": "twilight-struggle-red-sea-mvlo02q9",
+      "title": "Twilight Struggle: Red Sea",
+      "cover": {
+        "appid": "1276130",
+        "name": "Twilight Struggle: Red Sea",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1276130/header.jpg?t=1684950961",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1276130/capsule_184x69.jpg?t=1684950961"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/pljHb4HalXsDHw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/0e0d9927-caea-4abd-ba07-97866da91c94?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1XoaFu7YLiYWhJM6rLmtyFp1ckOgrEqWb?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801966545
+    },
+    {
+      "id": "twilight-struggle-mvlnzm67",
+      "title": "Twilight Struggle",
+      "cover": {
+        "appid": "406290",
+        "name": "Twilight Struggle",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/header.jpg?t=1647893895",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/406290/capsule_184x69.jpg?t=1647893895"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/sb_IZhG4Xr3dpg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/ccff07d1-0185-49aa-af8a-a28e72770cbd?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1Rg7euQDcnxnrc4c2A3qRoErYYwdkiZ36?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801945087
+    },
+    {
+      "id": "ticket-to-ride-mvlnt3di",
+      "title": "Ticket to Ride",
+      "cover": {
+        "appid": "2477010",
+        "name": "Сэкономьте 70% при покупке Ticket to Ride®",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2477010/4751c635779e064bbb3ccaaf257618e295881114/capsule_616x353_alt_assets_10.jpg?t=1792584181"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/5h8qJdRRoqTjow",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1myOECu8taFky3rNtoa3-jJ40SMm9HJVz?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/18a75e93-65aa-4c4d-a703-de1d9cb862ff?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792801640790
+    },
+    {
+      "id": "the-king-s-dilemma-chronicles-mvlnsgkg",
+      "title": "The King's Dilemma: Chronicles",
+      "cover": {
+        "appid": "2069180",
+        "name": "The King's Dilemma: Chronicles",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069180/header.jpg?t=1677494055",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069180/capsule_184x69.jpg?t=1677494055"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/zW2Ra_C28FNgEQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/9e114453-382d-4805-aa28-dc6d0b078347?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1PIcHXc70fYADG9juB-jk4-7lCmBtb1aM?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801611232
+    },
+    {
+      "id": "the-isle-of-cats-mvlnrk0y",
+      "title": "The Isle of Cats",
+      "cover": {
+        "appid": "2438980",
+        "name": "The Isle of Cats",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438980/f3dbe7004eb984e682fd27720a8b6d6ec77ed538/capsule_616x353.jpg?t=1767903452"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/-QBKIA5mNmcpYA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/7e46e7e7-aff9-46d2-aae4-78a845c45823?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1BJI8wivvqUfyUT6DXxTdpgIuMCuxR2Ku?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801569058
+    },
+    {
+      "id": "the-fox-in-the-forest-mvlnr3wy",
+      "title": "The Fox in the Forest",
+      "cover": {
+        "appid": "1729050",
+        "name": "The Fox in the Forest",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1729050/capsule_616x353.jpg?t=1767903253"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/IktsZ3REutSb2g",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/de0fd8d7-dac9-47f5-94e2-d1c1ce16fda1?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1eToMv0etkRK2CYBe1IiC9pTEHLMB2dPB?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801548178
+    },
+    {
+      "id": "the-captain-is-dead-mvlnipa0",
+      "title": "The Captain is Dead",
+      "cover": {
+        "appid": "1126580",
+        "name": "The Captain is Dead",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1126580/capsule_616x353.jpg?t=1656532144"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/2JNrBXxu9ARLMA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/df3b8c85-9bf5-4d51-8952-b8c89095939a?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/11xqjj687_wbD4xIFm2brz0SNj21XA-t-?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801155960
+    },
+    {
+      "id": "terraforming-mars-mvlnh08w",
+      "title": "Terraforming Mars",
+      "cover": {
+        "appid": "800270",
+        "name": "Terraforming Mars",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/800270/b2ba0c2def4e41e550c6e494e9614e8d23512fb1/capsule_616x353.jpg?t=1769091240"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/DLl0tdrGUld5Ig",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/bb798ec5-bb0f-46c1-b76f-fd251363cb1a?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1tcOAEptaE4oWRSqZq4CsB6rPla3r8G85?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792801076864
+    },
+    {
+      "id": "сэкономьте-10-при-покупке-tape-to-tape-mvlnfaby",
+      "title": "Tape to Tape",
+      "cover": {
+        "appid": "1566200",
+        "name": "Сэкономьте 10% при покупке Tape to Tape",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1566200/19876816fec67180615cc23cf87ac27660a97311/capsule_616x353_alt_assets_2.jpg?t=1792785759"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/kxWX3-xgwI2p4g",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/9e71b5fc-971f-4c6c-8e5f-e53ff846513b?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792800996622,
+      "badge": {
+        "text": "Не обновляется",
+        "color": "#f5c518"
+      }
+    },
+    {
+      "id": "talisman-origins-classic-mvlne9km",
+      "title": "Talisman: Origins (Classic)",
+      "cover": {
+        "appid": "1033170",
+        "name": "Talisman: Origins (Classic)",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1033170/5d078b22462d96e67f5aac123a40bd83010d04b7/capsule_616x353_alt_assets_0.jpg?t=1777540232"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/MNNnIBGljfnecQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/77365ac5-2a0e-405f-ad3c-1b5a008ffb88?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/15LAmXftEh-pSE_E56Ka78kk7BdGlJ3PX?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=952832&view=findpost&p=85394470",
+          "dl": 0
+        }
+      ],
+      "created": 1792800948982
+    },
+    {
+      "id": "talisman-digital-5th-edition-mvln6hmb",
+      "title": "Talisman: Digital 5th Edition",
+      "cover": {
+        "appid": "908060",
+        "name": "Talisman: Digital 5th Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908060/902720f64083b465a043d5856acff24a5c9ffd63/header.jpg?t=1779379575",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908060/91c1ed5d58fd074f1b27500f385bc924d1159ce9/capsule_184x69.jpg?t=1779379575"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/VADsv_SqRp2oCQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/0a105ab4-f16a-4a99-914b-86dd300cc315?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1xfd05MTIWmA0f2pRvRHueIes4Btxalt1?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800586163
+    },
+    {
+      "id": "storage-hunter-simulator-mvln5yex",
+      "title": "Storage Hunter Simulator",
+      "cover": {
+        "appid": "1442430",
+        "name": "Storage Hunter Simulator",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1442430/7e80101e998d9bed0bac2fe7c73f4a13b1150a14/header.jpg?t=1788881598",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1442430/0fda12ca03b70e0e0ee26fff56f1cf3acc56856e/capsule_184x69.jpg?t=1788881598"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/xsAZDtJBnpOkPQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/203a08aa-98cf-42ef-8949-fa61a363b315?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792800561273,
+      "badge": {
+        "text": "Не обновляется",
+        "color": "#f5c518"
+      }
+    },
+    {
+      "id": "stone-age-digital-edition-mvln5k8j",
+      "title": "Stone Age: Digital Edition",
+      "cover": {
+        "appid": "2177570",
+        "name": "Stone Age: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2177570/header.jpg?t=1788436365",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2177570/capsule_184x69.jpg?t=1788436365"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/qfqSWZWG04PldA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/1fb35917-8413-4d9b-b7d1-f0e43039d1d9?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/118Xz_pXUn2bn9hGaFSFMC2Jtgs9Cmy6r?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1088317",
+          "dl": 0
+        }
+      ],
+      "created": 1792800542899
+    },
+    {
+      "id": "set-a-watch-digital-edition-mvlmzjhv",
+      "title": "Set a Watch: Digital Edition",
+      "cover": {
+        "appid": "3493430",
+        "name": "Set a Watch: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3493430/31058d2349e8f25a2a073a68e1c96bb388846c51/header.jpg?t=1769814198",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3493430/d6bc8d150243540f488d3ee2ce13a0b9552d1467/capsule_184x69.jpg?t=1769814198"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/kR1XjRkIxri7Pg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/83480ea3-538c-498c-8906-a601b8d31b1b?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1By7pHRbJL3vndvhg5ziwfvDbOPBatcdy?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800262003
+    },
+    {
+      "id": "sagrada-mvlmz4y5",
+      "title": "Sagrada",
+      "cover": {
+        "appid": "965590",
+        "name": "Sagrada",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965590/header.jpg?t=1767903067",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965590/capsule_184x69.jpg?t=1767903067"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/77hD94E3fGPBUg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/a1a1f740-7f77-49af-aadc-9fe28910d973?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1Vm44rs65gw-R-HC7ON9ldZqBWgCX_Rjk?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800243149
+    },
+    {
+      "id": "raiders-of-the-north-sea-mvlmyot7",
+      "title": "Raiders of the North Sea",
+      "cover": {
+        "appid": "965600",
+        "name": "Raiders of the North Sea",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965600/header.jpg?t=1767902947",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/965600/capsule_184x69.jpg?t=1767902947"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/AlnOwrnVYPqV3w",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/e7a614e4-2069-4b1b-b461-cc057c135164?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1sVdOLfvBByDI9X2PCI5bweEsFGYRB5-q?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800222235
+    },
+    {
+      "id": "power-chord-mvlmy6o3",
+      "title": "Power Chord",
+      "cover": {
+        "appid": "1724390",
+        "name": "Power Chord",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1724390/header.jpg?t=1679059179",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1724390/capsule_184x69.jpg?t=1679059179"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/kt_ftPzyZ1Cchg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/b52229b6-e107-4d86-bab5-165b376269dc?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1BdhZDe4DzeLCYqtKUSxFCsfDRqSrt6_2?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800198723
+    },
+    {
+      "id": "potion-explosion-mvlmxl0f",
+      "title": "Potion Explosion",
+      "cover": {
+        "appid": "788420",
+        "name": "Potion Explosion",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/788420/header.jpg?t=1731075937",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/788420/capsule_184x69.jpg?t=1731075937"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/tjlHbTx5LyUhbg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/c2173b3d-dc2b-4a88-aa85-1974a5beffc3?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1xJr1xy_3ZQgrZBiSBoz7mngQ5M8xWRNz?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800170655
+    },
+    {
+      "id": "pathfinder-adventures-mvlmx9wj",
+      "title": "Pathfinder Adventures",
+      "cover": {
+        "appid": "480640",
+        "name": "Pathfinder Adventures",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/480640/header.jpg?t=1726058377",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/480640/capsule_184x69.jpg?t=1726058377"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/BqihYiXB3sLGjg",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1ghgdDvFMc7LtZ4UgwFiEJ-DNTnoPrz2j?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800156259
+    },
+    {
+      "id": "overboss-mvlmwrct",
+      "title": "Overboss",
+      "cover": {
+        "appid": "2109390",
+        "name": "Overboss",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2109390/header.jpg?t=1778505901",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2109390/capsule_184x69.jpg?t=1778505901"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/VHg1sDzhuVUD6w",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/66b01cd4-1c84-4c1e-aa50-ea94cfa183b5?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/199kUzByOjLQCVR_d41mcLRO3xWUahWe_?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800132221
+    },
+    {
+      "id": "nemesis-lockdown-mvlmw2st",
+      "title": "Nemesis: Lockdown",
+      "cover": {
+        "appid": "1915550",
+        "name": "Nemesis: Lockdown",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1915550/header.jpg?t=1724323885",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1915550/capsule_184x69.jpg?t=1724323885"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/GYaBv3S4gbHIDw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/d8bf5732-7e34-41b1-bf9f-27f66147f13f?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/17PADfc-f2vv2Muulh83QMO0wFWY0OG7k?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792800100397
+    },
+    {
+      "id": "mystic-vale-mvlms5uz",
+      "title": "Mystic Vale",
+      "cover": {
+        "appid": "908070",
+        "name": "Mystic Vale",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908070/header.jpg?t=1760518129",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/908070/capsule_184x69.jpg?t=1760518129"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/P-KcG897Xr681Q",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1L4u72zRRp2s7Nauin93TNraBnABx_zdF?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/c7e88c98-2a75-44cf-a0d1-0e1b70388cd9?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792799917739
+    },
+    {
+      "id": "munchkin-digital-mvlmqh46",
+      "title": "Munchkin Digital",
+      "cover": {
+        "appid": "1722860",
+        "name": "Munchkin Digital",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/header.jpg?t=1788454320",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722860/capsule_184x69.jpg?t=1788454320"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/UcabQGHDorNtqA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/afd41880-eecf-4269-b597-ceb63ad04a23?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1ZPTKfY8a1x5OhWJBRKHoT8ZP12efUX5h?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1073175&view=findpost&p=124022739",
+          "dl": 0
+        }
+      ],
+      "created": 1792799839014
+    },
+    {
+      "id": "let-them-trade-mvlmoj6f",
+      "title": "Let Them Trade",
+      "cover": {
+        "appid": "1313290",
+        "name": "Let Them Trade",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/03febd9b7c531a5a685fc46c0f06a6f249a2e273/header.jpg?t=1792070270",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1313290/c2b85763fab13ed1068cffe2013de2dcc9d344bf/capsule_184x69.jpg?t=1792070270"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/jTwfRJyk3JiTdg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/1db76d38-4cf6-4203-9a50-c7ee07dfb2c2?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/10SG8vZbeaNauhOhE0jrT3m_cMLGiiv1N?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792799748375
+    },
+    {
+      "id": "le-havre-the-inland-port-mvlmm9st",
+      "title": "Le Havre: The Inland Port",
+      "cover": {
+        "appid": "511820",
+        "name": "Сэкономьте 80% при покупке Le Havre: The Inland Port",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/511820/capsule_616x353.jpg?t=1741270713"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/8PJnKM8CMHRjDg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/ef319574-4060-4ba8-8f6b-3df91e622df5?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1uojgX2aTmw_j5gFXehh2zCHKMw5WCN1B?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792799642909
+    },
+    {
+      "id": "labyrinth-the-war-on-terror-mvlml5bd",
+      "title": "Labyrinth: The War on Terror",
+      "cover": {
+        "appid": "931950",
+        "name": "Labyrinth: The War on Terror",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/header.jpg?t=1666393189",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/931950/capsule_184x69.jpg?t=1666393189"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/RggpP6zPbCxccA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/9cb796ac-d729-4ec8-aa3d-d255f1b83d7e?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/14sD10qi_KjqiUSG197JVUgEYZUEztQSs?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792799590441
+    },
+    {
+      "id": "kingdom-of-cards-mvlmjj7r",
+      "title": "Kingdom of Cards",
+      "cover": {
+        "appid": "3160500",
+        "name": "Kingdom of Cards",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/header.jpg?t=1758551676",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3160500/3f5b57f5b45e4f34c60a99a9e9a39740ebda810e/capsule_184x69.jpg?t=1758551676"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/YOzTmwRSP4l9dw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/fbd34149-d5e9-40d2-87f3-8a6b79495dae?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1z1X5soXMufwACbAF6wcdZ1uJhZ8DZ5o7?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792799515143
+    },
+    {
+      "id": "k2-digital-edition-mvlmitaz",
+      "title": "K2: Digital Edition",
+      "cover": {
+        "appid": "2561310",
+        "name": "K2: Digital Edition",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2561310/capsule_616x353.jpg?t=1763553739"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/qTB-_lbwRelAUg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/74b851ad-5dc3-4640-a858-f6239f38e766?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1szHD2QgtCm4hRc3pjAPdTsSeFuZjd5kZ?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792799481563
+    },
+    {
+      "id": "istanbul-digital-edition-mvlme322",
+      "title": "Istanbul: Digital Edition",
+      "cover": {
+        "appid": "943410",
+        "name": "Istanbul: Digital Edition",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/943410/f4e8c36eff1bb074c07a6b4cc96f2d6167f7da23/capsule_616x353.jpg?t=1772553316"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/6MZszLY5wfy6fw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/7ac5a170-92e2-4e97-8d17-3d3ede0d90ab?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1SqT2kRRsRPJ-stRGgHOygyv6Jk_9vvCa?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=907225&view=findpost&p=74562799",
+          "dl": 0
+        }
+      ],
+      "created": 1792799260922
+    },
+    {
+      "id": "inkborn-mvlmdf40",
+      "title": "Inkborn",
+      "cover": {
+        "appid": "2924580",
+        "name": "Inkborn",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2924580/547cf4021992c050be48a85429821bf4c65f8a99/capsule_616x353_alt_assets_8.jpg?t=1792510079"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/ewSq2oTynPjr3g",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1_5l_M_xO0BY0UI8GJ-e_AOpR2zYP9OED?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/bf048cb9-dda3-401c-ac76-15c53be5029b?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792799229888
+    },
+    {
+      "id": "howl-mvlm840y",
+      "title": "Howl",
+      "cover": {
+        "appid": "2172180",
+        "name": "Howl",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2172180/85caa6e7aa3a72906f7b72a04514181073f114b7/header.jpg?t=1754385397",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2172180/5071a299c1f8ecb8eabefd1cd5ea1aaa48bff14d/capsule_184x69.jpg?t=1754385397"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/Yw7WMFG4X8zljQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/4f90bb8e-f803-4a4a-9c40-daaeb3e25fe7?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1rXf1Tyg7t7nZVkBnLGN9DNrAVPVtl7lo?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798982242
+    },
+    {
+      "id": "here-be-dragons-mvlm6me8",
+      "title": "Here Be Dragons",
+      "cover": {
+        "appid": "945680",
+        "name": "Here Be Dragons",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/945680/header.jpg?t=1667390066",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/945680/capsule_184x69.jpg?t=1667390066"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/42tbYxBnKSUidw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/cb57dfc2-265f-49fb-b68b-113e29547799?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1qOD9_y9mFv1ECvzxH6Y1NV67h3Or0ZXF?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798912736
+    },
+    {
+      "id": "hasbro-s-battleship-mvlm61x9",
+      "title": "Hasbro's BATTLESHIP",
+      "cover": {
+        "appid": "893050",
+        "name": "Сэкономьте 85% при покупке Hasbro's BATTLESHIP",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/893050/capsule_616x353.jpg?t=1752167994"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/NQ3bruEY-QbD9g",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/0a8d7957-db46-4fb4-b4d4-7ae721953ec4?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1b6bcVnODcFko_lXv-LrRmMccXFJCoOJt?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798886205
+    },
+    {
+      "id": "fury-of-dracula-digital-edition-mvlm3pc4",
+      "title": "Fury of Dracula: Digital Edition",
+      "cover": {
+        "appid": "958530",
+        "name": "Fury of Dracula: Digital Edition",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/958530/capsule_616x353.jpg?t=1760518039"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/DsM_AYDZLKw1-Q",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/c7f048c3-ddcc-4553-b708-0e115b1d04a5?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/13aO655orx-7esI-z2RrpzZVmio5gRrip?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798776580
+    },
+    {
+      "id": "exploding-kittens-2-mvlm2sfg",
+      "title": "Exploding Kittens® 2",
+      "cover": {
+        "appid": "2999030",
+        "name": "Сэкономьте 70% при покупке Exploding Kittens® 2",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2999030/821be9a55cbc7863392bf603e7ad0d178477d20e/capsule_616x353.jpg?t=1787313738"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/WMOYiNiQy_y3yQ",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1lGZSLOkpL-LJ6LzY7_JJ0fl--LQ5O7fh?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/2bd9ec1f-cbf2-49ad-9c1c-fbb4039a500a?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1093016",
+          "dl": 0
+        }
+      ],
+      "created": 1792798733932
+    },
+    {
+      "id": "evergreen-the-board-game-mvlm1480",
+      "title": "Evergreen: The Board Game",
+      "cover": {
+        "appid": "2238070",
+        "name": "Evergreen: The Board Game",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2238070/capsule_616x353.jpg?t=1715265295"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/NrDsDTFgUCy3_g",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/b89ba571-8c16-49be-822d-28cf87a85430?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1RNSQbOGhnSuUtTT_dc77CUBzHwHS8gTb?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798655904
+    },
+    {
+      "id": "everdell-mvlm0944",
+      "title": "Everdell",
+      "cover": {
+        "appid": "1722840",
+        "name": "Everdell",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722840/header.jpg?t=1778777751",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722840/capsule_184x69.jpg?t=1778777751"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/U2PQL4Uz28-RkA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/57f7429d-0c1f-4bb3-a6c8-625f50e698ef?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1R3zkplZUZrGw5YgTRH0oscLNeAP6FTrO?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1092443",
+          "dl": 0
+        }
+      ],
+      "created": 1792798615588
+    },
+    {
+      "id": "escape-tales-the-awakening-mvllwu84",
+      "title": "Escape Tales: The Awakening",
+      "cover": {
+        "appid": "2921150",
+        "name": "Escape Tales: The Awakening",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2921150/capsule_616x353.jpg?t=1729789091"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/zfqaIg2AX9HKtA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/18d5fd43-d73d-4eb8-8550-2393aa72edc4?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1jaCPOIMJMJOlQ6nmY-v0Gcjf2f3B5Fgs?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792798456324
+    },
+    {
+      "id": "dune-imperium-mvllu80o",
+      "title": "Dune: Imperium",
+      "cover": {
+        "appid": "1689500",
+        "name": "Dune: Imperium",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1689500/1bfdfcb98addc21208ea6b3f15a5448c55c4f38c/capsule_616x353.jpg?t=1781022179"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/Zw07WxhA4i19ZA",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1LC8MUNVRLlaQ55DdYELIgYUlQcMUo0Zj?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/3c11ea2c-88b1-4ce6-9ab7-fb739f45f774?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1086185&view=findpost&p=129041629",
+          "dl": 0
+        }
+      ],
+      "created": 1792798334232
+    },
+    {
+      "id": "decks-daggers-mvljuknx",
+      "title": "Decks Daggers",
+      "cover": {
+        "appid": "1431950",
+        "name": "Decks & Daggers",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1431950/header.jpg?t=1634109034",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1431950/capsule_184x69.jpg?t=1634109034"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/xu8ighQ2Sd-xCQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/7900672c-5cdf-447e-ac5e-c77ac986c0b7?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1oNwjg5a-0TsKYGo9qMjn_hFceaXBmVCy?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792794991389
+    },
+    {
+      "id": "death-roads-tournament-mvljrqix",
+      "title": "Death Roads: Tournament",
+      "cover": {
+        "appid": "1619570",
+        "name": "Death Roads: Tournament",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1619570/header.jpg?t=1724144013",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1619570/capsule_184x69.jpg?t=1724144013"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/qtPLU4m9lvZOkw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/d6e4da48-4536-4558-8a20-74ee4c261d25?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1a6Udtjk_VubaccVpK0b9WTGte18N0FzZ?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792794859017
+    },
+    {
+      "id": "dawnmaker-mvljmgot",
+      "title": "Dawnmaker",
+      "cover": {
+        "appid": "2749100",
+        "name": "Dawnmaker",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2749100/header.jpg?t=1769451193",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2749100/86b99fb7f0dd564a46431ebe96ad5c09048281ac/capsule_184x69.jpg?t=1769451193"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/toOwETO0YctT3g",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1Zn20_3XMwV-GCdURewyTVOt8udJWN7Ar?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/50f44ee4-2c2c-4f11-bba1-a4a2505db2c4?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792794612989
+    },
+    {
+      "id": "crime-o-clock-mvljjx11",
+      "title": "Crime O'Clock",
+      "cover": {
+        "appid": "1736290",
+        "name": "Crime O'Clock",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1736290/header.jpg?t=1712675428",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1736290/capsule_184x69.jpg?t=1712675428"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/hcj83_b5I9EjHg",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/1846b12b-e81b-4442-a180-1ef361d9e32a?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1fYE434MEODu1504K2dboRMKCg-Y9YFfk?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792794494197
+    },
+    {
+      "id": "concordia-digital-edition-mvlji7xq",
+      "title": "Concordia: Digital Edition",
+      "cover": {
+        "appid": "1450330",
+        "name": "Concordia: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1450330/a192c66f78fcc0247e625af8a4e0672de25fc2cf/header.jpg?t=1773923584",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1450330/36038842d031ee4f335722543b140803a9d2e503/capsule_184x69.jpg?t=1773923584"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/bYhUwIdKuKtEIw",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1ZeABxKA_9kLDUXSeV5qcp0qVwBuMLtW_?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/65b77f0c-562d-4fb8-b37f-1ca232035184?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1033846",
+          "dl": 0
+        }
+      ],
+      "created": 1792794415023
+    },
+    {
+      "id": "clue-cluedo-classic-edition-mvljg6cl",
+      "title": "Clue/Cluedo: Classic Edition",
+      "cover": {
+        "appid": "794800",
+        "name": "Clue/Cluedo: Classic Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/794800/b53a7b2070558728da452e83322028e617085c72/header.jpg?t=1748350571",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/794800/c2768f08fe0228c50d8af77e0fcad38834f3a187/capsule_184x69.jpg?t=1748350571"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/VnKJOJavgB2-5Q",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/54767002-ef63-4c4e-a7f1-cabd9f7f675f?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1-HYhvAt29dhEQV9xMs_w2cLMDKeg5YuW?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=187610",
+          "dl": 0
+        }
+      ],
+      "created": 1792794319653
+    },
+    {
+      "id": "clue-cluedo-mvlj9vni",
+      "title": "Clue/Cluedo",
+      "cover": {
+        "appid": "2506480",
+        "name": "Clue/Cluedo",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2506480/066983e66c03169ed617c7e7fa876074ae67ba7e/header_alt_assets_9.jpg?t=1791792661",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2506480/17089fbd0270a56e6d3908ad8792e5328a763479/capsule_184x69_alt_assets_9.jpg?t=1791792661"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/S61uyJXWbBwMPw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/c67773bb-9443-4a49-92ad-fae8695a4630?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/15rQ5XwVF8nK77CHUoihX3G2elM8QRSNt?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792794025854
+    },
+    {
+      "id": "clank-mvlj90ek",
+      "title": "Clank!",
+      "cover": {
+        "appid": "1722870",
+        "name": "Clank!",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722870/ed76a3e3ba468f4f7c3dd8d49b36f905534660c9/header_alt_assets_1.jpg?t=1773855162",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1722870/8affa2524082c304f24fb6c4e8d477c1cbbda6f9/capsule_184x69_alt_assets_1.jpg?t=1773855162"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/97-G0Y7KH-T7IA",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1OrWCSlOJWs_JhTxRv-ExZ9QMvgs1etD6?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/9c9cc342-638b-431c-98d3-17809bb244b9?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792793985356
+    },
+    {
+      "id": "charterstone-digital-edition-mvlizs0s",
+      "title": "Charterstone: Digital Edition",
+      "cover": {
+        "appid": "1046660",
+        "name": "Charterstone: Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046660/header.jpg?t=1753693728",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1046660/capsule_184x69.jpg?t=1753693728"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/8p2vWlqIpCMVWA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/7b49cf0b-a1b7-4a41-a50c-9ad09db6e3c8?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1VHKyz82Tz9mTdgGp2nCvNifRdzjUlNEg?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1073341",
+          "dl": 0
+        }
+      ],
+      "created": 1792793554588
+    },
+    {
+      "id": "cascadia-mvlixns2",
+      "title": "Cascadia",
+      "cover": {
+        "appid": "2438970",
+        "name": "Cascadia",
+        "url": "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2438970/capsule_616x353.jpg?t=1767897466"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/aeD6TIGDnR3aXw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/ef214dc1-485c-4a7e-9e77-3f45a0e417cc?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1mJfduJyA4H15Q1uvEEn9zcQwFBdkMLex?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792793455778
+    },
+    {
+      "id": "carcassonne-tiles-tactics-mvlidjk9",
+      "title": "Carcassonne - Tiles & Tactics",
+      "cover": {
+        "appid": "598810",
+        "name": "Carcassonne - Tiles & Tactics",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/598810/header.jpg?t=1758125330",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/598810/capsule_184x69.jpg?t=1758125330"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/7kOY050FTQqIWQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/8e15d188-e3bf-4dd2-b294-2948fdea609e?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1aEpjqZG94oJhJzhzs3nx5kQICKJ2b8gd?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=876024",
+          "dl": 0
+        }
+      ],
+      "created": 1792792517193
+    },
+    {
+      "id": "brass-birmingham-mvlibhcb",
+      "title": "Brass: Birmingham",
+      "cover": {
+        "appid": "1287920",
+        "name": "Brass: Birmingham",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1287920/header.jpg?t=1780346468",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1287920/capsule_184x69.jpg?t=1780346468"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/xvK5pDx5b4i_MA",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/74984210-2774-4dca-8a23-29eb964d1939?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1aWKEr4uixg5711WUIG_4CWArDTSvxMAm?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792792421003
+    },
+    {
+      "id": "blocky-dungeon-mvli0p2q",
+      "title": "Blocky Dungeon",
+      "cover": {
+        "appid": "1683370",
+        "name": "Blocky Dungeon",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1683370/header.jpg?t=1687795042",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1683370/capsule_184x69.jpg?t=1687795042"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/mrKpEA0AzJCAYQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/39849f05-0e88-4737-aeaf-ce5bc5c60aa3?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1mPJL2KthMTmYOoR5d9AkrvI5vcSoX1jO?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792791917810
+    },
+    {
+      "id": "arkham-horror-mother-s-embrace-mvlhzzlz",
+      "title": "Arkham Horror: Mother's Embrace",
+      "cover": {
+        "appid": "840210",
+        "name": "Сэкономьте 80% при покупке Arkham Horror: Mother's Embrace",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/840210/capsule_616x353.jpg?t=1741270543"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/41KvrzHFPUklQw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/2a82e4a2-60aa-407d-87f4-7c6b713e15a6?isFromShowcase=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1H-oOfkOCwf1QngfZzrBe6DgzcJJ_CsPT?usp=sharing",
+          "dl": 0
+        }
+      ],
+      "created": 1792791884807
+    },
+    {
+      "id": "ark-nova-mvlh51bz",
+      "title": "Ark Nova",
+      "cover": {
+        "appid": "2438990",
+        "name": "Ark Nova",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438990/header.jpg?t=1767897183",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2438990/2b3fca049923556bf45bed02055d4c4f56285084/capsule_184x69.jpg?t=1767897183"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/jFvXCffjlRiehg",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1s3yo4GhK6cIu1nMvtOzxFP0HMUeMfi7V?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/703182d9-d525-4338-a91b-b5a63bd2bb07?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792790440703
+    },
+    {
+      "id": "ancient-enemy-mvlgljch",
+      "title": "Ancient Enemy",
+      "cover": {
+        "appid": "993790",
+        "name": "Ancient Enemy",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/993790/header.jpg?t=1779462503",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/993790/capsule_184x69.jpg?t=1779462503"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/jFvXCffjlRiehg",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/19GJkbKhjf7nbLHbz2bhVc2E6uPio7tYw?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/437df294-700b-4344-bd5c-a47eb58ed578?isFromShowcase=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792789530929
+    },
+    {
+      "id": "adore-mvlgco6s",
+      "title": "Adore",
+      "cover": {
+        "appid": "1074620",
+        "name": "Adore",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1074620/5fd93d522efe0cdf4ec916d5a3d3ddb98e21229c/header.jpg?t=1760528956",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1074620/capsule_184x69.jpg?t=1760528956"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/f8O03AUGRqJjuQ",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/31716b40-ef01-4636-999e-5e049f605f5a?isFromShowcasePreview=true",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1FrI2Nj7UlWje0rybSVCeWsAEdXLvYKf_?usp=drive_link",
+          "dl": 0
+        }
+      ],
+      "created": 1792789117300
+    },
+    {
+      "id": "above-the-snow-mvlg7u1m",
+      "title": "Above the Snow",
+      "cover": {
+        "appid": "2423760",
+        "name": "Above the Snow",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2423760/4499772f65f0042c24d760f22a589017d04aed36/header.jpg?t=1791324155",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2423760/922469681cec5936ee3a231fbaef8157865685b2/capsule_184x69.jpg?t=1791324155"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/cVuWKwrEXIkYhw",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/e3188483-fd06-477d-baee-48477e7bc5f6?isFromShowcasePreview=true",
+          "dl": 0
+        }
+      ],
+      "created": 1792788891610,
+      "badge": {
+        "text": "Не обновляется",
+        "color": "#f5c518"
+      }
+    },
+    {
+      "id": "a-game-of-thrones-the-board-game-digital-edition-mvlg5ji9",
+      "title": "A Game of Thrones: The Board Game - Digital Edition",
+      "cover": {
+        "appid": "1075190",
+        "name": "A Game of Thrones: The Board Game - Digital Edition",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1075190/header.jpg?t=1742483806",
+        "capsule": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1075190/capsule_184x69.jpg?t=1742483806"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/ldSmOlkkfD9Zcw",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1FfkDpQr97e57-C_JN3Ufb4koy6F1s9F2?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/6d5953e2-525c-4f3e-a727-00ae433a5bcc?isFromShowcasePreview=true",
+          "dl": 0
+        },
+        {
+          "type": "pda4",
+          "url": "https://4pda.to/forum/index.php?showtopic=1022161",
+          "dl": 0
+        }
+      ],
+      "created": 1792788784641
+    }
+  ]
+}
