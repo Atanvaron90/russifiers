@@ -93,10 +93,9 @@
   .settings-panel { width:200px; }
   .v-panel { min-width:190px; }
   .filter-panel.hidden, .settings-panel.hidden, .v-panel.hidden { display:none; }
-  .v-row { display:flex; justify-content:space-between; align-items:baseline; gap:16px; font-size:.9rem; }
-  .v-row span { color:var(--muted); }
-  .v-row b { color:var(--text); font-size:1rem; }
-  .filter-panel .f-title, .settings-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
+  .v-row { font-size:.9rem; color:var(--text); }
+  .v-row b { font-weight:700; }
+  .filter-panel .f-title, .settings-panel .f-title, .v-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
   .f-chip {
     display:inline-flex; align-items:center; gap:6px;
     border:1px solid var(--border); border-radius:10px;
@@ -122,9 +121,8 @@
     align-self:center; padding:12px 14px; background:var(--card);
     border:1px solid var(--border); border-radius:10px;
     color:var(--text); font-size:.95rem; white-space:nowrap;
-    margin-left:auto;
   }
-  .uv-wrap { position:relative; align-self:center; display:inline-flex; margin-left:8px; }
+  .uv-wrap { position:relative; align-self:center; display:inline-flex; }
   #statVisitors { cursor:pointer; font-family:inherit; }
   #statVisitors:hover { border-color:var(--accent); }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
@@ -494,8 +492,9 @@
         <span id="uvShort">—</span>
       </button>
       <div id="visitorsPanel" class="v-panel hidden" role="status">
-        <div class="v-row"><span>Посетителей:</span><b id="uvTotal">—</b></div>
-        <div class="v-row"><span>Сегодня:</span><b id="uvToday">—</b></div>
+        <div class="f-title">Уникальные посетители:</div>
+        <div class="v-row">Всего — <b id="uvTotal">—</b></div>
+        <div class="v-row">Сегодня — <b id="uvToday">—</b></div>
       </div>
     </div>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
