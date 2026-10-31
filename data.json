@@ -740,7 +740,7 @@ const CONFIG = {
   contactsFile: "contacts.json",
   siteFile: "site.json",
   counterNS: "my-russifiers-site", // УНИКАЛЬНОЕ имя для счётчиков!
-  metricaId: "113956215",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
+  metricaId: "",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
   // —— Загрузка файлов на диски через форму (необязательно) ——
   gdriveClientId: "",            // OAuth Client ID из Google Cloud Console (...apps.googleusercontent.com)
   yandexFolder: "Русификаторы"   // имя папки на обоих дисках — создаётся автоматически
