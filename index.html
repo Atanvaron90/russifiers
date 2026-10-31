@@ -47,15 +47,12 @@
   @media (max-width:640px) {
     .title-text h1 { font-size:1.45rem; }
     .site-logo { max-height:48px; }
-    .title-edit { top:-4px; right:-28px; font-size:.85rem; }
+    .title-edit { top:-4px; right:-4px; font-size:.85rem; }
   }
 
-  .auth-btn {
-    position:absolute; top:8px; right:22px;
-    background:none; border:none; cursor:pointer;
-    font-size:1.1rem; opacity:.4; padding:6px; line-height:1;
-  }
-  .auth-btn:hover { opacity:.9; }
+  /* Вход/выход администратора — клик по аватару сайта */
+  .site-logo, .logo-fallback { cursor:pointer; }
+  .site-logo:hover, .logo-fallback:hover { filter:brightness(1.25); }
 
   .toolbar { max-width:1000px; margin:0 auto; padding:0 20px; display:flex; gap:10px; flex-wrap:wrap; }
 
@@ -91,9 +88,9 @@
   .filter-panel { left:0; right:0; }
   .settings-panel, .v-panel { right:0; }
   .settings-panel { width:200px; }
-  .v-panel { min-width:190px; }
+  .v-panel { right:0; min-width:190px; flex-direction:column; align-items:stretch; }
   .filter-panel.hidden, .settings-panel.hidden, .v-panel.hidden { display:none; }
-  .v-row { font-size:.9rem; color:var(--text); }
+  .v-row { display:block; font-size:.9rem; color:var(--text); }
   .v-row b { font-weight:700; }
   .filter-panel .f-title, .settings-panel .f-title, .v-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
   .f-chip {
@@ -224,7 +221,8 @@
     }
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
-    .uv-wrap { order:3; }
+    .uv-wrap { order:3; position:static; }
+    .v-panel { left:12px; right:12px; min-width:0; }
     #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
     #btnAdd .m-full { display:none; }
     #btnAdd .m-short { display:inline; }
@@ -449,7 +447,6 @@
 
 <div class="sticky-top">
   <header>
-    <button id="authBtn" class="auth-btn" title="Вход администратора">🔐</button>
     <div class="title-row">
       <img id="siteLogo" class="site-logo" alt="">
       <span id="logoFallback" class="logo-fallback">🌐</span>
@@ -1985,12 +1982,13 @@ function openGame(id) {
 // ---------- Вход администратора ----------
 function setAdmin(on) {
   document.body.classList.toggle("admin", on);
-  $("authBtn").textContent = on ? "🚪" : "🔐";
-  $("authBtn").title = on
+  const t = on
     ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
     : "Вход администратора";
+  $("siteLogo").title = t;
+  $("logoFallback").title = t;
 }
- $("authBtn").addEventListener("click", () => {
+const authClick = () => {
   if (state.token) {
     if (!confirm("Выйти из режима администратора?")) return;
     state.token = ""; state.user = "";
@@ -2000,7 +1998,9 @@ function setAdmin(on) {
     $("loginModal").classList.remove("hidden");
     $("tokenInput").focus();
   }
-});
+};
+$("siteLogo").addEventListener("click", authClick);
+$("logoFallback").addEventListener("click", authClick);
  $("loginOk").addEventListener("click", async () => {
   const t = $("tokenInput").value.trim();
   if (!t) return;
