@@ -82,15 +82,20 @@
   .search-toggle:hover { border-color:var(--accent); color:var(--text); }
   .search-toggle.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   @keyframes searchSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
-  .filter-panel, .settings-panel {
+  .filter-panel, .settings-panel, .v-panel {
     position:absolute; top:calc(100% + 8px); z-index:30;
     background:var(--card); border:1px solid var(--border); border-radius:12px;
     padding:12px; box-shadow:0 12px 30px rgba(0,0,0,.5);
     display:flex; flex-direction:column; gap:8px; align-items:stretch;
   }
   .filter-panel { left:0; right:0; }
-  .settings-panel { right:0; width:200px; }
-  .filter-panel.hidden, .settings-panel.hidden { display:none; }
+  .settings-panel, .v-panel { right:0; }
+  .settings-panel { width:200px; }
+  .v-panel { min-width:190px; }
+  .filter-panel.hidden, .settings-panel.hidden, .v-panel.hidden { display:none; }
+  .v-row { display:flex; justify-content:space-between; align-items:baseline; gap:16px; font-size:.9rem; }
+  .v-row span { color:var(--muted); }
+  .v-row b { color:var(--text); font-size:1rem; }
   .filter-panel .f-title, .settings-panel .f-title { width:100%; font-size:.78rem; color:var(--muted); }
   .f-chip {
     display:inline-flex; align-items:center; gap:6px;
@@ -119,7 +124,9 @@
     color:var(--text); font-size:.95rem; white-space:nowrap;
     margin-left:auto;
   }
-  #statVisitors { margin-left:8px; }
+  .uv-wrap { position:relative; align-self:center; display:inline-flex; margin-left:8px; }
+  #statVisitors { cursor:pointer; font-family:inherit; }
+  #statVisitors:hover { border-color:var(--accent); }
   .tool-btn { padding:12px 16px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:.95rem; }
   .tool-btn:hover { border-color:var(--accent); }
   .tool-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
@@ -219,6 +226,7 @@
     }
     .gear-btn { display:inline-flex; order:2; }
     .stat-chip { order:3; margin-left:0; }
+    .uv-wrap { order:3; }
     #btnAdd { order:4; margin-left:0; padding:12px; font-size:.9rem; }
     #btnAdd .m-full { display:none; }
     #btnAdd .m-short { display:inline; }
@@ -481,7 +489,15 @@
       <option value="compact">Список</option>
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
-    <span id="statVisitors" class="stat-chip admin-only" title="Уникальные посетители: всего и за сегодня (каждый браузер считается один раз)"></span>
+    <div class="uv-wrap admin-only">
+      <button id="statVisitors" class="stat-chip" type="button" title="Уникальные посетители: всего / за сегодня">
+        <span id="uvShort">—</span>
+      </button>
+      <div id="visitorsPanel" class="v-panel hidden" role="status">
+        <div class="v-row"><span>Посетителей:</span><b id="uvTotal">—</b></div>
+        <div class="v-row"><span>Сегодня:</span><b id="uvToday">—</b></div>
+      </div>
+    </div>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
     <button id="btnAdd" class="tool-btn primary admin-only">
       <span class="m-full">Добавить русификатор</span><span class="m-short">Добавить</span>
@@ -1225,20 +1241,53 @@ const mergedData = () => ({
   projects: state.projects
 });
 const writeData = message => putJson(CONFIG.dataFile, mergedData(), message);
+
+// Чтение файла из репозитория с резервными источниками: raw.githubusercontent.com →
+// тот же файл на самом сайте (GitHub Pages) → jsDelivr CDN. Если провайдер/DPI или сбой
+// GitHub подменяют raw HTML-страницей — данные всё равно загрузятся с другого источника.
+const hostOf = u => { try { return new URL(u).host; } catch (e) { return u; } };
+let repoSrc = 0; // рабочий источник запоминается на время сессии
+async function fetchRepoFile(file) {
+  const build = [
+    f => `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${f}?t=${Date.now()}`,
+    f => new URL(f, location.href).href + "?t=" + Date.now(),
+    f => `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/${f}?t=${Date.now()}`
+  ];
+  const order = [repoSrc, (repoSrc + 1) % 3, (repoSrc + 2) % 3];
+  let lastErr = null;
+  for (const i of order) {
+    const u = build[i](file);
+    try {
+      const r = await fetch(u, { cache: "no-store" });
+      if (r.status === 404) { repoSrc = i; return { notFound: true }; }
+      if (!r.ok) { lastErr = new Error("HTTP " + r.status + " (" + hostOf(u) + ")"); continue; }
+      const txt = await r.text();
+      if (txt.trimStart().startsWith("<")) { lastErr = new Error("источник " + hostOf(u) + " вернул HTML вместо JSON"); continue; }
+      repoSrc = i;
+      return { text: txt };
+    } catch (e) {
+      lastErr = e;
+      console.warn("Источник недоступен:", hostOf(u), e && e.message);
+    }
+  }
+  throw lastErr || new Error("файл " + file + " недоступен");
+}
+
 async function loadData() {
   // Дефолты — пока файлы не загружены (или их нет)
   state.site = { ...SITE_DEFAULT };
   state.donate = DONATE_DEFAULT;
   state.contacts = CONTACTS_DEFAULT;
-  const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`);
-  if (r.status === 404) {
+  const res = await fetchRepoFile(CONFIG.dataFile);
+  if (res.notFound) {
     // data.json ещё не создан — читаем старые отдельные файлы (переходный период)
     state.projects = []; state.dataSha = null;
     await loadSite(); await loadDonate(); await loadContacts();
     return;
   }
-  if (!r.ok) throw new Error("GitHub вернул " + r.status);
-  const data = await r.json();
+  let data;
+  try { data = JSON.parse(res.text); }
+  catch (e) { throw new Error("data.json в репозитории повреждён (это не JSON)"); }
   if (Array.isArray(data)) {
     // Старый формат: в data.json только каталог, остальное — в отдельных файлах
     state.projects = data.filter(p => p && p.title).map(migrate);
@@ -1259,9 +1308,9 @@ async function loadData() {
 // ---------- Название и слоган сайта ----------
 async function loadSite() {
   try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.siteFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
+    const res = await fetchRepoFile(CONFIG.siteFile);
+    if (res.text) {
+      const j = JSON.parse(res.text);
       if (j && typeof j === "object") { state.site = j; return; }
     }
   } catch (e) {}
@@ -1339,9 +1388,9 @@ async function autoHealCovers() {
 // ---------- Донаты ----------
 async function loadDonate() {
   try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.donateFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
+    const res = await fetchRepoFile(CONFIG.donateFile);
+    if (res.text) {
+      const j = JSON.parse(res.text);
       if (j && typeof j === "object" && Array.isArray(j.methods)) { state.donate = j; return; }
     }
   } catch (e) {}
@@ -1448,9 +1497,9 @@ const closeDonate = () => $("donateModal").classList.add("hidden");
 // ---------- Контакты ----------
 async function loadContacts() {
   try {
-    const r = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.contactsFile}?t=${Date.now()}`);
-    if (r.ok) {
-      const j = await r.json();
+    const res = await fetchRepoFile(CONFIG.contactsFile);
+    if (res.text) {
+      const j = JSON.parse(res.text);
       if (j && typeof j === "object" && Array.isArray(j.contacts)) { state.contacts = j; return; }
     }
   } catch (e) {}
@@ -1589,12 +1638,24 @@ function countVisit() {
   } catch (e) {}
 }
 async function showVisitors() {
-  const el = $("statVisitors");
-  if (!el) return;
   const [total, today] = await Promise.all([remoteGet("uvTotal"), remoteGet(uvDayKey())]);
   const fmt = v => (v == null ? "—" : v);
-  el.textContent = "Посетителей: " + fmt(total) + " · сегодня " + fmt(today);
+  const short = $("uvShort");
+  if (short) short.textContent = fmt(total) + "/" + fmt(today);
+  const tEl = $("uvTotal");
+  const dEl = $("uvToday");
+  if (tEl) tEl.textContent = fmt(total);
+  if (dEl) dEl.textContent = fmt(today);
 }
+$("statVisitors").addEventListener("click", () => {
+  const p = $("visitorsPanel");
+  p.classList.toggle("hidden");
+  if (!p.classList.contains("hidden")) showVisitors();
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".uv-wrap")) $("visitorsPanel").classList.add("hidden");
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("visitorsPanel").classList.add("hidden"); });
 
 // ---------- Сортировка ----------
 const SORTS = {
