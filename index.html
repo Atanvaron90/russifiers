@@ -125,7 +125,7 @@
   .uv-wrap { position:relative; align-self:center; display:inline-flex; }
   #statVisitors { cursor:default; font-family:inherit; }
   #statVisitors:hover { border-color:var(--accent); }
-  /* Полный текст счётчика — на десктопе, краткий (N/M) — на мобильных */
+  /* Полный текст счётчика — на десктопе, краткий (N) — на мобильных */
   #uvShort { display:none; }
   #uvFull { display:inline; }
   @media (max-width:640px) {
@@ -505,9 +505,8 @@
         <span id="uvFull">—</span>
       </button>
       <div id="visitorsPanel" class="v-panel hidden" role="status">
-        <div class="f-title">Уникальные посетители:</div>
-        <div class="v-row">Всего — <b id="uvTotal">—</b></div>
-        <div class="v-row">Сегодня — <b id="uvToday">—</b></div>
+        <div class="v-row">Всего посетителей — <b id="uvTotal">—</b></div>
+        <div class="f-title">считаются разные браузеры за всё время: повторный визит того же человека число не увеличивает</div>
       </div>
     </div>
     <button id="gearBtn" class="gear-btn" type="button" title="Настройки поиска">⚙️</button>
@@ -1648,46 +1647,29 @@ async function syncCounters() {
 
 // ---------- Уникальные посещения (плашка видна только админу) ----------
 const LS_UV_EVER = "russifiers_uv_ever";
-const LS_UV_DAY = "russifiers_uv_day";
 const LS_UV_TOT_ACK = "russifiers_uv_total_ack";
-const LS_UV_DAY_ACK = "russifiers_uv_day_ack";
-const uvDayKey = () => {
-  const d = new Date();
-  return "uvDay_" + d.getFullYear() + "_" + String(d.getMonth() + 1).padStart(2, "0") + "_" + String(d.getDate()).padStart(2, "0");
-};
 // hit может потеряться (сеть, лимит Abacus, блокировщик) — ставим флаг-квитанцию ДО отправки
-// и повторяем на следующих визитах, пока сервис не подтвердит (иначе «всего» отстаёт от «сегодня»)
+// и повторяем на следующих визитах, пока сервис не подтвердит (иначе «всего» занижено)
 async function countVisit() {
   try {
     if (state.token) return; // собственные визиты администратора не считаем
-    const day = uvDayKey();
     if (!localStorage.getItem(LS_UV_EVER)) {
       localStorage.setItem(LS_UV_EVER, "1");
       localStorage.setItem(LS_UV_TOT_ACK, "1");
     }
     if (localStorage.getItem(LS_UV_TOT_ACK) && await remoteHit("uvTotal"))
       localStorage.removeItem(LS_UV_TOT_ACK);
-    if (localStorage.getItem(LS_UV_DAY) !== day) {
-      localStorage.setItem(LS_UV_DAY, day);
-      localStorage.setItem(LS_UV_DAY_ACK, "1");
-    }
-    if (localStorage.getItem(LS_UV_DAY_ACK) && await remoteHit(day))
-      localStorage.removeItem(LS_UV_DAY_ACK);
   } catch (e) {}
 }
 async function showVisitors() {
-  const [total, today] = await Promise.all([remoteGet("uvTotal"), remoteGet(uvDayKey())]);
+  const total = await remoteGet("uvTotal");
   const fmt = v => (v == null ? "—" : v);
-  // страховка: «всего» не может быть меньше «сегодня» (если hit ещё не повторился)
-  const shownTotal = (total != null && today != null) ? Math.max(total, today) : total;
   const short = $("uvShort");
-  if (short) short.textContent = fmt(shownTotal) + "/" + fmt(today);
+  if (short) short.textContent = fmt(total);
   const full = $("uvFull");
-  if (full) full.textContent = "Посетители: " + fmt(shownTotal) + " · сегодня: " + fmt(today);
+  if (full) full.textContent = "Посетители: " + fmt(total);
   const tEl = $("uvTotal");
-  const dEl = $("uvToday");
-  if (tEl) tEl.textContent = fmt(shownTotal);
-  if (dEl) dEl.textContent = fmt(today);
+  if (tEl) tEl.textContent = fmt(total);
 }
 // Панель открывается при наведении на плашку (на телефонах — по касанию, там наведения нет)
 const uvWrap = document.querySelector(".uv-wrap");
