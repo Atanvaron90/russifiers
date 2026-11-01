@@ -123,8 +123,12 @@
     color:var(--text); font-size:.95rem; white-space:nowrap;
   }
   .uv-wrap { position:relative; align-self:center; display:inline-flex; }
-  #statVisitors { cursor:default; font-family:inherit; }
-  #statVisitors:hover { border-color:var(--accent); }
+  /* Счётчик — обычная надпись без плашки (панель с пояснением — при наведении/тапе) */
+  #statVisitors {
+    background:none; border:none; padding:0; cursor:default;
+    font:inherit; color:var(--text); white-space:nowrap;
+  }
+  #statVisitors:hover { color:var(--accent); }
   /* Полный текст счётчика — на десктопе, краткий (N) — на мобильных */
   #uvShort { display:none; }
   #uvFull { display:inline; }
@@ -500,7 +504,7 @@
     </select>
     <span id="statCount" class="stat-chip" title="Всего русификаторов на сайте"></span>
     <div class="uv-wrap admin-only">
-      <button id="statVisitors" class="stat-chip" type="button">
+      <button id="statVisitors" type="button">
         <span id="uvShort">—</span>
         <span id="uvFull">—</span>
       </button>
