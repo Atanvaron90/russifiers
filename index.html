@@ -669,15 +669,17 @@
   </div>
 </div>
 
-<!-- Редактор названия и слогана (только для админа) -->
+<!-- Настройки сайта: название, слоган, ключ Яндекс.Метрики (только для админа) -->
 <div id="titleModal" class="overlay hidden">
   <div class="modal">
-    <h2>Название и слоган сайта</h2>
+    <h2>Настройки сайта</h2>
     <label>Название</label>
     <input id="tName" type="text" placeholder="Русификаторы от Atanvaron">
     <label>Слоган</label>
     <input id="tSlogan" type="text" placeholder="Мои переводы и проекты — бесплатно">
-    <p class="hint">Сохранение публикует изменения для всех посетителей и записывает их в общий файл data.json (название, слоган, донаты, контакты, каталог).</p>
+    <label>Яндекс.Метрика — № счётчика</label>
+    <input id="tMetrica" type="text" inputmode="numeric" placeholder="Например, 12345678">
+    <p class="hint">Номер из metrica.yandex.ru (Настройки → номер счётчика); пусто — статистика выключена. Ключ хранится в data.json и не теряется при обновлениях кода; новый номер начинает работать сразу, отключение — после следующего открытия сайта. Сохранение публикует изменения для всех посетителей (название, слоган, донаты, контакты, каталог).</p>
     <div class="modal-actions">
       <button id="tCancel" class="tool-btn" type="button">Отмена</button>
       <button id="tSaveBtn" class="tool-btn primary" type="button">Сохранить и опубликовать</button>
@@ -752,7 +754,7 @@ const CONFIG = {
   contactsFile: "contacts.json",
   siteFile: "site.json",
   counterNS: "my-russifiers-site", // УНИКАЛЬНОЕ имя для счётчиков!
-  metricaId: "113956215",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
+  metricaId: "",                 // номер счётчика Яндекс.Метрики (metrica.yandex.ru) — пусто = выключено
   // —— Загрузка файлов на диски через форму (необязательно) ——
   gdriveClientId: "",            // OAuth Client ID из Google Cloud Console (...apps.googleusercontent.com)
   yandexFolder: "Русификаторы"   // имя папки на обоих дисках — создаётся автоматически
@@ -760,13 +762,15 @@ const CONFIG = {
 const COUNTER_API = "https://abacus.jasoncameron.dev";
 
 // ==== СЧЁТЧИК ПОСЕЩЕНИЙ (Яндекс.Метрика) ====
-// Впишите в CONFIG.metricaId номер счётчика из https://metrica.yandex.ru — и статистика
-// начнёт собираться автоматически: уникальные посетители (новые/вернувшиеся), визиты,
-// переходы по внешним ссылкам (все ссылки на диски считаются сами), источники, карта кликов.
+// Ключ задаётся админом прямо на сайте (✏️ у названия → «Настройки сайта») и хранится
+// в общем data.json — обновления index.html его больше не затирают; CONFIG.metricaId — запасной вариант.
+// Статистика: уникальные посетители (новые/вернувшиеся), визиты, переходы по внешним ссылкам
+// (все ссылки на диски считаются сами), источники, карта кликов.
 // Счётчик невидим для посетителей, панель статистики — только у вас (вход по Яндекс-аккаунту).
-(function () {
-  const id = parseInt(String(CONFIG.metricaId || "").trim(), 10);
-  if (!id) return;
+function initMetrica(rawId) {
+  const id = parseInt(String(rawId || "").trim(), 10);
+  if (!id || window.__ymId === id) return; // без ключа — выключено; повторный init с тем же № — пусто
+  window.__ymId = id;
   window.ym = window.ym || function () { (window.ym.a = window.ym.a || []).push(arguments); };
   window.ym.l = 1 * new Date();
   window.ym(id, "init", { clickmap: true, linktrack: true, accurateTrackBounce: true, webvisor: false });
@@ -774,7 +778,7 @@ const COUNTER_API = "https://abacus.jasoncameron.dev";
   m.async = true;
   m.src = "https://mc.yandex.ru/metrika/tag.js";
   document.head.appendChild(m);
-})();
+}
 
 // ==== БЛОК ДОНАТОВ ПО УМОЛЧАНИЮ (до первого сохранения через ✏️) ====
 const DONATE_DEFAULT = {
@@ -828,6 +832,7 @@ const state = {
   donateSha: null, donate: null,
   contactsSha: null, contacts: null,
   siteSha: null, site: null,
+  metricaId: "",
   token: localStorage.getItem(LS_TOKEN) || "", user: ""
 };
 let dlCache = {}; try { dlCache = JSON.parse(localStorage.getItem(LS_DL)) || {}; } catch (e) {}
@@ -1244,10 +1249,11 @@ async function putJson(file, obj, message, retried = false) {
     throw e;
   }
 }
-// ---------- Единый файл данных: data.json = { name, slogan, donate, contacts, projects } ----------
+// ---------- Единый файл данных: data.json = { name, slogan, metricaId, donate, contacts, projects } ----------
 const mergedData = () => ({
   name: state.site?.name || SITE_DEFAULT.name,
   slogan: state.site?.slogan || SITE_DEFAULT.slogan,
+  metricaId: state.metricaId || "",
   donate: state.donate || DONATE_DEFAULT,
   contacts: state.contacts || CONTACTS_DEFAULT,
   projects: state.projects
@@ -1290,6 +1296,7 @@ async function loadData() {
   state.site = { ...SITE_DEFAULT };
   state.donate = DONATE_DEFAULT;
   state.contacts = CONTACTS_DEFAULT;
+  state.metricaId = String(CONFIG.metricaId || "").trim();
   const res = await fetchRepoFile(CONFIG.dataFile);
   if (res.notFound) {
     // data.json ещё не создан — читаем старые отдельные файлы (переходный период)
@@ -1313,6 +1320,7 @@ async function loadData() {
     state.site = { name: data.name ?? SITE_DEFAULT.name, slogan: data.slogan ?? SITE_DEFAULT.slogan };
   if (data.donate && typeof data.donate === "object" && Array.isArray(data.donate.methods)) state.donate = data.donate;
   if (data.contacts && typeof data.contacts === "object" && Array.isArray(data.contacts.contacts)) state.contacts = data.contacts;
+  if (data.metricaId != null) state.metricaId = String(data.metricaId).trim();
   state.projects = (Array.isArray(data.projects) ? data.projects : []).filter(p => p && p.title).map(migrate);
   state.dataSha = null;
 }
@@ -1338,6 +1346,7 @@ function renderSite() {
   const s = state.site || {};
   $("tName").value = s?.name || SITE_DEFAULT.name;
   $("tSlogan").value = s?.slogan || SITE_DEFAULT.slogan;
+  $("tMetrica").value = state.metricaId || "";
   $("titleModal").classList.remove("hidden");
 });
  $("tCancel").addEventListener("click", () => $("titleModal").classList.add("hidden"));
@@ -1347,13 +1356,16 @@ function renderSite() {
   if (!state.token) { alert("Войдите как администратор (иконка 🔐 вверху справа)"); return; }
   const name = $("tName").value.trim() || SITE_DEFAULT.name;
   const slogan = $("tSlogan").value.trim() || SITE_DEFAULT.slogan;
+  const metrica = $("tMetrica").value.trim().replace(/\D/g, ""); // только цифры номера
   btn.disabled = true;
   try {
     state.site = { name, slogan };
-    await putJson(CONFIG.dataFile, mergedData(), "Обновлены название и слоган сайта");
+    state.metricaId = metrica;
+    await putJson(CONFIG.dataFile, mergedData(), "Обновлены настройки сайта");
     renderSite();
+    initMetrica(state.metricaId); // новый номер начинает собирать статистику сразу
     $("titleModal").classList.add("hidden");
-    toast("Название и слоган обновлены", "ok", 4000);
+    toast("Настройки сайта обновлены", "ok", 4000);
   } catch (e) {
     toast("Не удалось сохранить data.json: " + e.message, "err", 6000);
   }
@@ -1612,7 +1624,12 @@ async function remoteGet(key) {
   } catch (e) {}
   return null;
 }
-const remoteHit = key => fetch(`${COUNTER_API}/hit/${CONFIG.counterNS}/${key}`).catch(() => {});
+async function remoteHit(key) {
+  try {
+    const r = await fetch(`${COUNTER_API}/hit/${CONFIG.counterNS}/${key}`);
+    return r.ok; // false — сеть/лимит 30 запр./10 c: hit не учтён и будет повторён
+  } catch (e) { return false; }
+}
 
 let lastSync = 0;
 async function syncCounters() {
@@ -1632,33 +1649,44 @@ async function syncCounters() {
 // ---------- Уникальные посещения (плашка видна только админу) ----------
 const LS_UV_EVER = "russifiers_uv_ever";
 const LS_UV_DAY = "russifiers_uv_day";
+const LS_UV_TOT_ACK = "russifiers_uv_total_ack";
+const LS_UV_DAY_ACK = "russifiers_uv_day_ack";
 const uvDayKey = () => {
   const d = new Date();
   return "uvDay_" + d.getFullYear() + "_" + String(d.getMonth() + 1).padStart(2, "0") + "_" + String(d.getDate()).padStart(2, "0");
 };
-function countVisit() {
+// hit может потеряться (сеть, лимит Abacus, блокировщик) — ставим флаг-квитанцию ДО отправки
+// и повторяем на следующих визитах, пока сервис не подтвердит (иначе «всего» отстаёт от «сегодня»)
+async function countVisit() {
   try {
     if (state.token) return; // собственные визиты администратора не считаем
+    const day = uvDayKey();
     if (!localStorage.getItem(LS_UV_EVER)) {
-      remoteHit("uvTotal");
       localStorage.setItem(LS_UV_EVER, "1");
+      localStorage.setItem(LS_UV_TOT_ACK, "1");
     }
-    if (localStorage.getItem(LS_UV_DAY) !== uvDayKey()) {
-      remoteHit(uvDayKey());
-      localStorage.setItem(LS_UV_DAY, uvDayKey());
+    if (localStorage.getItem(LS_UV_TOT_ACK) && await remoteHit("uvTotal"))
+      localStorage.removeItem(LS_UV_TOT_ACK);
+    if (localStorage.getItem(LS_UV_DAY) !== day) {
+      localStorage.setItem(LS_UV_DAY, day);
+      localStorage.setItem(LS_UV_DAY_ACK, "1");
     }
+    if (localStorage.getItem(LS_UV_DAY_ACK) && await remoteHit(day))
+      localStorage.removeItem(LS_UV_DAY_ACK);
   } catch (e) {}
 }
 async function showVisitors() {
   const [total, today] = await Promise.all([remoteGet("uvTotal"), remoteGet(uvDayKey())]);
   const fmt = v => (v == null ? "—" : v);
+  // страховка: «всего» не может быть меньше «сегодня» (если hit ещё не повторился)
+  const shownTotal = (total != null && today != null) ? Math.max(total, today) : total;
   const short = $("uvShort");
-  if (short) short.textContent = fmt(total) + "/" + fmt(today);
+  if (short) short.textContent = fmt(shownTotal) + "/" + fmt(today);
   const full = $("uvFull");
-  if (full) full.textContent = "Посетители: " + fmt(total) + " · сегодня: " + fmt(today);
+  if (full) full.textContent = "Посетители: " + fmt(shownTotal) + " · сегодня: " + fmt(today);
   const tEl = $("uvTotal");
   const dEl = $("uvToday");
-  if (tEl) tEl.textContent = fmt(total);
+  if (tEl) tEl.textContent = fmt(shownTotal);
   if (dEl) dEl.textContent = fmt(today);
 }
 // Панель открывается при наведении на плашку (на телефонах — по касанию, там наведения нет)
@@ -2677,6 +2705,7 @@ function banner(text) {
   }
   try { await loadData(); }
   catch (e) { banner("Не удалось загрузить данные из репозитория: " + esc(e.message)); }
+  initMetrica(state.metricaId || CONFIG.metricaId); // ключ из data.json, при сбое — запасной из CONFIG
   countVisit();
   renderSite();
   renderDonate();
