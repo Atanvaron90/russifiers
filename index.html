@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Русификаторы от Atanvaron</title>
-<meta name="description" content="Русификаторы для игр от Atanvaron">
+<meta name="description" content="Бесплатные русификаторы для игр от Atanvaron">
 <style>
   :root {
     --bg:#0f1117; --card:#1a1d27; --accent:#6c5ce7;
@@ -50,9 +50,8 @@
     .title-edit { top:-4px; right:-4px; font-size:.85rem; }
   }
 
-  /* Вход/выход администратора — клик по аватару сайта */
-  .site-logo, .logo-fallback { cursor:pointer; }
-  .site-logo:hover, .logo-fallback:hover { filter:brightness(1.25); }
+  /* Вход/выход администратора — тайный клик по аватару сайта.
+     Никаких визуальных подсказок (курсор, подсветка, tooltip): для посетителей это просто логотип */
   /* Аватар вошедшего администратора — золотая подсветка (у посетителей — фиолетовая) */
   body.admin .site-logo { border-color:#f5c542; box-shadow:0 3px 18px rgba(245,197,66,.55); }
   body.admin .logo-fallback { text-shadow:0 0 12px rgba(245,197,66,.9), 0 0 22px rgba(245,197,66,.5); }
@@ -2027,11 +2026,11 @@ function openGame(id) {
 // ---------- Вход администратора ----------
 function setAdmin(on) {
   document.body.classList.toggle("admin", on);
-  const t = on
-    ? (state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "Выйти")
-    : "Вход администратора";
-  $("siteLogo").title = t;
-  $("logoFallback").title = t;
+  // tooltip «Вход администратора» выдал бы тайный вход — гостям подсказки нет;
+  // вошедшему админу напоминаем, как выйти
+  const t = on && state.user ? "Вошли как " + state.user + " — нажмите, чтобы выйти" : "";
+  for (const el of [$("siteLogo"), $("logoFallback")])
+    t ? (el.title = t) : el.removeAttribute("title");
 }
 const authClick = () => {
   if (state.token) {
