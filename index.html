@@ -790,7 +790,6 @@
       <button id="sugCancel" class="tool-btn" type="button">Отмена</button>
       <button id="sugSend" class="tool-btn primary" type="button" disabled>Отправить предложение</button>
     </div>
-    <div id="sugState" class="f-note"></div>
   </div>
 </div>
 
@@ -798,7 +797,7 @@
 <div id="sugAdminModal" class="overlay hidden">
   <div class="modal">
     <h2>Предложения игр от посетителей</h2>
-    <div id="sugWarn" class="f-note hidden">⚠ Хранилище заявок недоступно — сервис удалил его. При публикации архива будет создано новое хранилище, а данные восстановятся из архива.</div>
+    <div id="sugWarn" class="f-note hidden">⚠ Хранилище заявок сейчас недоступно (сбой или дневной лимит бесплатного сервиса — 50 запросов в сутки). Показан архив из requests.json. При публикации архива будет создано новое хранилище, и данные восстановятся из архива.</div>
     <div id="sugList"></div>
     <p class="hint">Для заявки без AppID при открытии списка автоматически ищется совпадение в Steam и подтягивается обложка — найденное сохраняется в хранилище. Счётчик показывает, сколько раз игру предлагали. ✕ убирает игру из списка и из хранилища после публикации. «Опубликовать архив» сохраняет все заявки в requests.json в репозитории — так они не потеряются даже при сбое внешнего сервиса.</p>
     <div class="modal-actions">
@@ -1708,8 +1707,8 @@ const closeContacts = () => $("contactsModal").classList.add("hidden");
 // один объект {"games":[{appid,name,img,count,last}]}. Его ID — CONFIG.sugStoreId, а после
 // первой публикации архива — поле store в requests.json (оно перекрывает CONFIG).
 // «Опубликовать архив» копирует заявки в requests.json в репозитории — страховка от сбоя сервиса.
-// Сервис бесплатный и иногда кратковременно не отвечает: безопасные запросы (GET и PUT идемпотентны)
-// повторяются до 3 раз с паузами, чтобы единичный сбой не пугал посетителя ложной тревогой.
+// Сервис бесплатный и имеет дневной лимит запросов (50/сутки, при исчерпании отвечает HTTP 405/429):
+// лимитные ответы не повторяются, кратковременные сетевые сбои повторяются до 3 раз (GET и PUT идемпотентны).
 // POST (создание нового хранилища) не повторяется — иначе при потерянном ответе создадутся дубли.
 const SUG_API = "https://api.restful-api.dev/objects";
 const LS_SUG_THROTTLE = "russifiers_sug_throttle";
@@ -1733,7 +1732,7 @@ async function sugStoreGet(ms) {
   if (!id) return { gone: true };
   const r = await fetchTimeout(`${SUG_API}/${id}`, ms || 12000, { headers: { Accept: "application/json" } });
   if (r.status === 404) return { gone: true };
-  if (!r.ok) throw new Error("HTTP " + r.status);
+  if (!r.ok) throw sugHttpErr(r.status);
   const j = await r.json();
   return { games: (j.data && Array.isArray(j.data.games)) ? j.data.games : [] };
 }
@@ -1744,7 +1743,7 @@ async function sugStorePut(games, idOverride) {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ name: "russifiers-game-suggestions", data: { games } })
   });
-  if (!r.ok) throw new Error("HTTP " + r.status);
+  if (!r.ok) throw sugHttpErr(r.status);
 }
 async function sugStoreCreate() {
   const r = await fetchTimeout(SUG_API, 12000, {
@@ -1757,12 +1756,17 @@ async function sugStoreCreate() {
   if (!j.id) throw new Error("сервис не вернул id хранилища");
   return String(j.id);
 }
+function sugHttpErr(status) {
+  const e = new Error("HTTP " + status);
+  if (status === 405 || status === 429) e.noRetry = true; // дневной лимит сервиса — повторять бессмысленно
+  return e;
+}
 // Повторяет запрос до tries раз (пауза 0.8 / 1.6 c) — для GET и PUT; POST так не вызываем
 async function sugRetry(fn, tries = 3) {
   let lastErr;
   for (let i = 0; i < tries; i++) {
     if (i) await new Promise(r => setTimeout(r, 800 * i));
-    try { return await fn(); } catch (e) { lastErr = e; }
+    try { return await fn(); } catch (e) { lastErr = e; if (e && e.noRetry) break; }
   }
   throw lastErr;
 }
@@ -1778,6 +1782,7 @@ const sugSteamURL = appid => `https://store.steampowered.com/app/${appid}/`;
 // Плашка: у посетителя открывает форму, у админа — список заявок
 $("sugBtn").addEventListener("click", async () => {
   await loadRequestsFile();
+  sugFlushPending(); // дослать заявки, не ушедшие в прошлый раз
   if (state.token) sugAdminOpen(); else sugFormOpen();
 });
 
@@ -1790,25 +1795,8 @@ function sugFormOpen() {
   $("sugQuery").value = "";
   $("sugExist").innerHTML = "";
   $("sugSend").disabled = true;
-  $("sugState").textContent = "";
   $("sugModal").classList.remove("hidden");
-  sugStoreRefresh();
   setTimeout(() => $("sugQuery").focus(), 50);
-}
-let sugRefreshSeq = 0;
-async function sugStoreRefresh() {
-  const seq = ++sugRefreshSeq;
-  try {
-    const st = await sugRetry(() => sugStoreGet(7000));
-    if (seq !== sugRefreshSeq) return; // форму уже переоткрыли — не затираем свежую проверку
-    $("sugState").textContent = st.gone
-      ? "Хранилище предложений сейчас недоступно — отправка может не сработать."
-      : "";
-  } catch (e) {
-    console.warn("Хранилище предложений не отвечает после 3 попыток:", e && e.message);
-    if (seq !== sugRefreshSeq) return;
-    $("sugState").textContent = "Сервис предложений не отвечает — отправка может не сработать.";
-  }
 }
 // Подсказка «уже на сайте» — только по каталогу, мгновенно и без сетевых запросов
 $("sugQuery").addEventListener("input", () => {
@@ -1865,10 +1853,48 @@ $("sugSend").addEventListener("click", async () => {
     toast("Предложение учтено — спасибо!", "ok", 4500);
     $("sugModal").classList.add("hidden");
   } catch (e) {
-    toast("Не удалось отправить предложение — сервис хранилища не ответил. Попробуйте позже.", "err", 6000);
+    // сервис недоступен (например, исчерпан дневной лимит) — заявка сохранится в браузере
+    // и уйдёт автоматически при следующем визите на сайт
+    const pend = sugPendingLoad();
+    if (!pend.some(p => p.id === gid)) { pend.push({ id: gid, name, ts: Date.now() }); sugPendingSave(pend); }
+    toast(e && e.noRetry && /HTTP 405|HTTP 429/.test(String(e.message))
+      ? "Дневной лимит сервиса заявок исчерпан — предложение сохранено и уйдёт автоматически при следующем визите на сайт"
+      : "Не удалось отправить предложение — оно сохранено и уйдёт автоматически при следующем визите на сайт", "info", 7000);
   }
   btn.disabled = false; btn.textContent = "Отправить предложение";
 });
+
+// Заявки, не ушедшие из-за лимита/сбоя сервиса, хранятся в браузере посетителя
+// и отправляются автоматически при следующем визите на сайт
+const LS_SUG_PENDING = "russifiers_sug_pending";
+const sugPendingLoad = () => { try { const a = JSON.parse(localStorage.getItem(LS_SUG_PENDING)); return Array.isArray(a) ? a : []; } catch (e) { return []; } };
+const sugPendingSave = a => { try { localStorage.setItem(LS_SUG_PENDING, JSON.stringify(a)); } catch (e) {} };
+let sugFlushBusy = false;
+async function sugFlushPending() {
+  if (sugFlushBusy) return;
+  const pend = sugPendingLoad().filter(p => p && p.id && p.name);
+  if (!pend.length || !sugStoreId()) return;
+  sugFlushBusy = true;
+  try {
+    const st = await sugRetry(() => sugStoreGet());
+    if (st.gone) return; // хранилище появится после публикации архива — уйдёт при следующем визите
+    const games = st.games || [];
+    for (const p of pend) {
+      const cur = games.find(g => sugGameId(g) === p.id);
+      if (cur) { cur.count = (+cur.count || 0) + 1; cur.last = Date.now(); if (!cur.id) cur.id = p.id; }
+      else games.push({ id: p.id, name: p.name, count: 1, last: Date.now() });
+    }
+    await sugRetry(() => sugStorePut(games));
+    const thr = (() => { try { return JSON.parse(localStorage.getItem(LS_SUG_THROTTLE)) || {}; } catch (e) { return {}; } })();
+    const now = Date.now();
+    for (const p of pend) thr[p.id] = now;
+    localStorage.setItem(LS_SUG_THROTTLE, JSON.stringify(thr));
+    sugPendingSave([]);
+    console.info("Предложения игр, не ушедшие в прошлый раз, отправлены:", pend.length);
+  } catch (e) {
+    console.warn("Предложения из очереди не отправлены, останутся на следующий визит:", e && e.message);
+  } finally { sugFlushBusy = false; }
+}
 
 // ——— Список заявок (только админ): здесь происходят Steam-поиск и обложки ———
 let sugAdmin = null;           // { storeGames, gone, deleted:Set }
@@ -3116,6 +3142,7 @@ function banner(text) {
         }
       });
   }
+  sugFlushPending(); // дослать заявки, не ушедшие в прошлый раз (иначе уйдут при клике на плашку)
   render();
 })();
 </script>
