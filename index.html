@@ -1711,6 +1711,9 @@ const closeContacts = () => $("contactsModal").classList.add("hidden");
 // один объект {"games":[{appid,name,img,count,last}]}. Его ID — CONFIG.sugStoreId, а после
 // первой публикации архива — поле store в requests.json (оно перекрывает CONFIG).
 // «Опубликовать архив» копирует заявки в requests.json в репозитории — страховка от сбоя сервиса.
+// Сервис бесплатный и иногда кратковременно не отвечает: безопасные запросы (GET и PUT идемпотентны)
+// повторяются до 3 раз с паузами, чтобы единичный сбой не пугал посетителя ложной тревогой.
+// POST (создание нового хранилища) не повторяется — иначе при потерянном ответе создадутся дубли.
 const SUG_API = "https://api.restful-api.dev/objects";
 const LS_SUG_THROTTLE = "russifiers_sug_throttle";
 const sugStoreId = () => (state.requests && state.requests.store) || CONFIG.sugStoreId || "";
@@ -1728,10 +1731,10 @@ async function loadRequestsFile() {
     console.warn("requests.json недоступен:", e && e.message);
   }
 }
-async function sugStoreGet() {
+async function sugStoreGet(ms) {
   const id = sugStoreId();
   if (!id) return { gone: true };
-  const r = await fetchTimeout(`${SUG_API}/${id}`, 12000, { headers: { Accept: "application/json" } });
+  const r = await fetchTimeout(`${SUG_API}/${id}`, ms || 12000, { headers: { Accept: "application/json" } });
   if (r.status === 404) return { gone: true };
   if (!r.ok) throw new Error("HTTP " + r.status);
   const j = await r.json();
@@ -1756,6 +1759,15 @@ async function sugStoreCreate() {
   const j = await r.json();
   if (!j.id) throw new Error("сервис не вернул id хранилища");
   return String(j.id);
+}
+// Повторяет запрос до tries раз (пауза 0.8 / 1.6 c) — для GET и PUT; POST так не вызываем
+async function sugRetry(fn, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    if (i) await new Promise(r => setTimeout(r, 800 * i));
+    try { return await fn(); } catch (e) { lastErr = e; }
+  }
+  throw lastErr;
 }
 // Игра уже в каталоге? Ищем по AppID обложки, при неудаче — по точному названию
 function sugExisting(appid, name) {
@@ -1786,11 +1798,18 @@ function sugFormOpen() {
   sugStoreRefresh();
   setTimeout(() => $("sugQuery").focus(), 50);
 }
+let sugRefreshSeq = 0;
 async function sugStoreRefresh() {
+  const seq = ++sugRefreshSeq;
   try {
-    const st = await sugStoreGet();
-    if (st.gone) $("sugState").textContent = "Хранилище предложений сейчас недоступно — отправка может не сработать.";
+    const st = await sugRetry(() => sugStoreGet(7000));
+    if (seq !== sugRefreshSeq) return; // форму уже переоткрыли — не затираем свежую проверку
+    $("sugState").textContent = st.gone
+      ? "Хранилище предложений сейчас недоступно — отправка может не сработать."
+      : "";
   } catch (e) {
+    console.warn("Хранилище предложений не отвечает после 3 попыток:", e && e.message);
+    if (seq !== sugRefreshSeq) return;
     $("sugState").textContent = "Сервис предложений не отвечает — отправка может не сработать.";
   }
 }
@@ -1855,7 +1874,7 @@ $("sugSend").addEventListener("click", async () => {
   }
   btn.disabled = true; btn.textContent = "Отправляем…";
   try {
-    const st = await sugStoreGet();
+    const st = await sugRetry(() => sugStoreGet());
     if (st.gone) throw new Error("хранилище предложений недоступно");
     const games = st.games || [];
     const cur = games.find(g => String(g.appid) === String(sugPick.appid));
@@ -1866,7 +1885,7 @@ $("sugSend").addEventListener("click", async () => {
     } else {
       games.push({ appid: String(sugPick.appid), name: sugPick.name, img: sugPick.img || "", count: 1, last: Date.now() });
     }
-    await sugStorePut(games);
+    await sugRetry(() => sugStorePut(games));
     thr[sugPick.appid] = Date.now();
     localStorage.setItem(LS_SUG_THROTTLE, JSON.stringify(thr));
     toast("Предложение учтено — спасибо!", "ok", 4500);
@@ -1884,7 +1903,7 @@ async function sugAdminOpen() {
   $("sugList").innerHTML = '<div class="sug-empty">Загрузка…</div>';
   $("sugWarn").classList.add("hidden");
   let store = null;
-  try { store = await sugStoreGet(); } catch (e) { store = null; }
+  try { store = await sugRetry(() => sugStoreGet()); } catch (e) { store = null; }
   sugAdmin = {
     storeGames: (store && !store.gone && Array.isArray(store.games)) ? store.games : [],
     gone: !store || !!store.gone,
@@ -1943,10 +1962,10 @@ $("sugAdminSave").addEventListener("click", async () => {
     if (wasGone) keep = games;
     else {
       // берём свежую версию хранилища: заявки, пришедшие во время правки, не теряются
-      const fresh = await sugStoreGet();
+      const fresh = await sugRetry(() => sugStoreGet());
       keep = (fresh.gone ? games : (fresh.games || [])).filter(g => !sugAdmin.deleted.has(String(g.appid)));
     }
-    await sugStorePut(keep, storeId);
+    await sugRetry(() => sugStorePut(keep, storeId));
     const payload = { store: storeId, publishedAt: Date.now(), games };
     await putJson(CONFIG.requestsFile, payload, "Обновлён архив предложений игр");
     state.requests = payload;
