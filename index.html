@@ -395,10 +395,8 @@
   }
   .sug-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:2px 6px; flex:none; }
   .sug-del:hover { color:#ff6b6b; }
-  .sug-picked { border:1px solid rgba(74,163,245,.5); background:rgba(74,163,245,.08); border-radius:10px; padding:10px 12px; margin-top:10px; }
-  .sug-picked.hidden, #sugWarn.hidden { display:none; }
-  .sug-pick-main { display:flex; gap:10px; align-items:flex-start; }
-  .sug-pick-main img { width:92px; height:43px; object-fit:cover; border-radius:4px; flex:none; background:var(--field); }
+  #sugExist:not(:empty) { margin-top:8px; }
+  #sugWarn.hidden { display:none; }
   .sug-empty { color:var(--muted); font-size:.9rem; text-align:center; padding:14px 0; }
   #sugWarn { color:#f5c542; }
 
@@ -780,15 +778,14 @@
   </div>
 </div>
 
-<!-- Предложение игры от посетителя -->
+<!-- Предложение игры от посетителя: просто название, без поисков -->
 <div id="sugModal" class="overlay hidden">
   <div class="modal">
     <h2>Предложить игру для перевода</h2>
-    <label>Название игры, ссылка на страницу в Steam или AppID</label>
-    <input id="sugQuery" type="text" autocomplete="off" placeholder="Например: Spirit Island или ссылка на страницу игры в Steam">
-    <div id="sugResults"></div>
-    <div id="sugPicked" class="sug-picked hidden"></div>
-    <p class="hint">Начните вводить название — подгрузятся совпадения из Steam. Если игра уже переведена, под её названием появится пометка со ссылкой на русификатор.</p>
+    <label>Название игры</label>
+    <input id="sugQuery" type="text" autocomplete="off" placeholder="Например: Spirit Island">
+    <div id="sugExist"></div>
+    <p class="hint">Введите название игры. Если русификатор уже есть на сайте, под полем появится ссылка на него.</p>
     <div class="modal-actions">
       <button id="sugCancel" class="tool-btn" type="button">Отмена</button>
       <button id="sugSend" class="tool-btn primary" type="button" disabled>Отправить предложение</button>
@@ -803,7 +800,7 @@
     <h2>Предложения игр от посетителей</h2>
     <div id="sugWarn" class="f-note hidden">⚠ Хранилище заявок недоступно — сервис удалил его. При публикации архива будет создано новое хранилище, а данные восстановятся из архива.</div>
     <div id="sugList"></div>
-    <p class="hint">Счётчик показывает, сколько раз игру предлагали. ✕ убирает игру из списка и из хранилища после публикации. «Опубликовать архив» сохраняет все заявки в requests.json в репозитории — так они не потеряются даже при сбое внешнего сервиса.</p>
+    <p class="hint">Для заявки без AppID при открытии списка автоматически ищется совпадение в Steam и подтягивается обложка — найденное сохраняется в хранилище. Счётчик показывает, сколько раз игру предлагали. ✕ убирает игру из списка и из хранилища после публикации. «Опубликовать архив» сохраняет все заявки в requests.json в репозитории — так они не потеряются даже при сбое внешнего сервиса.</p>
     <div class="modal-actions">
       <button id="sugAdminClose" class="tool-btn" type="button">Закрыть</button>
       <button id="sugAdminSave" class="tool-btn primary" type="button">Опубликовать архив</button>
@@ -1784,14 +1781,14 @@ $("sugBtn").addEventListener("click", async () => {
   if (state.token) sugAdminOpen(); else sugFormOpen();
 });
 
-// ——— Форма предложения (посетители) ———
-let sugPick = null, sugSearchTimer = null;
+// ——— Форма предложения (посетители): просто название, без поисков ———
+const sugNorm = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+// стабильный ключ заявки: новые — "n"+нормализованное название, старые — "a"+appid
+const sugGameId = g => String(g.id || (g.appid != null && g.appid !== "" ? "a" + g.appid : "n" + sugNorm(g.name)));
+let sugExistPick = null;
 function sugFormOpen() {
-  sugPick = null;
   $("sugQuery").value = "";
-  $("sugResults").innerHTML = "";
-  $("sugPicked").classList.add("hidden");
-  $("sugPicked").innerHTML = "";
+  $("sugExist").innerHTML = "";
   $("sugSend").disabled = true;
   $("sugState").textContent = "";
   $("sugModal").classList.remove("hidden");
@@ -1813,62 +1810,38 @@ async function sugStoreRefresh() {
     $("sugState").textContent = "Сервис предложений не отвечает — отправка может не сработать.";
   }
 }
+// Подсказка «уже на сайте» — только по каталогу, мгновенно и без сетевых запросов
 $("sugQuery").addEventListener("input", () => {
-  clearTimeout(sugSearchTimer);
-  sugSearchTimer = setTimeout(sugSearchNow, 450);
-});
-async function sugSearchNow() {
-  const q = $("sugQuery").value.trim();
-  if (q.length < 2) { $("sugResults").innerHTML = ""; return; }
-  $("sugResults").innerHTML = '<div class="sug-empty">Ищем в Steam…</div>';
-  let items, note = null;
-  const m = q.match(/store\.steampowered\.com\/app\/(\d{2,10})/) || q.match(/^\s*(\d{2,10})\s*$/);
-  if (m) {
-    // Ссылка на Steam или чистый AppID — подтягиваем название и обложку, как в редакторе
-    const info = await fetchAppInfo(m[1]);
-    items = (info && info.name) ? [{ id: m[1], name: info.name, tiny: info.header || info.capsule || "" }] : null;
-    if (items === null) note = `Не удалось получить название из Steam по AppID ${m[1]} — проверьте ID или попробуйте позже`;
-  } else {
-    items = await steamSearch(q);
+  const text = $("sugQuery").value;
+  const n = sugNorm(text);
+  $("sugSend").disabled = n.length < 2;
+  sugExistPick = null;
+  $("sugExist").innerHTML = "";
+  if (n.length < 2) return;
+  const ex = sugExisting(null, text);
+  if (ex) {
+    sugExistPick = ex;
+    $("sugExist").innerHTML =
+      '<div class="sug-note ok">✔ Русификатор для этой игры уже есть на сайте — <button type="button" class="sug-open">открыть карточку</button></div>';
   }
-  const box = $("sugResults");
-  if (note) { box.innerHTML = `<div class="sug-empty">${esc(note)}</div>`; return; }
-  if (items === null) { box.innerHTML = '<div class="sug-empty">Steam не отвечает — попробуйте позже</div>'; return; }
-  if (!items.length) { box.innerHTML = '<div class="sug-empty">Ничего не найдено — проверьте название</div>'; return; }
-  box.innerHTML = items.map(x =>
-    `<button type="button" class="steam-item" data-id="${esc(x.id)}" data-name="${esc(x.name)}" data-img="${esc(x.tiny || "")}">` +
-    (x.tiny ? `<img src="${esc(x.tiny)}" alt="">` : "") +
-    `<span>${esc(x.name)}</span></button>`).join("");
-}
-$("sugResults").addEventListener("click", e => {
-  const b = e.target.closest(".steam-item");
-  if (!b) return;
-  sugPick = { appid: b.dataset.id, name: b.dataset.name, img: b.dataset.img || "" };
-  const ex = sugExisting(sugPick.appid, sugPick.name);
-  const el = $("sugPicked");
-  el.innerHTML =
-    `<div class="sug-pick-main">` +
-    (sugPick.img ? `<img src="${esc(sugPick.img)}" alt="">` : "") +
-    `<div class="sug-mid"><b>${esc(sugPick.name)}</b>` +
-    (ex
-      ? `<div class="sug-note ok">✔ Русификатор для этой игры уже есть на сайте — <button type="button" class="sug-open">открыть карточку</button></div>`
-      : `<div class="sug-note">Этой игры пока нет в каталоге — предложение попадёт в список к администратору</div>`) +
-    `</div></div>`;
-  el.classList.remove("hidden");
-  $("sugSend").disabled = false;
 });
-$("sugPicked").addEventListener("click", e => {
-  if (!sugPick || !e.target.closest(".sug-open")) return;
-  const ex = sugExisting(sugPick.appid, sugPick.name);
-  if (ex) { $("sugModal").classList.add("hidden"); openGame(ex.id); }
+$("sugExist").addEventListener("click", e => {
+  if (!sugExistPick || !e.target.closest(".sug-open")) return;
+  $("sugModal").classList.add("hidden");
+  openGame(sugExistPick.id);
+});
+$("sugQuery").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !$("sugSend").disabled) { e.preventDefault(); $("sugSend").click(); }
 });
 $("sugCancel").addEventListener("click", () => $("sugModal").classList.add("hidden"));
 $("sugSend").addEventListener("click", async () => {
   const btn = $("sugSend");
-  if (!sugPick || btn.disabled) return;
+  const name = $("sugQuery").value.trim();
+  if (!name || btn.disabled || sugNorm(name).length < 2) return;
+  const gid = "n" + sugNorm(name);
   let thr = {};
   try { thr = JSON.parse(localStorage.getItem(LS_SUG_THROTTLE)) || {}; } catch (e) {}
-  if (thr[sugPick.appid] && Date.now() - thr[sugPick.appid] < 86400000) {
+  if (thr[gid] && Date.now() - thr[gid] < 86400000) {
     toast("Вы уже предлагали эту игру сегодня — предложение учтено", "info", 5000);
     return;
   }
@@ -1877,16 +1850,17 @@ $("sugSend").addEventListener("click", async () => {
     const st = await sugRetry(() => sugStoreGet());
     if (st.gone) throw new Error("хранилище предложений недоступно");
     const games = st.games || [];
-    const cur = games.find(g => String(g.appid) === String(sugPick.appid));
+    const cur = games.find(g => sugGameId(g) === gid);
     if (cur) {
       cur.count = (+cur.count || 0) + 1;
       cur.last = Date.now();
-      if (sugPick.img && !cur.img) cur.img = sugPick.img;
+      if (!cur.id) cur.id = gid;      // заявки старого формата получают ключ
+      if (!cur.name && name) cur.name = name;
     } else {
-      games.push({ appid: String(sugPick.appid), name: sugPick.name, img: sugPick.img || "", count: 1, last: Date.now() });
+      games.push({ id: gid, name, count: 1, last: Date.now() });
     }
     await sugRetry(() => sugStorePut(games));
-    thr[sugPick.appid] = Date.now();
+    thr[gid] = Date.now();
     localStorage.setItem(LS_SUG_THROTTLE, JSON.stringify(thr));
     toast("Предложение учтено — спасибо!", "ok", 4500);
     $("sugModal").classList.add("hidden");
@@ -1896,8 +1870,10 @@ $("sugSend").addEventListener("click", async () => {
   btn.disabled = false; btn.textContent = "Отправить предложение";
 });
 
-// ——— Список заявок (только админ) ———
-let sugAdmin = null; // { storeGames, gone, deleted:Set }
+// ——— Список заявок (только админ): здесь происходят Steam-поиск и обложки ———
+let sugAdmin = null;           // { storeGames, gone, deleted:Set }
+let sugMatchSeq = 0;           // отмена фоновой проверки при переоткрытии/публикации
+const sugMatchNow = new Set(); // ключи заявок, по которым поиск в Steam идёт прямо сейчас
 async function sugAdminOpen() {
   $("sugAdminModal").classList.remove("hidden");
   $("sugList").innerHTML = '<div class="sug-empty">Загрузка…</div>';
@@ -1911,23 +1887,88 @@ async function sugAdminOpen() {
   };
   if (sugAdmin.gone) $("sugWarn").classList.remove("hidden");
   sugAdminRender();
+  sugMatchAll(); // в фоне: для заявок без AppID ищем игру в Steam и подтягиваем обложку
+}
+// Один поиск: первый результат Steam-поиска даёт appid и картинку
+async function sugMatchOne(g) {
+  const items = await steamSearch(g.name);
+  if (items === null) return "net"; // Steam/сети не ответили — попробуем при следующем открытии
+  if (!items.length) return "miss";
+  g.appid = String(items[0].id);
+  if (!g.img) g.img = items[0].tiny || "";
+  return "ok";
+}
+async function sugMatchAll() {
+  const seq = ++sugMatchSeq;
+  const games = (sugAdmin && sugAdmin.storeGames) || [];
+  let changed = false;
+  for (const g of games) {
+    if (seq !== sugMatchSeq) return; // список переоткрыли или публикуют — доделает новый запуск
+    if (!g || g.appid || g.miss || sugNorm(g.name).length < 2) continue;
+    const gid = sugGameId(g);
+    sugMatchNow.add(gid); sugAdminRender();
+    const res = await sugMatchOne(g);
+    sugMatchNow.delete(gid);
+    if (seq !== sugMatchSeq) return;
+    if (res === "ok" || res === "miss") { if (res === "miss") g.miss = 1; changed = true; }
+    sugAdminRender();
+  }
+  if (seq !== sugMatchSeq || !changed) return;
+  try {
+    // сохраняем найденное: merge в свежую версию, чтобы не потерять заявки, пришедшие во время поиска
+    const fresh = await sugRetry(() => sugStoreGet());
+    if (seq !== sugMatchSeq || fresh.gone) return;
+    const arr = fresh.games || [];
+    for (const g of games) {
+      if (!g.appid && !g.miss) continue;
+      const f = arr.find(x => sugGameId(x) === sugGameId(g));
+      if (f) {
+        if (g.appid && !f.appid) f.appid = g.appid;
+        if (g.img && !f.img) f.img = g.img;
+        if (g.miss && !f.appid) f.miss = 1;
+        if (!f.id) f.id = sugGameId(g);
+      } else {
+        arr.push(sugClean(g));
+      }
+    }
+    await sugRetry(() => sugStorePut(arr));
+  } catch (e) {
+    console.warn("Результаты Steam-поиска не сохранены в хранилище:", e && e.message); // попадут в архив при публикации
+  }
 }
 function sugAdminList() {
   if (!sugAdmin) return [];
   return (sugAdmin.gone ? (state.requests?.games || []) : sugAdmin.storeGames)
-    .filter(g => g && g.appid != null && !sugAdmin.deleted.has(String(g.appid)))
+    .filter(g => g && (g.name || g.appid != null) && !sugAdmin.deleted.has(sugGameId(g)))
     .sort((a, b) => (+b.count || 0) - (+a.count || 0) || (+b.last || 0) - (+a.last || 0));
+}
+// заявка в виде для хранилища и архива: обязательные поля + найденное в Steam (без пустых)
+function sugClean(g) {
+  const o = { id: sugGameId(g), name: g.name || "", count: +g.count || 0, last: +g.last || 0 };
+  if (g.appid != null && g.appid !== "") o.appid = String(g.appid);
+  if (g.img) o.img = g.img;
+  if (g.miss) o.miss = 1;
+  return o;
 }
 function sugAdminRender() {
   const list = sugAdminList();
   if (!list.length) { $("sugList").innerHTML = '<div class="sug-empty">Пока нет предложений от посетителей</div>'; return; }
   $("sugList").innerHTML = list.map(g => {
-    const ex = sugExisting(g.appid, g.name);
+    const gid = sugGameId(g);
+    const appid = g.appid != null && g.appid !== "" ? String(g.appid) : "";
+    const ex = sugExisting(appid || null, g.name);
     const n = +g.count || 0;
-    return `<div class="sug-row" data-appid="${esc(g.appid)}">` +
+    const status = sugMatchNow.has(gid) ? '<div class="sug-note">Ищем в Steam…</div>'
+      : (!appid && g.miss) ? '<div class="sug-note">Не найдено в Steam</div>'
+      : "";
+    const title = appid
+      ? `<a class="sug-name" href="${esc(sugSteamURL(appid))}" target="_blank" rel="noopener">${esc(g.name || "AppID " + appid)}</a>`
+      : `<span class="sug-name">${esc(g.name || "Заявка без названия")}</span>`;
+    return `<div class="sug-row" data-gid="${esc(gid)}">` +
       (g.img ? `<img src="${esc(g.img)}" alt="">` : `<span class="sug-noimg">🎮</span>`) +
-      `<div class="sug-mid"><a class="sug-name" href="${esc(sugSteamURL(g.appid))}" target="_blank" rel="noopener">${esc(g.name || "AppID " + g.appid)}</a>` +
+      `<div class="sug-mid">${title}` +
       (ex ? `<div class="sug-note ok">Русификатор уже на сайте — <button type="button" class="sug-open">открыть карточку</button></div>` : "") +
+      status +
       `</div><span class="sug-cnt">предлагали ${n} ${pluralRu(n, "раз", "раза", "раз")}</span>` +
       `<button type="button" class="sug-del" title="Убрать из списка">✕</button></div>`;
   }).join("");
@@ -1935,15 +1976,15 @@ function sugAdminRender() {
 $("sugList").addEventListener("click", e => {
   const row = e.target.closest(".sug-row");
   if (!row || !sugAdmin) return;
-  const appid = String(row.dataset.appid);
+  const gid = row.dataset.gid;
   if (e.target.closest(".sug-del")) {
-    sugAdmin.deleted.add(appid);
+    sugAdmin.deleted.add(gid);
     sugAdminRender();
     return;
   }
   if (e.target.closest(".sug-open")) {
-    const g = sugAdminList().find(x => String(x.appid) === appid);
-    const ex = sugExisting(appid, g && g.name);
+    const g = sugAdminList().find(x => sugGameId(x) === gid);
+    const ex = sugExisting((g && g.appid) || null, g && g.name);
     if (ex) { $("sugAdminModal").classList.add("hidden"); openGame(ex.id); }
   }
 });
@@ -1952,18 +1993,21 @@ $("sugAdminSave").addEventListener("click", async () => {
   const btn = $("sugAdminSave");
   if (btn.disabled || !sugAdmin) return;
   if (!state.token) { alert("Войдите как администратор"); return; }
+  sugMatchSeq++; // останавливаем фоновый Steam-поиск — сейчас публикуем
   btn.disabled = true; btn.textContent = "Публикуем…";
   try {
     let storeId = sugStoreId();
     const wasGone = sugAdmin.gone || !storeId;
     if (wasGone) storeId = await sugStoreCreate();
-    const games = sugAdminList().map(g => ({ appid: String(g.appid), name: g.name || "", img: g.img || "", count: +g.count || 0, last: +g.last || 0 }));
+    const games = sugAdminList().map(sugClean);
     let keep;
     if (wasGone) keep = games;
     else {
       // берём свежую версию хранилища: заявки, пришедшие во время правки, не теряются
       const fresh = await sugRetry(() => sugStoreGet());
-      keep = (fresh.gone ? games : (fresh.games || [])).filter(g => !sugAdmin.deleted.has(String(g.appid)));
+      keep = (fresh.gone ? games : (fresh.games || []))
+        .filter(g => !sugAdmin.deleted.has(sugGameId(g)))
+        .map(sugClean);
     }
     await sugRetry(() => sugStorePut(keep, storeId));
     const payload = { store: storeId, publishedAt: Date.now(), games };
