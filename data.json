@@ -47,6 +47,33 @@
   },
   "projects": [
     {
+      "id": "splendor-mwnr5vip",
+      "title": "Splendor",
+      "cover": {
+        "appid": "376680",
+        "name": "Сэкономьте 80% при покупке Splendor",
+        "url": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/376680/capsule_616x353.jpg?t=1742483733"
+      },
+      "links": [
+        {
+          "type": "yadisk",
+          "url": "https://disk.yandex.ru/d/ea_hsbTi19rRYw",
+          "dl": 0
+        },
+        {
+          "type": "gdrive",
+          "url": "https://drive.google.com/drive/folders/1AqbgEqSAbfH3w_-dgqePI7jVxHvcw4Va?usp=sharing",
+          "dl": 0
+        },
+        {
+          "type": "boosty",
+          "url": "https://boosty.to/atanvaron_/bundle/3208e342-86f0-4961-b028-fb8cafcbd500?isFromPostItem=true",
+          "dl": 0
+        }
+      ],
+      "created": 1795104990673
+    },
+    {
       "id": "blood-rage-digital-edition-mvmct4j8",
       "title": "Blood Rage: Digital Edition",
       "cover": {
